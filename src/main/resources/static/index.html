@@ -1,0 +1,356 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BrSE Copilot | プロジェクト管理ダッシュボード</title>
+    <link rel="stylesheet" href="assets/css/style.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <!-- ================= SIDEBAR (15%) ================= -->
+      <aside class="sidebar">
+        <div>
+          <div class="sidebar-logo">🧭 BrSE Copilot</div>
+          <div class="sidebar-date" id="sidebarDate">2026年8月23日（日）</div>
+        </div>
+
+        <nav class="sidebar-nav">
+          <button
+            class="nav-item is-active"
+            data-tab="schedule"
+            type="button"
+            onclick="switchMainTab('schedule')"
+          >
+            📅 進捗管理
+          </button>
+          <button
+            class="nav-item"
+            data-tab="nippo"
+            type="button"
+            onclick="switchMainTab('nippo')"
+          >
+            📝 日報作成
+          </button>
+          <button
+            class="nav-item"
+            data-tab="offshore"
+            type="button"
+            onclick="switchMainTab('offshore')"
+          >
+            🔍 オフショア支援
+          </button>
+        </nav>
+      </aside>
+
+      <!-- ================= MAIN CONTENT (60%) ================= -->
+      <main class="main-content">
+        <!-- ---------- TAB 1: QUẢN LÝ TIẾN ĐỘ ---------- -->
+        <section class="main-tab is-active" id="tab-schedule">
+          <div class="main-tab-head">
+            <h2>スケジュール・進捗管理</h2>
+            <button class="btn btn-ai" type="button" onclick="openAiModal()">
+              ✨ AI分析・提案
+            </button>
+          </div>
+
+          <div class="calendar-legend">
+            <span class="legend-item"><i class="legend-dot dot-mint"></i>余裕あり</span>
+            <span class="legend-item"><i class="legend-dot dot-warning"></i>期限間近</span>
+            <span class="legend-item"><i class="legend-dot dot-coral"></i>期限超過</span>
+          </div>
+
+          <div class="calendar-grid" id="calendarGrid"></div>
+        </section>
+
+        <!-- ---------- TAB 2: BÁO CÁO NIPPO ---------- -->
+        <section class="main-tab" id="tab-nippo">
+          <div class="main-tab-head">
+            <h2>報告書 Nippo 自動生成</h2>
+          </div>
+
+          <div class="card">
+            <div class="card-head">
+              <div>
+                <h3 class="title">🪵 作業ログ入力</h3>
+                <p class="subtitle">
+                  Git commit・タスクメモなどを貼り付けると、AIが日報を自動生成します
+                </p>
+              </div>
+            </div>
+            <div class="card-body">
+              <label class="field-label" for="nippoLogInput"
+                >本日の作業ログ</label
+              >
+              <textarea id="nippoLogInput" class="textarea-base mono" rows="4">
+git commit -m "feat: 保険料計算ロジックの実装"
+git commit -m "fix: 更新ロジックのNull例外を修正"</textarea
+              >
+
+              <button
+                class="btn btn-secondary"
+                id="btnGenerateNippo"
+                type="button"
+                onclick="generateNippoReport()"
+              >
+                🤖 AIで日報を自動作成
+              </button>
+
+              <label class="field-label" for="nippoOutput"
+                >生成された日報</label
+              >
+              <div class="stream-wrap" id="nippoOutputWrap">
+                <textarea
+                  id="nippoOutput"
+                  class="textarea-base mono"
+                  rows="6"
+                  readonly
+                  placeholder="「AIで日報を自動作成」を押すと、ここに日報が生成されます..."
+                ></textarea>
+              </div>
+
+              <button
+                id="btnSendNippo"
+                class="btn btn-primary btn-block"
+                type="button"
+                onclick="sendNippoMail(this)"
+              >
+                📧 上司へ報告書を送信（Gmail）
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- ---------- TAB 3: TRỢ LÝ OFFSHORE ---------- -->
+        <section class="main-tab" id="tab-offshore">
+          <div class="main-tab-head">
+            <h2>オフショア支援（仕様・コード確認）</h2>
+          </div>
+
+          <!-- Khối 1: So sánh Spec và Code -->
+          <div class="card">
+            <div class="card-head">
+              <div>
+                <h3 class="title">🔬 Spec vs Code 比較</h3>
+                <p class="subtitle">
+                  仕様書とコードの差分をAIが自動検知（Visual Diff）
+                </p>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="diff-box" id="specDiffBox">
+                <span class="diff-line diff-context"
+                  >if (age &gt;= 20) { applyAdultPremium(); }
+                  <span class="diff-tag">現在のコード（PremiumCalculator.java）</span></span
+                >
+              </div>
+              <p class="diff-note" id="specDiffNote">
+                「🤖 AIで比較する」を押すと、仕様書とコードの不整合をAIが分析します。
+              </p>
+              <button
+                class="btn btn-secondary"
+                id="btnRunSpecDiff"
+                type="button"
+                onclick="runSpecDiffReview()"
+              >
+                🤖 AIで比較する
+              </button>
+            </div>
+          </div>
+
+          <!-- Khối 2: Shadow Client -->
+          <div class="card shadow-client-card">
+            <div class="card-head">
+              <div>
+                <h3 class="title">🎭 Shadow Client</h3>
+                <p class="subtitle">
+                  質問の下書きをAIが添削・翻訳し、リスクを警告
+                </p>
+              </div>
+            </div>
+            <div class="card-body">
+              <textarea
+                id="rawQuestionInput"
+                class="textarea-base"
+                rows="3"
+                placeholder="お客様への質問を、母国語または簡単な日本語で入力..."
+              ></textarea>
+
+              <button
+                class="btn btn-secondary"
+                id="btnReviewQuestion"
+                type="button"
+                onclick="runShadowClientReview()"
+              >
+                🔍 AIで確認・翻訳
+              </button>
+
+              <div class="shadow-result hidden" id="shadowResult">
+                <div class="result-block mint-block">
+                  <h4>✅ ビジネス日本語訳</h4>
+                  <p id="shadowDraftText"></p>
+                </div>
+                <div class="result-block coral-block">
+                  <h4>⚠️ AIによるリスク警告</h4>
+                  <p id="shadowRiskText"></p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <button
+            id="btnSendQA"
+            class="btn btn-primary btn-block"
+            type="button"
+            onclick="sendQAMail(this)"
+          >
+            📧 お客様へ質問を送信（Gmail）
+          </button>
+        </section>
+      </main>
+
+      <!-- ================= RIGHT PANEL (25%) ================= -->
+      <aside class="right-panel">
+        <h2 class="right-panel-title">🎯 個人目標（MBO）</h2>
+
+        <div class="mbo-card" data-goal-id="short">
+          <div class="mbo-card-head">
+            <span class="mbo-badge">短期（今週）</span>
+            <button class="mbo-edit-btn" type="button" onclick="editGoal(this)">
+              ✏️
+            </button>
+          </div>
+          <p class="mbo-text" data-role="text">
+            保険料計算ロジックの単体テストを完了させる
+          </p>
+        </div>
+
+        <div class="mbo-card" data-goal-id="mid">
+          <div class="mbo-card-head">
+            <span class="mbo-badge">中期（今月）</span>
+            <button class="mbo-edit-btn" type="button" onclick="editGoal(this)">
+              ✏️
+            </button>
+          </div>
+          <p class="mbo-text" data-role="text">
+            更新ロジックの仕様Q&amp;Aを自走でこなせるようになる
+          </p>
+        </div>
+
+        <div class="mbo-card" data-goal-id="long">
+          <div class="mbo-card-head">
+            <span class="mbo-badge">長期</span>
+            <button class="mbo-edit-btn" type="button" onclick="editGoal(this)">
+              ✏️
+            </button>
+          </div>
+          <p class="mbo-text" data-role="text">
+            独立したBrSEとして、お客様との折衝を任せてもらえるようになる
+          </p>
+        </div>
+      </aside>
+    </div>
+
+    <!-- ================= MODAL: AI PHÂN TÍCH & ĐỀ XUẤT ================= -->
+    <div class="modal-overlay hidden" id="aiModal">
+      <div class="modal-box">
+        <div class="modal-topbar">
+          <h3>✨ AI分析・提案</h3>
+          <button class="modal-close" type="button" onclick="closeAiModal()">
+            ✕
+          </button>
+        </div>
+
+        <div class="modal-tabs">
+          <button
+            class="modal-tab is-active"
+            type="button"
+            onclick="switchModalPane('rebalance', this)"
+          >
+            ⚖️ 自動リスケジュール
+          </button>
+          <button class="modal-tab" type="button" onclick="switchModalPane('sos', this)">
+            🆘 緊急SOS
+          </button>
+          <button
+            class="modal-tab"
+            type="button"
+            onclick="switchModalPane('nippo', this)"
+          >
+            📝 Gitから日報作成
+          </button>
+        </div>
+
+        <div class="modal-body">
+          <!-- Pane 1: Auto-Rebalance -->
+          <div class="modal-pane is-active" id="pane-rebalance">
+            <p>AIが検知した遅延タスク：</p>
+            <div class="ai-finding-box coral-box" id="rebalanceFindingBox">
+              <span class="ai-loading">🤖 AIがWBSを分析中です...</span>
+            </div>
+            <button
+              class="btn btn-primary"
+              id="btnRebalanceMail"
+              type="button"
+              onclick="sendRebalanceMail(this)"
+              disabled
+            >
+              📧 PMへ承認依頼を送信（Gmail）
+            </button>
+          </div>
+
+          <!-- Pane 2: Auto SOS -->
+          <div class="modal-pane" id="pane-sos">
+            <p>AIが検知した停滞：</p>
+            <div class="ai-finding-box coral-box" id="sosFindingBox">
+              <span class="ai-loading">🤖 AIが分析中です...</span>
+            </div>
+            <p>AIが用意したSOSメッセージ：</p>
+            <div class="ai-message-box" id="sosMessageBox">—</div>
+            <button
+              class="btn btn-danger"
+              id="btnSosSlack"
+              type="button"
+              onclick="sendSosSlack(this)"
+              disabled
+            >
+              🆘 先輩へSOSを送信（Slack）
+            </button>
+          </div>
+
+          <!-- Pane 3: Git to Nippo -->
+          <div class="modal-pane" id="pane-nippo">
+            <p>Git commit 直近のログ：</p>
+            <div class="ai-finding-box mint-box">
+              <code>git commit -m "feat: 保険料計算ロジックの実装"</code>
+            </div>
+            <p>AIが自動生成した日報：</p>
+            <div class="ai-message-box" id="modalNippoMessageBox">
+              <span class="ai-loading">🤖 AIが日報を作成中です...</span>
+            </div>
+            <button
+              class="btn btn-primary"
+              id="btnModalNippoMail"
+              type="button"
+              onclick="sendModalNippoMail(this)"
+              disabled
+            >
+              📧 日報を送信（Gmail）
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= TOAST DÙNG CHUNG ================= -->
+    <div class="app-toast" id="appToast">
+      <span class="app-toast-icon" id="appToastIcon">🔔</span>
+      <div class="app-toast-body">
+        <h4 id="appToastTitle">AI Partner</h4>
+        <p id="appToastText"></p>
+      </div>
+    </div>
+
+    <script src="assets/js/app.js" defer></script>
+  </body>
+</html>

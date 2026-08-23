@@ -1,0 +1,39 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: brse-copilot-backend
+
+  ai:
+    google:
+      genai:
+        # Dùng Gemini Developer API (AI Studio - miễn phí), KHÔNG set project-id/location
+        # vì 2 property đó sẽ chuyển client sang chế độ Vertex AI (trả tiền) và làm API key
+        # dạng Developer bị từ chối.
+        #
+        # ⚠️ CẢNH BÁO BẢO MẬT (TẠM THỜI CHO MỤC ĐÍCH DEMO/HACKATHON):
+        # Key thật đang được gán cứng trực tiếp bên dưới để tiện chạy demo ngay mà không cần
+        # set biến môi trường. TUYỆT ĐỐI KHÔNG đẩy (commit/push) file này lên git repository
+        # công khai hoặc chia sẻ ra ngoài. Trước khi nộp bài/lưu trữ lâu dài, hãy xoá key khỏi
+        # đây và chuyển về dùng biến môi trường GEMINI_API_KEY (cú pháp ${GEMINI_API_KEY:...}).
+        # Nếu biến môi trường GEMINI_API_KEY được set, nó sẽ được ưu tiên dùng thay cho giá trị
+        # cứng bên dưới.
+        api-key: ${GEMINI_API_KEY:AQ.Ab8RN6IyPs104qtaiJB9ysvVs69OhkBvqV0Qm2ewLS2P9gWvgw}
+        chat:
+          options:
+            model: gemini-3.6-flash
+            temperature: 0.4
+
+  # Web servlet: cho phép Spring Boot serve toàn bộ frontend tĩnh trong src/main/resources/static
+  web:
+    resources:
+      static-locations: classpath:/static/
+
+  jackson:
+    default-property-inclusion: non_null
+
+logging:
+  level:
+    com.brsecopilot: INFO
+    org.springframework.ai: WARN

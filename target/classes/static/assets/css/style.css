@@ -1,0 +1,945 @@
+/* =========================================================
+   BrSE Copilot - Dashboard quản lý dự án cho Kỹ sư Cầu nối
+   File: assets/css/style.css
+   Layout: Sidebar (15%) + Main Content (60%) + Right Panel (25%)
+   Frontend gọi API thật (Spring Boot + Spring AI) qua fetch().
+   Vanilla CSS - không dùng framework.
+   ========================================================= */
+
+/* ---------- 1. CSS VARIABLES (Design Tokens) ---------- */
+:root {
+  --ink: #17324d;
+  --muted: #66788a;
+
+  --bg: #f4f6f9; /* nền xám nhạt cho vùng làm việc */
+  --paper: #ffffff;
+
+  --blue: #4d8fe8;
+  --mint: #45b994;
+  --coral: #c9574e;
+  --warning: #f5b74f;
+
+  --blue-soft: #eaf3ff;
+  --mint-soft: #e7faf3;
+  --coral-soft: #fdecea;
+  --warning-soft: #fff6e3;
+
+  --border: #e3e8ef;
+
+  --shadow-sm: 0 4px 14px rgba(23, 48, 77, 0.06);
+  --shadow-md: 0 14px 36px rgba(23, 48, 77, 0.16);
+
+  --radius-lg: 16px;
+  --radius-md: 10px;
+  --radius-sm: 6px;
+
+  --font-main: "Hiragino Kaku Gothic ProN", "Yu Gothic", "Noto Sans JP",
+    "Segoe UI", Meiryo, sans-serif;
+  --font-mono: "SFMono-Regular", Consolas, "Courier New", monospace;
+}
+
+/* ---------- 2. RESET CƠ BẢN ---------- */
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+body {
+  font-family: var(--font-main);
+  background: var(--bg);
+  color: var(--ink);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+button,
+textarea,
+input {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+h1,
+h2,
+h3,
+h4,
+p {
+  margin: 0;
+}
+
+/* ---------- 3. LAYOUT TỔNG: SIDEBAR (15%) + MAIN (60%) + RIGHT PANEL (25%) ---------- */
+.app-shell {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 15% 60% 25%;
+}
+
+/* ---------- 4. SIDEBAR ---------- */
+.sidebar {
+  background: #14213a;
+  color: #aab8cf;
+  padding: 26px 18px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 28px;
+}
+
+.sidebar-logo {
+  font-size: 16px;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: -0.01em;
+}
+
+.sidebar-date {
+  margin-top: 6px;
+  font-size: 11px;
+  color: #7c8ba8;
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.nav-item {
+  text-align: left;
+  padding: 11px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #aab8cf;
+  transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.nav-item:hover {
+  background: rgba(255, 255, 255, 0.07);
+  color: #ffffff;
+}
+
+.nav-item.is-active {
+  background: var(--blue);
+  color: #ffffff;
+  box-shadow: 0 8px 18px rgba(77, 143, 232, 0.4);
+}
+
+/* ---------- 5. MAIN CONTENT ---------- */
+.main-content {
+  padding: 30px 34px;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.main-tab {
+  display: none;
+}
+
+.main-tab.is-active {
+  display: block;
+  animation: fadeInUp 0.3s ease;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.main-tab-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.main-tab-head h2 {
+  font-size: 20px;
+  color: var(--ink);
+}
+
+/* Nút AI nổi bật ở góc trên phải */
+.btn-ai {
+  flex-shrink: 0;
+  padding: 12px 20px;
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-weight: 800;
+  color: #ffffff;
+  background: linear-gradient(135deg, var(--blue), #7b5fe0);
+  box-shadow: 0 10px 24px rgba(77, 143, 232, 0.4);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.btn-ai:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 30px rgba(77, 143, 232, 0.5);
+}
+
+.btn-ai:active {
+  transform: translateY(0);
+}
+
+/* ---------- 6. TAB 1: CALENDAR (Lịch lưới) ---------- */
+.calendar-legend {
+  display: flex;
+  gap: 18px;
+  margin-bottom: 14px;
+  font-size: 11.5px;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legend-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.dot-mint {
+  background: var(--mint);
+}
+
+.dot-warning {
+  background: var(--warning);
+}
+
+.dot-coral {
+  background: var(--coral);
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+  background: var(--paper);
+  padding: 18px;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border);
+}
+
+.calendar-weekday {
+  text-align: center;
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--muted);
+  padding-bottom: 6px;
+}
+
+.calendar-cell {
+  min-height: 88px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: #ffffff;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: box-shadow 0.2s ease;
+}
+
+.calendar-cell:hover {
+  box-shadow: var(--shadow-sm);
+}
+
+.calendar-cell.is-empty {
+  border: none;
+  background: transparent;
+  box-shadow: none;
+}
+
+.calendar-cell.is-today {
+  border: 2px solid var(--blue);
+  background: var(--blue-soft);
+}
+
+.calendar-date {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.calendar-cell.is-today .calendar-date {
+  color: var(--blue);
+}
+
+.task-pill {
+  font-size: 9.5px;
+  font-weight: 700;
+  padding: 3px 7px;
+  border-radius: 999px;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.task-pill.status-mint {
+  background: var(--mint);
+}
+
+.task-pill.status-warning {
+  background: var(--warning);
+  color: #5c4300;
+}
+
+.task-pill.status-coral {
+  background: var(--coral);
+}
+
+/* ---------- 7. CARD COMPONENT (dùng chung) ---------- */
+.card {
+  background: var(--paper);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 20px;
+}
+
+.card-head {
+  padding: 18px 20px 10px;
+}
+
+.card-head .title {
+  font-size: 14.5px;
+  color: var(--ink);
+}
+
+.card-head .subtitle {
+  margin-top: 4px;
+  font-size: 11.5px;
+  color: var(--muted);
+}
+
+.card-body {
+  padding: 4px 20px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.field-label {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+/* ---------- 8. TEXTAREA / INPUT DÙNG CHUNG ---------- */
+.textarea-base {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  font-size: 12.5px;
+  line-height: 1.7;
+  resize: vertical;
+  background: #fbfcfe;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.textarea-base:focus {
+  outline: none;
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px var(--blue-soft);
+}
+
+.textarea-base.mono {
+  font-family: var(--font-mono);
+}
+
+/* ---------- 9. BUTTON COMPONENTS ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 11px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 12.5px;
+  font-weight: 700;
+  white-space: nowrap;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, opacity 0.12s ease,
+    background 0.15s ease;
+}
+
+.btn:active {
+  transform: translateY(1px) scale(0.98);
+}
+
+.btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.btn-block {
+  width: 100%;
+}
+
+.btn-primary {
+  background: var(--blue);
+  color: #ffffff;
+  box-shadow: 0 6px 16px rgba(77, 143, 232, 0.32);
+}
+
+.btn-primary:hover {
+  box-shadow: 0 8px 20px rgba(77, 143, 232, 0.42);
+}
+
+.btn-secondary {
+  background: #ffffff;
+  border: 1px solid var(--border);
+  color: var(--ink);
+}
+
+.btn-secondary:hover {
+  background: var(--bg);
+}
+
+.btn-danger {
+  background: var(--coral);
+  color: #ffffff;
+  box-shadow: 0 6px 16px rgba(201, 87, 78, 0.32);
+}
+
+.btn-danger:hover {
+  box-shadow: 0 8px 20px rgba(201, 87, 78, 0.42);
+}
+
+/* ---------- 10. AI STREAMING (Typewriter Effect - dùng chung) ---------- */
+.is-streaming::after {
+  content: "▋";
+  display: inline-block;
+  margin-left: 2px;
+  color: var(--blue);
+  animation: caretBlink 0.9s steps(1) infinite;
+}
+
+@keyframes caretBlink {
+  50% {
+    opacity: 0;
+  }
+}
+
+.stream-wrap {
+  position: relative;
+}
+
+.stream-wrap.is-streaming::after {
+  content: "✎ AI入力中...";
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--blue);
+  background: var(--blue-soft);
+  padding: 3px 9px;
+  border-radius: 999px;
+  animation: caretBlink 0.9s steps(1) infinite;
+}
+
+.textarea-base.is-streaming {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px var(--blue-soft);
+}
+
+/* ---------- 10b. LOADING / ERROR STATE (gọi API thật) ---------- */
+.ai-loading {
+  display: inline-flex;
+  align-items: center;
+  font-style: italic;
+  color: inherit;
+  opacity: 0.85;
+  animation: aiLoadingPulse 1.2s ease-in-out infinite;
+}
+
+@keyframes aiLoadingPulse {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.ai-error-box {
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  background: var(--coral-soft);
+  border: 1px solid #f0c7c2;
+  color: #7a231c;
+  font-size: 12.5px;
+  line-height: 1.7;
+}
+
+/* ---------- 11. RIGHT PANEL: MBO (Mục tiêu cá nhân) ---------- */
+.right-panel {
+  background: var(--paper);
+  border-left: 1px solid var(--border);
+  padding: 28px 22px;
+  overflow-y: auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.right-panel-title {
+  font-size: 15px;
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+
+.mbo-card {
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.2s ease;
+}
+
+.mbo-card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.mbo-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.mbo-badge {
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: var(--blue-soft);
+  color: #215ea6;
+}
+
+.mbo-card[data-goal-id="mid"] .mbo-badge {
+  background: var(--mint-soft);
+  color: #1f7d68;
+}
+
+.mbo-card[data-goal-id="long"] .mbo-badge {
+  background: var(--warning-soft);
+  color: #8a5a06;
+}
+
+.mbo-edit-btn {
+  font-size: 13px;
+  opacity: 0.6;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.mbo-edit-btn:hover {
+  opacity: 1;
+  transform: scale(1.15);
+}
+
+.mbo-text {
+  font-size: 12.5px;
+  color: var(--ink);
+  line-height: 1.6;
+}
+
+.mbo-edit-textarea {
+  width: 100%;
+  min-height: 62px;
+  border: 1px solid var(--blue);
+  border-radius: var(--radius-sm);
+  padding: 8px;
+  font-size: 12.5px;
+  line-height: 1.6;
+  resize: vertical;
+}
+
+.mbo-edit-textarea:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--blue-soft);
+}
+
+/* ---------- 12. TAB 3: SPEC VS CODE (AI Analysis Box) ---------- */
+.diff-box {
+  background: #0f172a;
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.9;
+  display: flex;
+  flex-direction: column;
+  overflow-x: auto;
+  white-space: pre-wrap;
+}
+
+.diff-line {
+  display: block;
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+
+.diff-line.diff-context {
+  color: #c7d2e2;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.diff-removed {
+  color: #ff8b85;
+  background: rgba(255, 95, 86, 0.14);
+}
+
+.diff-added {
+  color: #8dffb8;
+  background: rgba(0, 255, 0, 0.08);
+  margin-top: 4px;
+}
+
+.diff-tag {
+  margin-left: 10px;
+  font-size: 10px;
+  font-family: var(--font-main);
+  color: #ffd166;
+}
+
+.diff-note {
+  margin-top: 4px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--coral);
+  white-space: pre-line;
+}
+
+/* ---------- 13. TAB 3: SHADOW CLIENT ---------- */
+.shadow-client-card {
+  border-top: 3px solid #8175c7;
+}
+
+.shadow-result {
+  margin-top: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.shadow-result.hidden {
+  display: none;
+}
+
+.result-block {
+  padding: 14px 16px;
+  border-radius: var(--radius-md);
+  font-size: 12.5px;
+  line-height: 1.7;
+}
+
+.result-block h4 {
+  font-size: 12.5px;
+  margin-bottom: 8px;
+}
+
+.result-block p {
+  color: inherit;
+  white-space: pre-line;
+}
+
+.result-block.mint-block {
+  background: var(--mint-soft);
+  border: 1px solid #bfeee1;
+  color: #1f7d68;
+}
+
+.result-block.coral-block {
+  background: var(--coral-soft);
+  border: 1px solid #f0c7c2;
+  color: #7a231c;
+}
+
+/* ---------- 14. MODAL: AI PHÂN TÍCH & ĐỀ XUẤT ---------- */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(23, 48, 77, 0.45);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  animation: overlayFadeIn 0.2s ease;
+}
+
+.modal-overlay.hidden {
+  display: none;
+}
+
+@keyframes overlayFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.modal-box {
+  width: min(560px, 92vw);
+  max-height: 86vh;
+  overflow-y: auto;
+  background: #ffffff;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  animation: modalPopIn 0.25s ease;
+}
+
+@keyframes modalPopIn {
+  from {
+    opacity: 0;
+    transform: scale(0.94) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.modal-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 22px;
+  border-bottom: 1px solid var(--border);
+}
+
+.modal-topbar h3 {
+  font-size: 16px;
+  color: var(--ink);
+}
+
+.modal-close {
+  font-size: 15px;
+  color: var(--muted);
+  padding: 5px 9px;
+  border-radius: 6px;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.modal-close:hover {
+  background: var(--bg);
+  color: var(--ink);
+}
+
+.modal-tabs {
+  display: flex;
+  gap: 6px;
+  padding: 12px 22px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.modal-tab {
+  padding: 9px 14px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+  border-radius: 8px 8px 0 0;
+  transition: color 0.2s ease, background 0.2s ease;
+}
+
+.modal-tab:hover {
+  color: var(--ink);
+}
+
+.modal-tab.is-active {
+  color: var(--blue);
+  background: var(--blue-soft);
+}
+
+.modal-body {
+  padding: 20px 22px 24px;
+}
+
+.modal-pane {
+  display: none;
+  flex-direction: column;
+  gap: 12px;
+  animation: fadeInUp 0.25s ease;
+}
+
+.modal-pane.is-active {
+  display: flex;
+}
+
+.modal-pane > p {
+  font-size: 12.5px;
+  color: var(--muted);
+}
+
+.ai-finding-box {
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  font-size: 12.5px;
+  line-height: 1.8;
+  white-space: pre-line;
+}
+
+.ai-finding-box.coral-box {
+  background: var(--coral-soft);
+  border: 1px solid #f0c7c2;
+  color: #7a231c;
+}
+
+.ai-finding-box.mint-box {
+  background: var(--mint-soft);
+  border: 1px solid #bfeee1;
+  color: #1f7d68;
+}
+
+.ai-finding-box code {
+  font-family: var(--font-mono);
+}
+
+.ai-message-box {
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  background: var(--blue-soft);
+  border: 1px solid #cfe0fb;
+  font-size: 12.5px;
+  line-height: 1.7;
+  color: var(--ink);
+  white-space: pre-line;
+}
+
+/* ---------- 15. APP TOAST (dùng chung) ---------- */
+.app-toast {
+  position: fixed;
+  top: 22px;
+  right: 22px;
+  width: 340px;
+  display: flex;
+  gap: 12px;
+  padding: 16px;
+  background: #ffffff;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-md);
+  z-index: 1400;
+
+  transform: translateX(130%);
+  opacity: 0;
+  transition: transform 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+    opacity 0.3s ease;
+}
+
+.app-toast.is-visible {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+.app-toast-icon {
+  font-size: 22px;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.app-toast-body h4 {
+  font-size: 13px;
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+
+.app-toast-body p {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.app-toast.toast-info {
+  border-color: #cfe0fb;
+  background: var(--blue-soft);
+}
+
+.app-toast.toast-info .app-toast-body h4 {
+  color: #215ea6;
+}
+
+.app-toast.toast-success {
+  border-color: #bfeee1;
+  background: var(--mint-soft);
+}
+
+.app-toast.toast-success .app-toast-body h4 {
+  color: #1f7d68;
+}
+
+.app-toast.toast-error {
+  border-color: #f0c7c2;
+  background: var(--coral-soft);
+}
+
+.app-toast.toast-error .app-toast-body h4 {
+  color: #7a231c;
+}
+
+.app-toast.toast-info .app-toast-body p,
+.app-toast.toast-success .app-toast-body p,
+.app-toast.toast-error .app-toast-body p {
+  color: var(--ink);
+}
+
+/* ---------- 16. RESPONSIVE (đơn giản cho demo) ---------- */
+@media (max-width: 1080px) {
+  .app-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .sidebar-nav {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .right-panel {
+    border-left: none;
+    border-top: 1px solid var(--border);
+  }
+}
