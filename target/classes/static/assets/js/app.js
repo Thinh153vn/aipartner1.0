@@ -46,6 +46,98 @@ const MOCK_DATA = {
   ],
 };
 
+// Task lấy về từ Google Calendar sau khi bấm "🔄 Googleカレンダー同期" (state cục bộ,
+// không lưu lại giữa các lần tải trang - mỗi lần sync sẽ thay thế toàn bộ danh sách này).
+let GOOGLE_SYNCED_TASKS = [];
+
+/* ---------- 2b. TRẠNG THÁI "ĐÃ HOÀN THÀNH" CỦA TASK (lưu localStorage) ----------
+   Dùng chung cho: click tick trên task-pill của Calendar, checklist trong widget
+   "leo núi", và card Reality-Check. Lưu theo taskId (không theo ngày) vì id của
+   MOCK_DATA/Google Calendar là cố định. */
+const DONE_TASKS_STORAGE_KEY = "brseCopilotDoneTaskIds";
+
+function loadDoneTaskIds() {
+  try {
+    const raw = localStorage.getItem(DONE_TASKS_STORAGE_KEY);
+    return new Set(raw ? JSON.parse(raw) : []);
+  } catch (e) {
+    return new Set();
+  }
+}
+
+let DONE_TASK_IDS = loadDoneTaskIds();
+
+function saveDoneTaskIds() {
+  localStorage.setItem(DONE_TASKS_STORAGE_KEY, JSON.stringify([...DONE_TASK_IDS]));
+}
+
+// Ghi nhớ task vừa được tick để phát hiệu ứng "pop" đúng vào đúng phần tử đó khi vẽ lại
+// (Calendar/widget leo núi được render lại toàn bộ mỗi lần toggle nên cần biết target).
+let lastToggledTaskId = null;
+
+// Toggle trạng thái hoàn thành của 1 task, rồi vẽ lại toàn bộ nơi hiển thị liên quan
+// (Calendar, widget leo núi, Reality-Check) để luôn đồng bộ dữ liệu.
+function toggleTaskDone(taskId) {
+  if (DONE_TASK_IDS.has(taskId)) {
+    DONE_TASK_IDS.delete(taskId);
+  } else {
+    DONE_TASK_IDS.add(taskId);
+  }
+  lastToggledTaskId = taskId;
+  saveDoneTaskIds();
+  buildCalendar();
+  renderMountainWidget();
+  renderRealityCheck();
+}
+
+// Hiệu ứng confetti ăn mừng khi hoàn thành 100% task hôm nay (leo lên đỉnh núi) - tăng
+// độ "wow" khi demo tại hackathon.
+function spawnConfetti(containerEl) {
+  if (!containerEl) return;
+  const colors = ["#cf2e2e", "#45b994", "#f5b74f", "#4d8fe8", "#ffffff"];
+  for (let i = 0; i < 26; i++) {
+    const piece = document.createElement("span");
+    piece.className = "confetti-piece";
+    piece.style.left = `${Math.random() * 100}%`;
+    piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+    piece.style.animationDelay = `${(Math.random() * 0.3).toFixed(2)}s`;
+    piece.style.setProperty("--rotate", `${Math.round(Math.random() * 360)}deg`);
+    piece.addEventListener("animationend", () => piece.remove());
+    containerEl.appendChild(piece);
+  }
+}
+
+// Hiệu ứng số đếm tăng dần (count-up) cho các số liệu thống kê - tạo cảm giác "sống" khi
+// dữ liệu thay đổi, phù hợp cho phần trình diễn demo.
+function animateCountUp(el, newValue) {
+  if (!el) return;
+  const startValue = parseInt(el.textContent, 10) || 0;
+  if (startValue === newValue) {
+    el.textContent = String(newValue);
+    return;
+  }
+  const duration = 450;
+  const startTime = performance.now();
+  function step(now) {
+    const progress = Math.min((now - startTime) / duration, 1);
+    const current = Math.round(startValue + (newValue - startValue) * progress);
+    el.textContent = String(current);
+    if (progress < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+function getAllTasks() {
+  return [...MOCK_DATA.tasks, ...GOOGLE_SYNCED_TASKS];
+}
+
+// Thu gọn/mở rộng 1 card (dùng cho các khối cài đặt ít dùng như Googleカレンダー連携設定)
+// để giao diện chính gọn gàng, không rối mắt.
+function toggleCollapse(cardId) {
+  const card = $(cardId);
+  if (card) card.classList.toggle("is-collapsed");
+}
+
 // Nội dung mẫu (Spec/Code) gửi cho API review-offshore ở chế độ SPEC_DIFF.
 // Đây là dữ liệu đầu vào minh hoạ (không phải phản hồi AI), mô phỏng cặp
 // Spec/Code hiện có trong dự án bảo hiểm.
@@ -67,24 +159,26 @@ class ApiError extends Error {
 }
 
 /**
- * Gọi POST JSON tới backend, luôn ném ApiError với message thân thiện khi thất bại
- * (timeout, mất mạng, hoặc lỗi trả về từ GlobalExceptionHandler phía Spring Boot).
+ * Gọi fetch tới backend với method bất kỳ (GET/POST/PUT), luôn ném ApiError với
+ * message thân thiện khi thất bại (timeout, mất mạng, hoặc lỗi trả về từ
+ * GlobalExceptionHandler phía Spring Boot). postJson/putJson/getJson bên dưới
+ * chỉ là các hàm rút gọn dựa trên hàm này.
  */
-async function postJson(url, body) {
+async function requestJson(url, method, body) {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), API_TIMEOUT_MS);
 
   let response;
   try {
     response = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
+      method,
+      headers: body !== undefined ? { "Content-Type": "application/json" } : undefined,
+      body: body !== undefined ? JSON.stringify(body) : undefined,
       signal: controller.signal,
     });
   } catch (networkError) {
     if (networkError.name === "AbortError") {
-      throw new ApiError("AIの応答がタイムアウトしました。しばらくしてから再度お試しください。");
+      throw new ApiError("応答がタイムアウトしました。しばらくしてから再度お試しください。");
     }
     throw new ApiError("ネットワークエラーが発生しました。接続をご確認のうえ、再度お試しください。");
   } finally {
@@ -99,8 +193,54 @@ async function postJson(url, body) {
   }
 
   if (!response.ok) {
-    const message = (payload && payload.message) || "AIエージェントとの通信でエラーが発生しました。";
+    const message = (payload && payload.message) || "サーバーとの通信でエラーが発生しました。";
     throw new ApiError(message, response.status);
+  }
+
+  return payload;
+}
+
+function postJson(url, body) {
+  return requestJson(url, "POST", body);
+}
+
+function putJson(url, body) {
+  return requestJson(url, "PUT", body);
+}
+
+function getJson(url) {
+  return requestJson(url, "GET");
+}
+
+/**
+ * Upload 1 file (multipart/form-data) tới backend, dùng riêng cho tính năng trích xuất
+ * text từ file (PDF/text) - KHÔNG dùng chung requestJson() vì không set JSON header/body.
+ */
+async function postFormData(url, formData) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), API_TIMEOUT_MS);
+
+  let response;
+  try {
+    response = await fetch(url, { method: "POST", body: formData, signal: controller.signal });
+  } catch (networkError) {
+    if (networkError.name === "AbortError") {
+      throw new ApiError("応答がタイムアウトしました。しばらくしてから再度お試しください。");
+    }
+    throw new ApiError("ネットワークエラーが発生しました。接続をご確認のうえ、再度お試しください。");
+  } finally {
+    clearTimeout(timeoutId);
+  }
+
+  let payload = null;
+  try {
+    payload = await response.json();
+  } catch (parseError) {
+    payload = null;
+  }
+
+  if (!response.ok) {
+    throw new ApiError((payload && payload.message) || "ファイルの処理でエラーが発生しました。", response.status);
   }
 
   return payload;
@@ -202,18 +342,240 @@ function buildCalendar() {
       day
     ).padStart(2, "0")}`;
 
-    MOCK_DATA.tasks
+    getAllTasks()
       .filter((task) => task.date === dateKey)
       .forEach((task) => {
+        const isFromGoogle = task.source === "google";
+        const isDone = DONE_TASK_IDS.has(task.id);
         const pill = document.createElement("div");
-        pill.className = `task-pill status-${getTaskStatus(task.date)}`;
-        pill.textContent = task.title;
-        pill.title = task.title;
+        pill.className = `task-pill status-${getTaskStatus(task.date)}${
+          isFromGoogle ? " task-pill-google" : ""
+        }${isDone ? " is-done" : ""}${task.id === lastToggledTaskId ? " just-toggled" : ""}`;
+        pill.textContent = `${isDone ? "✓ " : isFromGoogle ? "📅 " : ""}${task.title}`;
+        pill.title = `${task.title}（クリックで完了/未完了を切り替え）`;
+        pill.addEventListener("click", () => toggleTaskDone(task.id));
         cell.appendChild(pill);
       });
 
     grid.appendChild(cell);
   }
+}
+
+/* ---------- 6b. GOOGLE CALENDAR 連携（設定の読込・保存・同期） ---------- */
+
+// Đọc trạng thái cấu hình hiện tại từ backend, đổ vào ô CalendarID + cập nhật dòng trạng thái.
+// Gọi 1 lần khi tải trang; lỗi ở đây bị bỏ qua âm thầm để không làm phiền user ngay khi mở app.
+async function loadCalendarSettings() {
+  const statusEl = $("gcalStatusText");
+  const idInput = $("gcalCalendarIdInput");
+  try {
+    const settings = await getJson("/api/v1/calendar/settings");
+    if (idInput && settings.calendarId) idInput.value = settings.calendarId;
+
+    if (statusEl) {
+      const isConfigured = Boolean(settings.calendarId) && settings.apiKeyConfigured;
+      statusEl.textContent = isConfigured
+        ? "✅ 設定済みです。「Googleカレンダー同期」ボタンで最新の予定を取り込めます。"
+        : "⚠️ 未設定です。カレンダーIDとAPIキーを登録してください。";
+      statusEl.classList.toggle("is-configured", isConfigured);
+      statusEl.classList.toggle("is-missing", !isConfigured);
+    }
+  } catch (err) {
+    if (statusEl) statusEl.textContent = "⚠️ 設定状態を取得できませんでした。";
+  }
+}
+
+// Nút "💾 設定を保存" - lưu CalendarID/APIKey vào file cấu hình cục bộ của backend.
+async function saveCalendarSettings(buttonEl) {
+  const calendarId = $("gcalCalendarIdInput")?.value.trim();
+  const apiKey = $("gcalApiKeyInput")?.value.trim();
+
+  if (!calendarId) {
+    alert("カレンダーIDを入力してください。");
+    return;
+  }
+
+  if (!buttonEl || buttonEl.disabled) return;
+  const originalHtml = buttonEl.innerHTML;
+  buttonEl.disabled = true;
+  buttonEl.innerHTML = "⏳ 保存中...";
+
+  try {
+    await putJson("/api/v1/calendar/settings", { calendarId, apiKey: apiKey || null });
+    const apiKeyInput = $("gcalApiKeyInput");
+    if (apiKeyInput) apiKeyInput.value = ""; // Không giữ lại APIキー đã nhập trên màn hình vì lý do bảo mật.
+    showToast("✅ 保存完了", "Googleカレンダーの連携設定を保存しました。", "success");
+    await loadCalendarSettings();
+  } catch (err) {
+    notifyAiFailure(err);
+  } finally {
+    buttonEl.disabled = false;
+    buttonEl.innerHTML = originalHtml;
+  }
+}
+
+// Nút "🔄 Googleカレンダー同期" - gọi backend lấy toàn bộ event (±1 tháng quanh hôm nay)
+// và tự động gắn vào Calendar lưới dưới dạng Task, không cần người dùng nhập tay lại.
+async function syncGoogleCalendar(buttonEl) {
+  if (!buttonEl || buttonEl.disabled) return;
+  const originalHtml = buttonEl.innerHTML;
+  buttonEl.disabled = true;
+  buttonEl.innerHTML = "⏳ 同期中...";
+
+  try {
+    const result = await postJson("/api/v1/calendar/sync");
+    GOOGLE_SYNCED_TASKS = (result.tasks || []).map((task) => ({
+      id: task.id,
+      title: task.title,
+      date: task.dueDate,
+      source: "google",
+    }));
+    buildCalendar();
+    renderMountainWidget();
+    renderRealityCheck();
+    showToast(
+      "✅ 同期完了",
+      `Googleカレンダーから${GOOGLE_SYNCED_TASKS.length}件の予定を取り込みました。`,
+      "success"
+    );
+  } catch (err) {
+    notifyAiFailure(err);
+  } finally {
+    buttonEl.disabled = false;
+    buttonEl.innerHTML = originalHtml;
+  }
+}
+
+/* ---------- 6c. WIDGET "LEO NÚI" - Mục tiêu hằng ngày (gamification) ---------- */
+
+// Theo dõi % trước đó để chỉ bắn confetti đúng lúc "vừa mới" lên tới 100% (không lặp lại
+// mỗi lần render nếu trạng thái không đổi, và không bắn ngay khi mới load trang).
+let lastMountainPercent = -1;
+let mountainWidgetInitialized = false;
+
+// Vẽ lại vị trí nhân vật trên núi + danh sách task hôm nay dựa trên % hoàn thành.
+function renderMountainWidget() {
+  const mascotEl = $("mountainMascot");
+  const progressText = $("mountainProgressText");
+  const taskListEl = $("mountainTaskList");
+  const widgetEl = $("mountainWidget");
+  if (!mascotEl || !progressText || !taskListEl || !widgetEl) return;
+
+  const todayKey = toDateKey(TODAY);
+  const todayTasks = getAllTasks().filter((task) => task.date === todayKey);
+  const doneCount = todayTasks.filter((task) => DONE_TASK_IDS.has(task.id)).length;
+  const totalCount = todayTasks.length;
+  // Không có task hôm nay -> coi như đã "lên đỉnh" (100%) để khích lệ, không phải vì trễ hạn.
+  const percent = totalCount === 0 ? 100 : Math.round((doneCount / totalCount) * 100);
+
+  // Nội suy vị trí trên đường chéo trái của ngọn núi (tam giác đỉnh (150,10), đáy (0,140)).
+  const x = 150 * (percent / 100);
+  const y = 140 - 130 * (percent / 100);
+  mascotEl.style.left = `${(x / 300) * 100}%`;
+  mascotEl.style.top = `${(y / 140) * 100}%`;
+
+  widgetEl.classList.toggle("is-summit", percent >= 100 && totalCount > 0);
+
+  progressText.textContent =
+    totalCount === 0
+      ? "本日期日のタスクはありません。素晴らしい一日を！"
+      : `本日期日のタスク: ${doneCount}/${totalCount} 完了（${percent}%）`;
+
+  taskListEl.innerHTML = "";
+  todayTasks.forEach((task) => {
+    const isDone = DONE_TASK_IDS.has(task.id);
+    const item = document.createElement("div");
+    item.className = `mountain-task-item${isDone ? " is-done" : ""}${
+      task.id === lastToggledTaskId ? " just-toggled" : ""
+    }`;
+    item.innerHTML = `<span class="mountain-task-check">${isDone ? "✓" : ""}</span><span class="mountain-task-title"></span>`;
+    item.querySelector(".mountain-task-title").textContent = task.title; // textContent để tránh XSS
+    item.addEventListener("click", () => toggleTaskDone(task.id));
+    taskListEl.appendChild(item);
+  });
+
+  // Vừa đạt 100% (không phải trạng thái mặc định "không có task") -> bắn confetti ăn mừng.
+  if (mountainWidgetInitialized && totalCount > 0 && percent >= 100 && lastMountainPercent < 100) {
+    spawnConfetti(widgetEl);
+  }
+  lastMountainPercent = percent;
+  mountainWidgetInitialized = true;
+}
+
+/* ---------- 6d. REALITY-CHECK CARD - Thực tế vs Kế hoạch, cảnh báo quá hạn ---------- */
+
+// Tính toán hoàn toàn phía client dựa trên task hiện có (không gọi AI) để phản hồi ngay lập tức.
+function renderRealityCheck() {
+  const totalEl = $("rcTotalCount");
+  const doneEl = $("rcDoneCount");
+  const overdueEl = $("rcOverdueCount");
+  const alertBox = $("rcAlertBox");
+  const alertText = $("rcAlertText");
+  if (!totalEl || !doneEl || !overdueEl || !alertBox || !alertText) return;
+
+  const currentMonthTasks = getAllTasks().filter((task) => {
+    const d = new Date(`${task.date}T00:00:00`);
+    return d.getFullYear() === TODAY.getFullYear() && d.getMonth() === TODAY.getMonth();
+  });
+
+  const doneCount = currentMonthTasks.filter((task) => DONE_TASK_IDS.has(task.id)).length;
+  const overdueTasks = currentMonthTasks.filter((task) => {
+    if (DONE_TASK_IDS.has(task.id)) return false;
+    return new Date(`${task.date}T00:00:00`) < TODAY;
+  });
+
+  animateCountUp(totalEl, currentMonthTasks.length);
+  animateCountUp(doneEl, doneCount);
+  animateCountUp(overdueEl, overdueTasks.length);
+
+  if (overdueTasks.length === 0) {
+    alertBox.classList.add("hidden");
+    return;
+  }
+
+  alertBox.classList.remove("hidden");
+  alertText.textContent = overdueTasks
+    .map((task) => {
+      const diffDays = Math.round((TODAY - new Date(`${task.date}T00:00:00`)) / 86400000);
+      return `・${task.title}（${diffDays}日超過）`;
+    })
+    .join("\n");
+}
+
+/* ---------- 6e. GREETING MODAL - Chào hỏi đầu ngày (chỉ hiện 1 lần/ngày) ---------- */
+
+const LAST_GREETED_STORAGE_KEY = "brseCopilotLastGreetedDate";
+
+function buildGreetingHeadline() {
+  const hour = new Date().getHours();
+  if (hour < 11) return "おはようございます！";
+  if (hour < 18) return "こんにちは！";
+  return "お疲れ様です！";
+}
+
+function checkAndShowDailyGreeting() {
+  const todayKey = toDateKey(TODAY);
+  if (localStorage.getItem(LAST_GREETED_STORAGE_KEY) === todayKey) return; // đã chào hôm nay rồi
+
+  const todayTaskCount = getAllTasks().filter((task) => task.date === todayKey).length;
+  const headlineEl = $("greetingHeadline");
+  const textEl = $("greetingText");
+  const modal = $("greetingModal");
+  if (!headlineEl || !textEl || !modal) return;
+
+  headlineEl.textContent = buildGreetingHeadline();
+  textEl.textContent =
+    todayTaskCount === 0
+      ? "本日期日のタスクはありません。個人目標の達成に時間を使いましょう！"
+      : `本日は期日のタスクが${todayTaskCount}件あります。一緒に頑張りましょう！`;
+
+  modal.classList.remove("hidden");
+  localStorage.setItem(LAST_GREETED_STORAGE_KEY, todayKey);
+}
+
+function closeGreetingModal() {
+  const modal = $("greetingModal");
+  if (modal) modal.classList.add("hidden");
 }
 
 /* ---------- 7. TAB "BÁO CÁO NIPPO" (gọi API thật) ---------- */
@@ -257,6 +619,107 @@ async function generateNippoReport() {
 
 /* ---------- 8. TAB "TRỢ LÝ OFFSHORE": SPEC VS CODE + SHADOW CLIENT ---------- */
 
+// Text đã trích xuất từ file người dùng upload (spec/code). null = chưa upload -> dùng sample.
+const OFFSHORE_UPLOADED_TEXT = { spec: null, code: null };
+
+// Đuôi file được coi là "code/text" hợp lệ khi upload cả 1 thư mục project.
+const OFFSHORE_CODE_EXTENSIONS = [
+  ".java", ".js", ".jsx", ".ts", ".tsx", ".py", ".cs", ".go", ".rb", ".php",
+  ".c", ".cpp", ".h", ".hpp", ".kt", ".swift", ".sql", ".xml", ".yml", ".yaml",
+  ".json", ".html", ".css", ".md", ".txt",
+];
+// Thư mục nặng/không liên quan tới logic nghiệp vụ -> loại bỏ khi chọn cả thư mục project
+// (tránh upload thừa node_modules, .git, build output... vừa chậm vừa không cần thiết cho AI).
+const OFFSHORE_EXCLUDED_DIR_SEGMENTS = [
+  "node_modules", ".git", "target", "build", "dist", ".idea", ".vscode",
+  "venv", "__pycache__", ".gradle", "vendor", "coverage", ".next", "out",
+];
+const OFFSHORE_MAX_BATCH_FILES = 60;
+
+function getRelativePath(file) {
+  return file.webkitRelativePath && file.webkitRelativePath.length > 0
+    ? file.webkitRelativePath
+    : file.name;
+}
+
+function isOffshoreFileAllowed(file, kind) {
+  const path = getRelativePath(file).toLowerCase();
+  if (OFFSHORE_EXCLUDED_DIR_SEGMENTS.some((seg) => path.includes(`/${seg}/`) || path.startsWith(`${seg}/`))) {
+    return false;
+  }
+  if (kind === "spec") {
+    return [".pdf", ".txt", ".md"].some((ext) => path.endsWith(ext));
+  }
+  return OFFSHORE_CODE_EXTENSIONS.some((ext) => path.endsWith(ext));
+}
+
+// Xử lý khi người dùng chọn file(s) (仕様書 hoặc コード, có thể chọn cả 1 thư mục project) -
+// gọi backend trích xuất text (PDF dùng PDFBox, file khác đọc thẳng dạng text), lưu lại để
+// dùng khi bấm "AIで比較する". 1 file -> gọi API đơn; nhiều file -> gọi API batch (ghép nội dung).
+async function handleOffshoreFileSelect(inputEl, kind) {
+  const statusEl = $(kind === "spec" ? "specFileStatus" : "codeFileStatus");
+  const allFiles = inputEl.files ? Array.from(inputEl.files) : [];
+  if (allFiles.length === 0) return;
+
+  const filteredFiles = allFiles
+    .filter((file) => isOffshoreFileAllowed(file, kind))
+    .slice(0, OFFSHORE_MAX_BATCH_FILES);
+
+  if (filteredFiles.length === 0) {
+    if (statusEl) {
+      statusEl.textContent = "⚠️ 対応する形式のファイルが見つかりませんでした。";
+      statusEl.classList.add("is-error");
+    }
+    inputEl.value = "";
+    return;
+  }
+
+  if (statusEl) {
+    statusEl.textContent =
+      filteredFiles.length === 1
+        ? "⏳ ファイルを読み込み中..."
+        : `⏳ ${filteredFiles.length}個のファイルを読み込み中...`;
+    statusEl.classList.remove("is-loaded", "is-error");
+  }
+
+  try {
+    let text;
+    let statusMessage;
+
+    if (filteredFiles.length === 1) {
+      const formData = new FormData();
+      formData.append("file", filteredFiles[0]);
+      const result = await postFormData("/api/v1/files/extract-text", formData);
+      text = result.text;
+      statusMessage = `✅ ${result.originalFilename}（${result.text.length}文字${
+        result.truncated ? "・切り捨て" : ""
+      }）`;
+    } else {
+      const formData = new FormData();
+      filteredFiles.forEach((file) => formData.append("files", file, getRelativePath(file)));
+      const result = await postFormData("/api/v1/files/extract-text-batch", formData);
+      text = result.text;
+      statusMessage = `✅ ${result.includedFileCount}個のファイルを読み込みました（合計${
+        result.text.length
+      }文字${result.truncated ? "・切り捨て" : ""}）`;
+    }
+
+    OFFSHORE_UPLOADED_TEXT[kind] = text;
+    if (statusEl) {
+      statusEl.textContent = statusMessage;
+      statusEl.classList.add("is-loaded");
+    }
+  } catch (err) {
+    OFFSHORE_UPLOADED_TEXT[kind] = null;
+    if (statusEl) {
+      statusEl.textContent = `⚠️ ${err.message}`;
+      statusEl.classList.add("is-error");
+    }
+    notifyAiFailure(err);
+    inputEl.value = "";
+  }
+}
+
 async function runSpecDiffReview() {
   const box = $("specDiffBox");
   const note = $("specDiffNote");
@@ -272,8 +735,8 @@ async function runSpecDiffReview() {
   try {
     const result = await postJson("/api/v1/copilot/review-offshore", {
       mode: "SPEC_DIFF",
-      specText: OFFSHORE_SPEC_SAMPLE.specText,
-      codeText: OFFSHORE_SPEC_SAMPLE.codeText,
+      specText: OFFSHORE_UPLOADED_TEXT.spec || OFFSHORE_SPEC_SAMPLE.specText,
+      codeText: OFFSHORE_UPLOADED_TEXT.code || OFFSHORE_SPEC_SAMPLE.codeText,
     });
 
     // Render bằng textContent (không dùng innerHTML) vì đây là nội dung do AI sinh ra,
@@ -602,5 +1065,9 @@ function renderTodayDate() {
 document.addEventListener("DOMContentLoaded", () => {
   renderTodayDate();
   buildCalendar();
+  renderMountainWidget();
+  renderRealityCheck();
+  loadCalendarSettings();
   initModalOutsideClick();
+  checkAndShowDailyGreeting();
 });

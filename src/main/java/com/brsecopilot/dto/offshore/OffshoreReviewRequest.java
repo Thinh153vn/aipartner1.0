@@ -11,8 +11,8 @@ import jakarta.validation.constraints.Size;
  */
 public record OffshoreReviewRequest(
         @NotNull(message = "modeは必須です") ReviewMode mode,
-        @Size(max = 3000, message = "仕様書テキストは3000文字以内で入力してください") String specText,
-        @Size(max = 3000, message = "コードテキストは3000文字以内で入力してください") String codeText,
+        @Size(max = 6000, message = "仕様書テキストは6000文字以内で入力してください") String specText,
+        @Size(max = 6000, message = "コードテキストは6000文字以内で入力してください") String codeText,
         @Size(max = 2000, message = "質問内容は2000文字以内で入力してください") String rawQuestion
 ) {
 }

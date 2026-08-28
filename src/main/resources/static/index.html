@@ -3,67 +3,199 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>BrSE Copilot | プロジェクト管理ダッシュボード</title>
+    <title>BrSE Copilot | Calendar-Centric Workspace</title>
+
+    <!-- Google Fonts: BIZ UDPGothic（日本語ビジネス文書用）+ Inter（英数字・UI用） -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- FontAwesome（アイコン） -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    />
+
+    <!-- FullCalendar v6（JS一式にCSSも内包されているため、別途CSSリンクは不要） -->
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.21/index.global.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.21/locales-all.global.min.js"></script>
+
     <link rel="stylesheet" href="assets/css/style.css" />
   </head>
   <body>
     <div class="app-shell">
-      <!-- ================= SIDEBAR (15%) ================= -->
+      <!-- ================= LEFT SIDEBAR (20%): 積み残しタスク・目標 ================= -->
       <aside class="sidebar">
-        <div>
-          <div class="sidebar-logo">🧭 BrSE Copilot</div>
-          <div class="sidebar-date" id="sidebarDate">2026年8月23日（日）</div>
+        <div class="sidebar-top">
+          <div class="sidebar-logo">
+            <img src="assets/img/mascot.png" alt="BrSE Copilot" class="sidebar-mascot" />
+            BrSE Copilot
+          </div>
+          <div class="sidebar-date" id="sidebarDate">2026年8月28日（金）</div>
         </div>
 
-        <nav class="sidebar-nav">
+        <div class="sidebar-section-head">
+          <h3><i class="fa-solid fa-layer-group"></i> 積み残しタスク・目標</h3>
+          <span class="backlog-count" id="backlogCount">0</span>
+        </div>
+        <p class="sidebar-hint">
+          <i class="fa-solid fa-hand-pointer"></i> カードをカレンダーへドラッグして予定を組めます
+        </p>
+
+        <div class="backlog-list" id="backlogList">
+          <!-- Draggable task card は app.js が動的に生成 -->
+        </div>
+
+        <!-- Cài đặt liên kết Google Calendar (API Key, không OAuth) - thu gọn theo mặc định -->
+        <div class="card collapsible-card is-collapsed sidebar-gcal-card" id="gcalSettingsCard">
+          <div class="card-head" onclick="toggleCollapse('gcalSettingsCard')">
+            <div>
+              <h3 class="title"><i class="fa-brands fa-google"></i> Googleカレンダー連携</h3>
+              <p class="subtitle gcal-status-text" id="gcalStatusText">読み込み中...</p>
+            </div>
+            <span class="collapsible-chevron">▾</span>
+          </div>
+          <div class="card-body">
+            <label class="field-label" for="gcalCalendarIdInput">カレンダーID</label>
+            <input
+              type="text"
+              id="gcalCalendarIdInput"
+              class="input-base"
+              placeholder="例）your-account@gmail.com"
+            />
+
+            <label class="field-label" for="gcalApiKeyInput"
+              >APIキー（登録済みの場合は空欄でも構いません）</label
+            >
+            <input
+              type="password"
+              id="gcalApiKeyInput"
+              class="input-base"
+              placeholder="Google Cloud Consoleで発行したAPIキー"
+            />
+
+            <button
+              class="btn btn-secondary btn-block"
+              id="btnSaveGcalSettings"
+              type="button"
+              onclick="saveCalendarSettings(this)"
+            >
+              💾 設定を保存
+            </button>
+          </div>
+        </div>
+      </aside>
+
+      <!-- ================= MAIN CENTER (60%): Dynamic Calendar + Tabs ================= -->
+      <main class="main-content">
+        <nav class="center-tabs">
           <button
-            class="nav-item is-active"
-            data-tab="schedule"
+            class="center-tab is-active"
+            data-tab="calendar"
             type="button"
-            onclick="switchMainTab('schedule')"
+            onclick="switchMainTab('calendar')"
           >
-            📅 進捗管理
+            <i class="fa-regular fa-calendar-days"></i> カレンダー
+          </button>
+          <button class="center-tab" data-tab="mbo" type="button" onclick="switchMainTab('mbo')">
+            <i class="fa-solid fa-bullseye"></i> MBO目標
           </button>
           <button
-            class="nav-item"
+            class="center-tab"
             data-tab="nippo"
             type="button"
             onclick="switchMainTab('nippo')"
           >
-            📝 日報作成
+            <i class="fa-solid fa-pen-to-square"></i> 日報作成
           </button>
           <button
-            class="nav-item"
+            class="center-tab"
             data-tab="offshore"
             type="button"
             onclick="switchMainTab('offshore')"
           >
-            🔍 オフショア支援
+            <i class="fa-solid fa-magnifying-glass-chart"></i> オフショア支援
           </button>
         </nav>
-      </aside>
 
-      <!-- ================= MAIN CONTENT (60%) ================= -->
-      <main class="main-content">
-        <!-- ---------- TAB 1: QUẢN LÝ TIẾN ĐỘ ---------- -->
-        <section class="main-tab is-active" id="tab-schedule">
-          <div class="main-tab-head">
-            <h2>スケジュール・進捗管理</h2>
-            <button class="btn btn-ai" type="button" onclick="openAiModal()">
-              ✨ AI分析・提案
-            </button>
+        <!-- ---------- TAB 1: DYNAMIC CALENDAR（メイン） ---------- -->
+        <section class="main-tab is-active" id="tab-calendar">
+          <div class="calendar-toolbar">
+            <div class="calendar-legend">
+              <span class="legend-item"><i class="legend-dot dot-blue"></i>固定業務・会議</span>
+              <span class="legend-item"><i class="legend-dot dot-mint"></i>AIおすすめ学習枠</span>
+              <span class="legend-item"><i class="legend-dot dot-google"></i>Googleカレンダー</span>
+            </div>
+            <div class="calendar-toolbar-actions">
+              <button
+                class="btn btn-secondary"
+                id="btnSyncGcal"
+                type="button"
+                onclick="syncGoogleCalendar(this)"
+              >
+                <i class="fa-solid fa-rotate"></i> Google同期
+              </button>
+              <button class="btn btn-ai" id="btnAiAutoSchedule" type="button" onclick="runAiAutoSchedule(this)">
+                ✨ AI自動スケジューリング
+              </button>
+            </div>
           </div>
 
-          <div class="calendar-legend">
-            <span class="legend-item"><i class="legend-dot dot-mint"></i>余裕あり</span>
-            <span class="legend-item"><i class="legend-dot dot-warning"></i>期限間近</span>
-            <span class="legend-item"><i class="legend-dot dot-coral"></i>期限超過</span>
-          </div>
-
-          <div class="calendar-grid" id="calendarGrid"></div>
+          <div id="fullCalendar"></div>
         </section>
 
-        <!-- ---------- TAB 2: BÁO CÁO NIPPO ---------- -->
+        <!-- ---------- TAB 2: MBO（個人目標） ---------- -->
+        <section class="main-tab" id="tab-mbo">
+          <div class="main-tab-head">
+            <h2>MBO 個人目標管理</h2>
+          </div>
+          <p class="tab-intro">
+            業務の進捗管理だけでなく、あなた自身の成長目標も一緒に伴走します。短期・中期・長期の目標を定期的に見直しましょう。
+          </p>
+
+          <div class="mbo-grid">
+            <div class="mbo-card" data-goal-id="short">
+              <div class="mbo-card-head">
+                <span class="mbo-badge">短期（今週）</span>
+                <button class="mbo-edit-btn" type="button" onclick="editGoal(this)">
+                  <i class="fa-solid fa-pen"></i>
+                </button>
+              </div>
+              <p class="mbo-text" data-role="text">
+                保険料計算ロジックの単体テストを完了させる
+              </p>
+            </div>
+
+            <div class="mbo-card" data-goal-id="mid">
+              <div class="mbo-card-head">
+                <span class="mbo-badge">中期（今月）</span>
+                <button class="mbo-edit-btn" type="button" onclick="editGoal(this)">
+                  <i class="fa-solid fa-pen"></i>
+                </button>
+              </div>
+              <p class="mbo-text" data-role="text">
+                更新ロジックの仕様Q&amp;Aを自走でこなせるようになる
+              </p>
+            </div>
+
+            <div class="mbo-card" data-goal-id="long">
+              <div class="mbo-card-head">
+                <span class="mbo-badge">長期</span>
+                <button class="mbo-edit-btn" type="button" onclick="editGoal(this)">
+                  <i class="fa-solid fa-pen"></i>
+                </button>
+              </div>
+              <p class="mbo-text" data-role="text">
+                独立したBrSEとして、お客様との折衝を任せてもらえるようになる
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- ---------- TAB 3: 日報作成 ---------- -->
         <section class="main-tab" id="tab-nippo">
           <div class="main-tab-head">
             <h2>報告書 Nippo 自動生成</h2>
@@ -72,16 +204,14 @@
           <div class="card">
             <div class="card-head">
               <div>
-                <h3 class="title">🪵 作業ログ入力</h3>
+                <h3 class="title"><i class="fa-solid fa-code-commit"></i> 作業ログ入力</h3>
                 <p class="subtitle">
                   Git commit・タスクメモなどを貼り付けると、AIが日報を自動生成します
                 </p>
               </div>
             </div>
             <div class="card-body">
-              <label class="field-label" for="nippoLogInput"
-                >本日の作業ログ</label
-              >
+              <label class="field-label" for="nippoLogInput">本日の作業ログ</label>
               <textarea id="nippoLogInput" class="textarea-base mono" rows="4">
 git commit -m "feat: 保険料計算ロジックの実装"
 git commit -m "fix: 更新ロジックのNull例外を修正"</textarea
@@ -96,9 +226,7 @@ git commit -m "fix: 更新ロジックのNull例外を修正"</textarea
                 🤖 AIで日報を自動作成
               </button>
 
-              <label class="field-label" for="nippoOutput"
-                >生成された日報</label
-              >
+              <label class="field-label" for="nippoOutput">生成された日報</label>
               <div class="stream-wrap" id="nippoOutputWrap">
                 <textarea
                   id="nippoOutput"
@@ -121,7 +249,7 @@ git commit -m "fix: 更新ロジックのNull例外を修正"</textarea
           </div>
         </section>
 
-        <!-- ---------- TAB 3: TRỢ LÝ OFFSHORE ---------- -->
+        <!-- ---------- TAB 4: オフショア支援 ---------- -->
         <section class="main-tab" id="tab-offshore">
           <div class="main-tab-head">
             <h2>オフショア支援（仕様・コード確認）</h2>
@@ -131,13 +259,45 @@ git commit -m "fix: 更新ロジックのNull例外を修正"</textarea
           <div class="card">
             <div class="card-head">
               <div>
-                <h3 class="title">🔬 Spec vs Code 比較</h3>
+                <h3 class="title"><i class="fa-solid fa-code-compare"></i> Spec vs Code 比較</h3>
                 <p class="subtitle">
                   仕様書とコードの差分をAIが自動検知（Visual Diff）
                 </p>
               </div>
             </div>
             <div class="card-body">
+              <div class="file-upload-row">
+                <div class="file-upload-field">
+                  <label class="field-label" for="specFileInput"
+                    >仕様書ファイル（PDF / テキスト・複数選択可）</label
+                  >
+                  <input
+                    type="file"
+                    id="specFileInput"
+                    class="file-input"
+                    accept=".pdf,.txt,.md"
+                    multiple
+                    onchange="handleOffshoreFileSelect(this, 'spec')"
+                  />
+                  <p class="file-upload-status" id="specFileStatus">未選択（サンプルを使用）</p>
+                </div>
+                <div class="file-upload-field">
+                  <label class="field-label" for="codeFileInput"
+                    >コードファイル（複数選択・フォルダ選択可）</label
+                  >
+                  <input
+                    type="file"
+                    id="codeFileInput"
+                    class="file-input"
+                    multiple
+                    webkitdirectory
+                    directory
+                    onchange="handleOffshoreFileSelect(this, 'code')"
+                  />
+                  <p class="file-upload-status" id="codeFileStatus">未選択（サンプルを使用）</p>
+                </div>
+              </div>
+
               <div class="diff-box" id="specDiffBox">
                 <span class="diff-line diff-context"
                   >if (age &gt;= 20) { applyAdultPremium(); }
@@ -145,7 +305,7 @@ git commit -m "fix: 更新ロジックのNull例外を修正"</textarea
                 >
               </div>
               <p class="diff-note" id="specDiffNote">
-                「🤖 AIで比較する」を押すと、仕様書とコードの不整合をAIが分析します。
+                「🤖 AIで比較する」を押すと、仕様書とコードの不整合・セキュリティリスクをAIが分析します。
               </p>
               <button
                 class="btn btn-secondary"
@@ -162,7 +322,7 @@ git commit -m "fix: 更新ロジックのNull例外を修正"</textarea
           <div class="card shadow-client-card">
             <div class="card-head">
               <div>
-                <h3 class="title">🎭 Shadow Client</h3>
+                <h3 class="title"><i class="fa-solid fa-comments"></i> Shadow Client</h3>
                 <p class="subtitle">
                   質問の下書きをAIが添削・翻訳し、リスクを警告
                 </p>
@@ -209,137 +369,90 @@ git commit -m "fix: 更新ロジックのNull例外を修正"</textarea
         </section>
       </main>
 
-      <!-- ================= RIGHT PANEL (25%) ================= -->
+      <!-- ================= RIGHT SIDEBAR (20%): AI Agent Command Center ================= -->
       <aside class="right-panel">
-        <h2 class="right-panel-title">🎯 個人目標（MBO）</h2>
-
-        <div class="mbo-card" data-goal-id="short">
-          <div class="mbo-card-head">
-            <span class="mbo-badge">短期（今週）</span>
-            <button class="mbo-edit-btn" type="button" onclick="editGoal(this)">
-              ✏️
-            </button>
+        <div class="agent-header">
+          <img src="assets/img/mascot.png" alt="" class="agent-avatar" />
+          <div>
+            <h2>BrSEアシスタント</h2>
+            <p id="agentStatusLine">今日も一緒に頑張りましょう！</p>
           </div>
-          <p class="mbo-text" data-role="text">
-            保険料計算ロジックの単体テストを完了させる
-          </p>
         </div>
 
-        <div class="mbo-card" data-goal-id="mid">
-          <div class="mbo-card-head">
-            <span class="mbo-badge">中期（今月）</span>
-            <button class="mbo-edit-btn" type="button" onclick="editGoal(this)">
-              ✏️
-            </button>
+        <!-- Gamification thu gọn: leo núi mục tiêu ngày + Reality-Check -->
+        <div class="mini-widget mountain-mini" id="mountainWidget">
+          <div class="mini-widget-top">
+            <span class="mini-widget-icon">🏔</span>
+            <span class="mini-widget-title">本日の目標達成度</span>
+            <img
+              src="assets/img/mascot.png"
+              alt=""
+              class="mini-mascot"
+              id="mountainMascot"
+            />
           </div>
-          <p class="mbo-text" data-role="text">
-            更新ロジックの仕様Q&amp;Aを自走でこなせるようになる
+          <div class="mini-progress-track">
+            <div class="mini-progress-fill" id="mountainProgressFill"></div>
+          </div>
+          <p class="mountain-progress-text" id="mountainProgressText">
+            本日期日のタスクはありません。
           </p>
+          <div class="mountain-task-list" id="mountainTaskList"></div>
         </div>
 
-        <div class="mbo-card" data-goal-id="long">
-          <div class="mbo-card-head">
-            <span class="mbo-badge">長期</span>
-            <button class="mbo-edit-btn" type="button" onclick="editGoal(this)">
-              ✏️
-            </button>
+        <div class="rc-stats" id="rcStats">
+          <div class="rc-stat">
+            <h4>今月の計画</h4>
+            <b id="rcTotalCount">0</b>
           </div>
-          <p class="mbo-text" data-role="text">
-            独立したBrSEとして、お客様との折衝を任せてもらえるようになる
-          </p>
+          <div class="rc-stat">
+            <h4>完了済み</h4>
+            <b id="rcDoneCount" class="rc-stat-mint">0</b>
+          </div>
+          <div class="rc-stat">
+            <h4>期限超過</h4>
+            <b id="rcOverdueCount" class="rc-stat-coral">0</b>
+          </div>
+        </div>
+        <div class="rc-alert hidden" id="rcAlertBox">
+          <span class="rc-alert-icon">🚨</span>
+          <div>
+            <strong>期限超過のタスクがあります：</strong>
+            <p id="rcAlertText"></p>
+          </div>
+        </div>
+
+        <!-- クイックアクション: リアルAI呼び出し -->
+        <div class="agent-quick-actions">
+          <button class="agent-chip" id="btnQuickRebalance" type="button" onclick="runAiAutoSchedule(this)">
+            <i class="fa-solid fa-scale-balanced"></i> 自動リスケジュール
+          </button>
+          <button class="agent-chip agent-chip-danger" id="btnQuickSos" type="button" onclick="runQuickSos(this)">
+            <i class="fa-solid fa-triangle-exclamation"></i> 緊急SOS
+          </button>
+        </div>
+
+        <!-- Execution timeline + Chat: quá trình suy nghĩ + hội thoại của AI Agent -->
+        <div class="agent-feed" id="agentFeed">
+          <div class="agent-feed-empty" id="agentFeedEmpty">
+            <i class="fa-solid fa-robot"></i>
+            <p>ここにAIエージェントの実行ログと会話が表示されます。</p>
+          </div>
+        </div>
+
+        <div class="agent-input-bar">
+          <input
+            type="text"
+            id="agentChatInput"
+            class="agent-chat-input"
+            placeholder="AIに話しかける（例：今週のタスクを整理して）"
+            onkeydown="handleAgentInputKeydown(event)"
+          />
+          <button class="agent-send-btn" id="btnAgentSend" type="button" onclick="sendAgentChatMessage()">
+            <i class="fa-solid fa-paper-plane"></i>
+          </button>
         </div>
       </aside>
-    </div>
-
-    <!-- ================= MODAL: AI PHÂN TÍCH & ĐỀ XUẤT ================= -->
-    <div class="modal-overlay hidden" id="aiModal">
-      <div class="modal-box">
-        <div class="modal-topbar">
-          <h3>✨ AI分析・提案</h3>
-          <button class="modal-close" type="button" onclick="closeAiModal()">
-            ✕
-          </button>
-        </div>
-
-        <div class="modal-tabs">
-          <button
-            class="modal-tab is-active"
-            type="button"
-            onclick="switchModalPane('rebalance', this)"
-          >
-            ⚖️ 自動リスケジュール
-          </button>
-          <button class="modal-tab" type="button" onclick="switchModalPane('sos', this)">
-            🆘 緊急SOS
-          </button>
-          <button
-            class="modal-tab"
-            type="button"
-            onclick="switchModalPane('nippo', this)"
-          >
-            📝 Gitから日報作成
-          </button>
-        </div>
-
-        <div class="modal-body">
-          <!-- Pane 1: Auto-Rebalance -->
-          <div class="modal-pane is-active" id="pane-rebalance">
-            <p>AIが検知した遅延タスク：</p>
-            <div class="ai-finding-box coral-box" id="rebalanceFindingBox">
-              <span class="ai-loading">🤖 AIがWBSを分析中です...</span>
-            </div>
-            <button
-              class="btn btn-primary"
-              id="btnRebalanceMail"
-              type="button"
-              onclick="sendRebalanceMail(this)"
-              disabled
-            >
-              📧 PMへ承認依頼を送信（Gmail）
-            </button>
-          </div>
-
-          <!-- Pane 2: Auto SOS -->
-          <div class="modal-pane" id="pane-sos">
-            <p>AIが検知した停滞：</p>
-            <div class="ai-finding-box coral-box" id="sosFindingBox">
-              <span class="ai-loading">🤖 AIが分析中です...</span>
-            </div>
-            <p>AIが用意したSOSメッセージ：</p>
-            <div class="ai-message-box" id="sosMessageBox">—</div>
-            <button
-              class="btn btn-danger"
-              id="btnSosSlack"
-              type="button"
-              onclick="sendSosSlack(this)"
-              disabled
-            >
-              🆘 先輩へSOSを送信（Slack）
-            </button>
-          </div>
-
-          <!-- Pane 3: Git to Nippo -->
-          <div class="modal-pane" id="pane-nippo">
-            <p>Git commit 直近のログ：</p>
-            <div class="ai-finding-box mint-box">
-              <code>git commit -m "feat: 保険料計算ロジックの実装"</code>
-            </div>
-            <p>AIが自動生成した日報：</p>
-            <div class="ai-message-box" id="modalNippoMessageBox">
-              <span class="ai-loading">🤖 AIが日報を作成中です...</span>
-            </div>
-            <button
-              class="btn btn-primary"
-              id="btnModalNippoMail"
-              type="button"
-              onclick="sendModalNippoMail(this)"
-              disabled
-            >
-              📧 日報を送信（Gmail）
-            </button>
-          </div>
-        </div>
-      </div>
     </div>
 
     <!-- ================= TOAST DÙNG CHUNG ================= -->
@@ -348,6 +461,18 @@ git commit -m "fix: 更新ロジックのNull例外を修正"</textarea
       <div class="app-toast-body">
         <h4 id="appToastTitle">AI Partner</h4>
         <p id="appToastText"></p>
+      </div>
+    </div>
+
+    <!-- ================= 本日最初の挨拶モーダル（1日1回） ================= -->
+    <div class="modal-overlay hidden" id="greetingModal">
+      <div class="modal-box greeting-box">
+        <img src="assets/img/mascot.png" alt="" class="greeting-mascot" />
+        <p class="greeting-headline" id="greetingHeadline">おはようございます！</p>
+        <p class="greeting-text" id="greetingText"></p>
+        <button class="btn btn-primary btn-block" type="button" onclick="closeGreetingModal()">
+          今日も頑張りましょう！
+        </button>
       </div>
     </div>
 

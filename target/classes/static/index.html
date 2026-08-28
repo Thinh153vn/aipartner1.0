@@ -4,6 +4,12 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>BrSE Copilot | プロジェクト管理ダッシュボード</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="assets/css/style.css" />
   </head>
   <body>
@@ -11,7 +17,10 @@
       <!-- ================= SIDEBAR (15%) ================= -->
       <aside class="sidebar">
         <div>
-          <div class="sidebar-logo">🧭 BrSE Copilot</div>
+          <div class="sidebar-logo">
+            <img src="assets/img/mascot.png" alt="BrSE Copilot" class="sidebar-mascot" />
+            BrSE Copilot
+          </div>
           <div class="sidebar-date" id="sidebarDate">2026年8月23日（日）</div>
         </div>
 
@@ -49,15 +58,94 @@
         <section class="main-tab is-active" id="tab-schedule">
           <div class="main-tab-head">
             <h2>スケジュール・進捗管理</h2>
-            <button class="btn btn-ai" type="button" onclick="openAiModal()">
-              ✨ AI分析・提案
-            </button>
+            <div class="main-tab-head-actions">
+              <button class="btn btn-secondary" id="btnSyncGcal" type="button" onclick="syncGoogleCalendar(this)">
+                🔄 Googleカレンダー同期
+              </button>
+              <button class="btn btn-ai" type="button" onclick="openAiModal()">
+                ✨ AI分析・提案
+              </button>
+            </div>
+          </div>
+
+          <!-- Reality-Check: đối chiếu thực tế vs kế hoạch, cảnh báo task quá hạn -->
+          <div class="card reality-check-card">
+            <div class="card-head">
+              <div>
+                <h3 class="title">⚖️ Reality-Check（実績 vs 計画）</h3>
+                <p class="subtitle">今月の予定と実績のズレを自動チェックします</p>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="rc-stats" id="rcStats">
+                <div class="rc-stat">
+                  <h4>今月の予定タスク</h4>
+                  <b id="rcTotalCount">0</b>
+                </div>
+                <div class="rc-stat">
+                  <h4>完了済み</h4>
+                  <b id="rcDoneCount" class="rc-stat-mint">0</b>
+                </div>
+                <div class="rc-stat">
+                  <h4>期限超過</h4>
+                  <b id="rcOverdueCount" class="rc-stat-coral">0</b>
+                </div>
+              </div>
+
+              <div class="rc-alert hidden" id="rcAlertBox">
+                <span class="rc-alert-icon">🚨</span>
+                <div>
+                  <strong>期限超過のタスクがあります：</strong>
+                  <p id="rcAlertText"></p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Cài đặt liên kết Google Calendar (API Key, không OAuth) - thu gọn theo mặc định để giảm rối mắt -->
+          <div class="card gcal-settings-card collapsible-card is-collapsed" id="gcalSettingsCard">
+            <div class="card-head" onclick="toggleCollapse('gcalSettingsCard')">
+              <div>
+                <h3 class="title">📅 Googleカレンダー連携設定</h3>
+                <p class="subtitle gcal-status-text" id="gcalStatusText">読み込み中...</p>
+              </div>
+              <span class="collapsible-chevron">▾</span>
+            </div>
+            <div class="card-body">
+              <label class="field-label" for="gcalCalendarIdInput">カレンダーID</label>
+              <input
+                type="text"
+                id="gcalCalendarIdInput"
+                class="input-base"
+                placeholder="例）your-account@gmail.com"
+              />
+
+              <label class="field-label" for="gcalApiKeyInput"
+                >APIキー（登録済みの場合は空欄でも構いません）</label
+              >
+              <input
+                type="password"
+                id="gcalApiKeyInput"
+                class="input-base"
+                placeholder="Google Cloud Consoleで発行したAPIキー"
+              />
+
+              <button
+                class="btn btn-secondary"
+                id="btnSaveGcalSettings"
+                type="button"
+                onclick="saveCalendarSettings(this)"
+              >
+                💾 設定を保存
+              </button>
+            </div>
           </div>
 
           <div class="calendar-legend">
             <span class="legend-item"><i class="legend-dot dot-mint"></i>余裕あり</span>
             <span class="legend-item"><i class="legend-dot dot-warning"></i>期限間近</span>
             <span class="legend-item"><i class="legend-dot dot-coral"></i>期限超過</span>
+            <span class="legend-item"><i class="legend-dot dot-google"></i>Googleカレンダー</span>
           </div>
 
           <div class="calendar-grid" id="calendarGrid"></div>
@@ -138,6 +226,39 @@ git commit -m "fix: 更新ロジックのNull例外を修正"</textarea
               </div>
             </div>
             <div class="card-body">
+              <!-- Upload file để đối chiếu: nếu không chọn file, dùng dữ liệu mẫu có sẵn -->
+              <div class="file-upload-row">
+                <div class="file-upload-field">
+                  <label class="field-label" for="specFileInput"
+                    >仕様書ファイル（PDF / テキスト・複数選択可）</label
+                  >
+                  <input
+                    type="file"
+                    id="specFileInput"
+                    class="file-input"
+                    accept=".pdf,.txt,.md"
+                    multiple
+                    onchange="handleOffshoreFileSelect(this, 'spec')"
+                  />
+                  <p class="file-upload-status" id="specFileStatus">未選択（サンプルを使用）</p>
+                </div>
+                <div class="file-upload-field">
+                  <label class="field-label" for="codeFileInput"
+                    >コードファイル（複数選択・フォルダ選択可）</label
+                  >
+                  <input
+                    type="file"
+                    id="codeFileInput"
+                    class="file-input"
+                    multiple
+                    webkitdirectory
+                    directory
+                    onchange="handleOffshoreFileSelect(this, 'code')"
+                  />
+                  <p class="file-upload-status" id="codeFileStatus">未選択（サンプルを使用）</p>
+                </div>
+              </div>
+
               <div class="diff-box" id="specDiffBox">
                 <span class="diff-line diff-context"
                   >if (age &gt;= 20) { applyAdultPremium(); }
@@ -145,7 +266,7 @@ git commit -m "fix: 更新ロジックのNull例外を修正"</textarea
                 >
               </div>
               <p class="diff-note" id="specDiffNote">
-                「🤖 AIで比較する」を押すと、仕様書とコードの不整合をAIが分析します。
+                「🤖 AIで比較する」を押すと、仕様書とコードの不整合・セキュリティリスクをAIが分析します。
               </p>
               <button
                 class="btn btn-secondary"
@@ -211,6 +332,34 @@ git commit -m "fix: 更新ロジックのNull例外を修正"</textarea
 
       <!-- ================= RIGHT PANEL (25%) ================= -->
       <aside class="right-panel">
+        <!-- 今日の目標達成度（登山ゲージ） - 今日期日のタスクを完了するとキャラクターが山を登る -->
+        <div class="card mountain-card">
+          <div class="card-head">
+            <div>
+              <h3 class="title">🏔 今日の目標達成度</h3>
+              <p class="subtitle">今日期日のタスクを完了すると、キャラクターが山を登ります</p>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="mountain-widget" id="mountainWidget">
+              <svg viewBox="0 0 300 140" preserveAspectRatio="none" class="mountain-svg">
+                <polygon points="0,140 150,10 300,140" class="mountain-shape" />
+              </svg>
+              <span class="mountain-flag" id="mountainFlag">🚩</span>
+              <img
+                src="assets/img/mascot.png"
+                alt=""
+                class="mountain-mascot"
+                id="mountainMascot"
+              />
+            </div>
+            <p class="mountain-progress-text" id="mountainProgressText">
+              本日期日のタスクはありません。
+            </p>
+            <div class="mountain-task-list" id="mountainTaskList"></div>
+          </div>
+        </div>
+
         <h2 class="right-panel-title">🎯 個人目標（MBO）</h2>
 
         <div class="mbo-card" data-goal-id="short">
@@ -348,6 +497,18 @@ git commit -m "fix: 更新ロジックのNull例外を修正"</textarea
       <div class="app-toast-body">
         <h4 id="appToastTitle">AI Partner</h4>
         <p id="appToastText"></p>
+      </div>
+    </div>
+
+    <!-- ================= 本日最初の挨拶モーダル（1日1回） ================= -->
+    <div class="modal-overlay hidden" id="greetingModal">
+      <div class="modal-box greeting-box">
+        <img src="assets/img/mascot.png" alt="" class="greeting-mascot" />
+        <p class="greeting-headline" id="greetingHeadline">おはようございます！</p>
+        <p class="greeting-text" id="greetingText"></p>
+        <button class="btn btn-primary btn-block" type="button" onclick="closeGreetingModal()">
+          今日も頑張りましょう！
+        </button>
       </div>
     </div>
 

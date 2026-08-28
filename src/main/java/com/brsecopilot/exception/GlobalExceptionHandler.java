@@ -10,6 +10,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 import java.util.stream.Collectors;
 
@@ -71,6 +72,34 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_GATEWAY)
                 .body(ApiErrorResponse.of(HttpStatus.BAD_GATEWAY.value(),
                         "AIエージェントとの通信に失敗しました。しばらくしてから再度お試しください。"));
+    }
+
+    /**
+     * Lỗi đồng bộ Google Calendar: chưa cấu hình, API Key/Calendar ID sai, hoặc calendar
+     * chưa public. Khác với AiAgentException, message ở đây được hiển thị trực tiếp cho
+     * người dùng vì đã được viết rõ nguyên nhân + hướng xử lý ngay tại GoogleCalendarService.
+     */
+    @ExceptionHandler(CalendarSyncException.class)
+    public ResponseEntity<ApiErrorResponse> handleCalendarSyncError(CalendarSyncException ex) {
+        log.error("Googleカレンダー同期に失敗しました: {}", ex.getMessage(), ex);
+        return ResponseEntity.status(HttpStatus.BAD_GATEWAY)
+                .body(ApiErrorResponse.of(HttpStatus.BAD_GATEWAY.value(), ex.getMessage()));
+    }
+
+    /** Lỗi trích xuất text từ file upload (PDF/text): file rỗng, quá lớn, hoặc PDF lỗi. */
+    @ExceptionHandler(FileExtractionException.class)
+    public ResponseEntity<ApiErrorResponse> handleFileExtractionError(FileExtractionException ex) {
+        log.warn("ファイルからのテキスト抽出に失敗しました: {}", ex.getMessage());
+        return ResponseEntity.badRequest()
+                .body(ApiErrorResponse.of(HttpStatus.BAD_REQUEST.value(), ex.getMessage()));
+    }
+
+    /** File upload vượt quá dung lượng cho phép (cấu hình ở application.yml). */
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<ApiErrorResponse> handleMaxUploadSize(MaxUploadSizeExceededException ex) {
+        log.warn("アップロードされたファイルのサイズが上限を超えています: {}", ex.getMessage());
+        return ResponseEntity.badRequest().body(ApiErrorResponse.of(HttpStatus.BAD_REQUEST.value(),
+                "ファイルサイズが上限（5MB）を超えています。より小さいファイルをお試しください。"));
     }
 
     /** Fallback cho mọi lỗi không lường trước, tránh lộ thông tin nội bộ. */

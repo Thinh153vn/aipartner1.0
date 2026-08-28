@@ -8,7 +8,10 @@ import com.brsecopilot.dto.schedule.ScheduleAnalysisRequest;
 import com.brsecopilot.dto.schedule.ScheduleAnalysisResponse;
 import com.brsecopilot.dto.sos.SosAlertRequest;
 import com.brsecopilot.dto.sos.SosAlertResponse;
-import com.brsecopilot.service.AiAgentService;
+import com.brsecopilot.service.NippoGenerationService;
+import com.brsecopilot.service.OffshoreReviewService;
+import com.brsecopilot.service.ScheduleAnalysisService;
+import com.brsecopilot.service.SosAlertService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,44 +21,57 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * REST API cho BrSE Copilot Autonomous AI Agent Dashboard.
- * Toàn bộ endpoint dùng chung 1 AiAgentService, lỗi được xử lý tập trung ở
- * GlobalExceptionHandler nên Controller chỉ tập trung vào việc nhận request
- * đã validate (@Valid) và trả response.
+ *
+ * Mỗi nghiệp vụ AI (schedule analysis, SOS alert, nippo generation, offshore
+ * review) có 1 Service riêng biệt (Single Responsibility) thay vì dùng chung
+ * 1 "God Service" như trước; Controller chỉ nhận request đã validate (@Valid)
+ * và uỷ quyền toàn bộ xử lý cho Service tương ứng, không chứa business logic.
+ * Lỗi được xử lý tập trung ở GlobalExceptionHandler.
  */
 @RestController
 @RequestMapping("/api/v1/copilot")
 public class CopilotController {
 
-    private final AiAgentService aiAgentService;
+    private final ScheduleAnalysisService scheduleAnalysisService;
+    private final SosAlertService sosAlertService;
+    private final NippoGenerationService nippoGenerationService;
+    private final OffshoreReviewService offshoreReviewService;
 
-    public CopilotController(AiAgentService aiAgentService) {
-        this.aiAgentService = aiAgentService;
+    public CopilotController(
+            ScheduleAnalysisService scheduleAnalysisService,
+            SosAlertService sosAlertService,
+            NippoGenerationService nippoGenerationService,
+            OffshoreReviewService offshoreReviewService) {
+        this.scheduleAnalysisService = scheduleAnalysisService;
+        this.sosAlertService = sosAlertService;
+        this.nippoGenerationService = nippoGenerationService;
+        this.offshoreReviewService = offshoreReviewService;
     }
 
     /** Auto-Rebalance: phân tích WBS, phát hiện task trễ hạn và đề xuất dời lịch. */
     @PostMapping("/analyze-schedule")
     public ResponseEntity<ScheduleAnalysisResponse> analyzeSchedule(
             @Valid @RequestBody ScheduleAnalysisRequest request) {
-        return ResponseEntity.ok(aiAgentService.analyzeSchedule(request));
+        return ResponseEntity.ok(scheduleAnalysisService.analyze(request));
     }
 
     /** Auto SOS: phát hiện kẹt logic lâu, soạn tin nhắn cầu cứu Senior. */
     @PostMapping("/sos-alert")
     public ResponseEntity<SosAlertResponse> sosAlert(@Valid @RequestBody SosAlertRequest request) {
-        return ResponseEntity.ok(aiAgentService.generateSosAlert(request));
+        return ResponseEntity.ok(sosAlertService.generateAlert(request));
     }
 
     /** Git to Nippo: sinh báo cáo ngày từ log Git/công việc thô. */
     @PostMapping("/generate-nippo")
     public ResponseEntity<NippoGenerationResponse> generateNippo(
             @Valid @RequestBody NippoGenerationRequest request) {
-        return ResponseEntity.ok(aiAgentService.generateNippo(request.rawLogs()));
+        return ResponseEntity.ok(nippoGenerationService.generate(request.rawLogs()));
     }
 
     /** Trợ lý Offshore: dùng chung cho Spec vs Code diff (SPEC_DIFF) và Shadow Client (SHADOW_CLIENT). */
     @PostMapping("/review-offshore")
     public ResponseEntity<OffshoreReviewResponse> reviewOffshore(
             @Valid @RequestBody OffshoreReviewRequest request) {
-        return ResponseEntity.ok(aiAgentService.reviewOffshore(request));
+        return ResponseEntity.ok(offshoreReviewService.review(request));
     }
 }
