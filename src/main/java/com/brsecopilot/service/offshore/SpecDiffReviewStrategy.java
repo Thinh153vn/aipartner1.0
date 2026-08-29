@@ -31,7 +31,7 @@ public class SpecDiffReviewStrategy implements OffshoreReviewStrategy {
     @Override
     public OffshoreReviewResponse execute(OffshoreReviewRequest request) {
         if (isBlank(request.specText()) || isBlank(request.codeText())) {
-            throw new InvalidRequestException("SPEC_DIFFモードでは specText と codeText の両方が必須です。");
+            throw new InvalidRequestException("仕様とコード比較では仕様書とソースコードの両方が必須です。");
         }
 
         log.info("Spec vs Code比較リクエストを受信しました specLength={} codeLength={}",

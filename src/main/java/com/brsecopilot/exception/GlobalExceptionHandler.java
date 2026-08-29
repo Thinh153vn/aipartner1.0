@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.stream.Collectors;
 
@@ -100,6 +101,18 @@ public class GlobalExceptionHandler {
         log.warn("アップロードされたファイルのサイズが上限を超えています: {}", ex.getMessage());
         return ResponseEntity.badRequest().body(ApiErrorResponse.of(HttpStatus.BAD_REQUEST.value(),
                 "ファイルサイズが上限（5MB）を超えています。より小さいファイルをお試しください。"));
+    }
+
+    /**
+     * Static resource không tồn tại (ví dụ browser tự động GET /favicon.ico).
+     * Đây KHÔNG phải lỗi nghiệp vụ nên chỉ log ở mức DEBUG và trả 404 gọn,
+     * tránh làm nhiễu log ERROR của ứng dụng với những request vô hại này.
+     */
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleStaticResourceNotFound(NoResourceFoundException ex) {
+        log.debug("静的リソースが見つかりません: {}", ex.getResourcePath());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ApiErrorResponse.of(HttpStatus.NOT_FOUND.value(), "リソースが見つかりません。"));
     }
 
     /** Fallback cho mọi lỗi không lường trước, tránh lộ thông tin nội bộ. */

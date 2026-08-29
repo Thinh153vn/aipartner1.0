@@ -19,7 +19,7 @@ spring:
         # đây và chuyển về dùng biến môi trường GEMINI_API_KEY (cú pháp ${GEMINI_API_KEY:...}).
         # Nếu biến môi trường GEMINI_API_KEY được set, nó sẽ được ưu tiên dùng thay cho giá trị
         # cứng bên dưới.
-        api-key: ${GEMINI_API_KEY:AQ.Ab8RN6Lu4ORaw8k1UYPCTTcGy_fE2ALfYonSNXvQxT_NGPO3wA}
+        api-key: ${GEMINI_API_KEY:AQ.Ab8RN6IsZWSIneNfBMCPXDOVo5gvy1WEpzK8d-tBqvGwCJqeyg}
         chat:
           options:
             model: gemini-3.6-flash
@@ -31,11 +31,13 @@ spring:
       static-locations: classpath:/static/
 
   # Giới hạn dung lượng file upload cho tính năng "so sánh Spec vs Code" (PDF/text)
-  # max-request-size lớn hơn để hỗ trợ upload cả 1 thư mục project (nhiều file cùng lúc)
+  # max-request-size lớn hơn để hỗ trợ upload cả 1 thư mục project (nhiều file cùng lúc,
+  # tối đa 300 file/lượt theo OFFSHORE_MAX_BATCH_FILES ở frontend -> nâng trần lên đủ dư
+  # cho các project thật có nhiều file text/code, dù nội dung mỗi file vẫn bị cắt ở tầng AI).
   servlet:
     multipart:
-      max-file-size: 5MB
-      max-request-size: 30MB
+      max-file-size: 20MB
+      max-request-size: 300MB
 
   jackson:
     default-property-inclusion: non_null

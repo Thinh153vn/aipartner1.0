@@ -35,10 +35,12 @@ public class FileTextExtractionService {
 
     private static final Logger log = LoggerFactory.getLogger(FileTextExtractionService.class);
 
-    private static final long MAX_FILE_SIZE_BYTES = 5L * 1024 * 1024; // 5MB / file
+    private static final long MAX_FILE_SIZE_BYTES = 10L * 1024 * 1024; // 10MB / file
     private static final int MAX_TEXT_LENGTH = 3000; // Giới hạn cho 1 file đơn (spec đơn lẻ)
     private static final int MAX_BATCH_TEXT_LENGTH = 6000; // Giới hạn cho nội dung ghép nhiều file
-    private static final int MAX_BATCH_FILE_COUNT = 60; // Tránh upload cả node_modules/.git nếu lọt lưới FE
+    // Đồng bộ với OFFSHORE_MAX_BATCH_FILES ở frontend (app.js) - cho phép duyệt/hiển thị cả
+    // project lớn, nhưng chỉ số lượng này thực sự được gửi lên AI để trích xuất nội dung.
+    private static final int MAX_BATCH_FILE_COUNT = 300;
 
     public ExtractedTextResponse extract(MultipartFile file) {
         String filename = safeFilename(file);
@@ -107,7 +109,7 @@ public class FileTextExtractionService {
             throw new FileExtractionException("「" + filename + "」の内容が空です。");
         }
         if (file.getSize() > MAX_FILE_SIZE_BYTES) {
-            throw new FileExtractionException("「" + filename + "」のサイズが上限（5MB）を超えています。");
+            throw new FileExtractionException("「" + filename + "」のサイズが上限（10MB）を超えています。");
         }
 
         String rawText = isPdf(filename, file.getContentType())

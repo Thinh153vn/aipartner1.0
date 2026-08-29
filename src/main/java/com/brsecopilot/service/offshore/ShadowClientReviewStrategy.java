@@ -31,7 +31,7 @@ public class ShadowClientReviewStrategy implements OffshoreReviewStrategy {
     @Override
     public OffshoreReviewResponse execute(OffshoreReviewRequest request) {
         if (isBlank(request.rawQuestion())) {
-            throw new InvalidRequestException("SHADOW_CLIENTモードでは rawQuestion が必須です。");
+            throw new InvalidRequestException("顧客質問レビューでは質問内容が必須です。");
         }
 
         log.info("Shadow Clientレビューリクエストを受信しました questionLength={}", request.rawQuestion().length());

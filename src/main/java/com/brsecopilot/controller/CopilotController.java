@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * REST API cho BrSE Copilot Autonomous AI Agent Dashboard.
+ * REST API cho AI PARTNER Autonomous AI Agent Dashboard.
  *
  * Mỗi nghiệp vụ AI (schedule analysis, SOS alert, nippo generation, offshore
  * review) có 1 Service riêng biệt (Single Responsibility) thay vì dùng chung
@@ -68,7 +68,7 @@ public class CopilotController {
         return ResponseEntity.ok(nippoGenerationService.generate(request.rawLogs()));
     }
 
-    /** Trợ lý Offshore: dùng chung cho Spec vs Code diff (SPEC_DIFF) và Shadow Client (SHADOW_CLIENT). */
+    /** Trợ lý Offshore: SPEC_DIFF / SHADOW_CLIENT / UNIT_TEST_GEN / TEST_CASE_GEN. */
     @PostMapping("/review-offshore")
     public ResponseEntity<OffshoreReviewResponse> reviewOffshore(
             @Valid @RequestBody OffshoreReviewRequest request) {
