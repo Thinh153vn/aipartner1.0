@@ -10,8 +10,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 
 /**
- * Nghiệp vụ "Auto-Rebalance": phân tích WBS, phát hiện task trễ hạn và đề xuất
- * dời lịch. Single Responsibility: chỉ lo dựng prompt + gọi AI cho nghiệp vụ này.
+ * WBS上の遅延を検出し、再スケジュール案をAIで作る。
  */
 @Service
 public class ScheduleAnalysisService {

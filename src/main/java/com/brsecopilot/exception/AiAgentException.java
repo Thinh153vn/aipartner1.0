@@ -1,9 +1,7 @@
 package com.brsecopilot.exception;
 
 /**
- * Ném ra khi việc gọi AI (Spring AI / OpenAI) thất bại: timeout, sai API key,
- * hết quota, hoặc phản hồi trả về không đúng định dạng JSON kỳ vọng.
- * Được GlobalExceptionHandler bắt và trả HTTP 502 kèm message thân thiện.
+ * AI呼び出し失敗（タイムアウト、キー不正、想定外JSONなど）。HTTP 502 で返す。
  */
 public class AiAgentException extends RuntimeException {
 

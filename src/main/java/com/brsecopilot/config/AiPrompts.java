@@ -1,11 +1,9 @@
 package com.brsecopilot.config;
 
 /**
- * Tập hợp System Prompt cho từng nghiệp vụ của AI PARTNER.
- * Mỗi prompt ràng buộc: vai trò AI, ngữ cảnh Hệ thống Bảo hiểm (保険システム),
- * và văn phong tiếng Nhật Business. Định dạng JSON đầu ra được Spring AI tự
- * động bổ sung thông qua ChatClient.entity(...) (BeanOutputConverter), nên
- * prompt chỉ cần tập trung mô tả nghiệp vụ.
+ * GROWTH PARTNER 各業務のシステムプロンプト集。
+ * 役割は保険システムのBrSE支援、文体はビジネス日本語。
+ * 出力JSONスキーマは ChatClient.entity(...)（BeanOutputConverter）が付与するため、ここは業務説明に集中する。
  */
 public final class AiPrompts {
 
@@ -14,7 +12,7 @@ public final class AiPrompts {
 
     private static final String COMMON_PERSONA = """
             あなたは日本のSIer企業（生命保険の契約管理システム開発案件）で働く、経験豊富な
-            ブリッジシステムエンジニア（BrSE）を支援する自律型AIエージェント「AI PARTNER」です。
+            ブリッジシステムエンジニア（BrSE）を支援する自律型AIエージェント「GROWTH PARTNER」です。
             対象システムは保険料計算ロジック、契約更新（更新ロジック）、解約返戻金計算などを扱う
             保険システムです。回答は必ず丁寧な日本語のビジネス文書表現（敬語）を用いてください。
             """;

@@ -1,11 +1,9 @@
 package com.brsecopilot.dto.offshore;
 
 /**
- * Phân biệt các nghiệp vụ dùng chung endpoint /api/v1/copilot/review-offshore:
- * - SPEC_DIFF: so sánh Spec vs Code, phát hiện điểm không khớp.
- * - SHADOW_CLIENT: dịch câu hỏi thô sang tiếng Nhật business + cảnh báo rủi ro.
- * - UNIT_TEST_GEN: sinh Unit Test tự động từ source code đã upload/dán.
- * - TEST_CASE_GEN: sinh bộ test case (RBT) từ tài liệu yêu cầu (要件).
+ * /review-offshore の業務区分。
+ * SPEC_DIFF: 仕様とコードの差分。SHADOW_CLIENT: 顧客質問の点検。
+ * UNIT_TEST_GEN: ユニットテスト生成。TEST_CASE_GEN: 要件からのテストケース生成。
  */
 public enum ReviewMode {
     SPEC_DIFF,

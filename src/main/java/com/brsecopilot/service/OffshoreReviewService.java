@@ -9,10 +9,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 /**
- * Nghiệp vụ "Trợ lý Offshore": SPEC_DIFF / SHADOW_CLIENT / UNIT_TEST_GEN /
- * TEST_CASE_GEN. Áp dụng Strategy Pattern: Service này chỉ
- * chịu trách nhiệm CHỌN đúng strategy theo {@code request.mode()} rồi uỷ quyền
- * xử lý, không còn if/else nghiệp vụ nằm trong 1 method dài như trước.
+ * オフショア支援の窓口。{@code request.mode()} に応じた Strategy を選び、処理は委譲する。
  */
 @Service
 public class OffshoreReviewService {

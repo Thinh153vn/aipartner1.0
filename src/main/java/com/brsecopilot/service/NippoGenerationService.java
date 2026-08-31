@@ -7,8 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 /**
- * Nghiệp vụ "Git to Nippo": sinh báo cáo ngày từ log Git/công việc thô.
- * Single Responsibility: chỉ lo dựng prompt + gọi AI cho nghiệp vụ này.
+ * Git／作業ログから日報を生成する。プロンプト組み立てとAI呼び出しのみを担う。
  */
 @Service
 public class NippoGenerationService {

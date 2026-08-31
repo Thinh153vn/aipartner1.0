@@ -1,12 +1,11 @@
 /* =========================================================
-   AI PARTNER - Calendar-Centric SaaS Workspace
+   GROWTH PARTNER - カレンダー中心のSaaSワークスペース
    File: assets/js/app.js
-   Frontend gọi REST API thật của backend Spring Boot + Spring AI
-   (cùng origin, không cần CORS). Project/Task vẫn là state cục bộ
-   (localStorage) vì không có endpoint CRUD tương ứng.
+   フロントは同一オリジンの Spring Boot + Spring AI REST API を呼び出す（CORS不要）。
+   プロジェクト／タスクは CRUD API が無いため、ブラウザの localStorage で保持する。
    ========================================================= */
 
-/* ---------- 1. HELPER FUNCTIONS ---------- */
+/* ---------- 1. 共通ヘルパー ---------- */
 
 function $(id) {
   return document.getElementById(id);
@@ -18,7 +17,737 @@ function addDays(baseDate, days) {
   return d;
 }
 
-// Format Date -> chuỗi "YYYY-MM-DD" theo giờ local (tránh lệch múi giờ của toISOString)
+/* ---------- 1b. 多言語（表示設定：言語切替） ---------- */
+const I18N_STORAGE_KEY = "app_language";
+const I18N_DEFAULT = "ja";
+
+const translations = {
+  ja: {
+    pageTitle: "GROWTH PARTNER | ワークスペース",
+    menu: "メニュー",
+    notifications: "通知",
+    userRole: "BrSE / 保険システム開発",
+    addTask: "タスク追加",
+    search: "検索",
+    searchPlaceholder: "タスクを検索...",
+    today: "今日",
+    calendar: "カレンダー",
+    projects: "プロジェクト（WBS）",
+    addNew: "新規追加",
+    aiTools: "AIツール",
+    wbsImport: "WBSインポート",
+    nippo: "日報作成",
+    offshore: "オフショア支援",
+    apiKeySettings: "APIキー設定",
+    settings: "表示設定",
+    aiAutoSchedule: "AIタスク自動調整",
+    sos: "緊急SOS",
+    backToToday: "今日のタスクへ戻る",
+    statTodo: "未着手",
+    statInProgress: "対応中",
+    statDone: "完了",
+    statOverdue: "期限超過",
+    chartCompletion: "タスク完了率",
+    chartPriority: "優先度別タスク件数",
+    taskList: "タスク一覧",
+    colDone: "完了",
+    colTaskName: "タスク名（クリックで詳細）",
+    colDue: "期日",
+    colPriority: "優先度",
+    googleSync: "Google同期",
+    aiAnalyze: "AI分析",
+    legendTask: "タスク",
+    legendLearning: "AIおすすめ学習",
+    legendMeeting: "会議・打ち合わせ",
+    legendGoogle: "Googleカレンダー",
+    dragToSchedule: "ドラッグしてスケジュール",
+    taskDetailEmpty: "タスクを選択すると、ここに詳細が表示されます。",
+    close: "閉じる",
+    taskName: "タスク名",
+    project: "プロジェクト",
+    dueDate: "期日",
+    priority: "優先度",
+    priorityHigh: "高",
+    priorityMedium: "中",
+    priorityLow: "低",
+    memo: "メモ",
+    memoPlaceholder: "引き継ぎ事項や補足情報を記入...",
+    subtasks: "サブタスク",
+    addSubtaskPlaceholder: "サブタスクを追加...",
+    add: "追加",
+    markDone: "完了にする",
+    markUndone: "未完了に戻す",
+    autoReschedule: "自動リスケジュール",
+    chatEmpty: "ここにAIエージェントの実行ログと会話が表示されます。",
+    chatPlaceholder: "AIに話しかける（例：今週のタスクを整理して）",
+    talkToAi: "GROWTH PARTNERに話しかける",
+    splashStart: "業務を開始する",
+    languageLabel: "🌐 言語 / Language / Ngôn ngữ",
+    settingsSubtitle: "お好みのテーマを選択してください。設定は自動的に保存されます。",
+    themeLight: "ライト",
+    themeDark: "ダーク",
+    themeGlass: "グラスモーフィズム",
+    accentColor: "アクセントカラー",
+    bgImage: "背景画像",
+    selectImage: "画像を選択",
+    delete: "削除",
+    bgHint: "背景画像を設定すると、画面全体にうっすらと表示されます（カード等の可読性は保たれます）。",
+    sosResultTitle: "緊急SOS - AI分析結果",
+    riskSummary: "リスク要約",
+    sosEmailLabel: "PM／先輩への連絡文面（編集可能）",
+    sosSend: "PM・先輩へ送信（Gmail）",
+    newTask: "新しいタスク",
+    taskNameExample: "例）保険料計算ロジックの実装",
+    addSubmit: "追加する",
+    newProject: "新規プロジェクト",
+    projectName: "プロジェクト名",
+    projectNameExample: "例）解約返戻金システム改修",
+    color: "カラー",
+    nippoTitle: "日報の自動生成",
+    nippoLogLabel: "本日の作業ログ（Git commit・メモなど）",
+    nippoLogPlaceholder: "git commit -m \"feat: 保険料計算ロジックの実装\" のように貼り付けてください...",
+    nippoGenerate: "AIで日報を自動作成",
+    nippoOutputLabel: "生成された日報（編集可能）",
+    nippoOutputPlaceholder: "「AIで日報を自動作成」を押すと、ここに日報が生成されます。送信前に自由に編集できます...",
+    nippoSend: "上司へ報告書を送信（Gmail）",
+    tabSpecDiff: "仕様とコード比較",
+    tabShadow: "顧客質問レビュー",
+    tabTest: "テスト支援",
+    specFileLabel: "仕様書ファイル（PDF / テキスト・複数選択可）",
+    selectFile: "ファイルを選択",
+    selectFolder: "フォルダを選択",
+    fileStatusSample: "未選択（サンプルを使用）",
+    codeFolderLabel: "コードフォルダ（フォルダ選択・複数ファイル可）",
+    specDiffNote: "「🤖 AIで比較する」を押すと、仕様書とコードの不整合・セキュリティリスクをAIが分析します。",
+    runSpecDiff: "AIで比較する",
+    rawQuestionPlaceholder: "お客様への質問を、母国語または簡単な日本語で入力...",
+    reviewQuestion: "AIで確認・翻訳",
+    businessJp: "ビジネス日本語訳",
+    aiRisk: "AIによるリスク警告",
+    sendQA: "お客様へ質問を送信（Gmail）",
+    testSupportIntro: "要件からテストケース（リスクベース）を作成し、ソースコードからユニットテストを自動生成します。未入力の場合は保険システムのサンプルを使用します。",
+    reqFileLabel: "要件ファイル（PDF / Markdown・任意）",
+    reqStatusDefault: "未選択（下のテキストまたはサンプルを使用）",
+    reqTextLabel: "要件・受け入れ条件",
+    reqTextPlaceholder: "モジュール、受け入れ条件、正常系／代替系／異常系を記入...",
+    sourceCodeLabel: "ソースコード（フォルダ選択可）",
+    unittestStatusDefault: "未選択（サンプルコードを使用）",
+    frameworkLabel: "ユニットテストのフレームワーク",
+    frameworkAuto: "自動判定（Java→JUnit5 / JS,TS→Jest）",
+    frameworkJunit: "JUnit5 + Mockito（Java）",
+    frameworkJest: "Jest（JavaScript / TypeScript）",
+    genTestCases: "テストケースを生成",
+    genUnitTests: "ユニットテストを生成",
+    outputLabel: "生成結果（編集・コピー可能）",
+    outputPlaceholder: "生成ボタンを押すと、ここにテストケースまたはテストコードが表示されます...",
+    copyResult: "結果をコピー",
+    gcalTitle: "Googleカレンダー連携設定",
+    gcalSettingsTitle: "Google連携設定",
+    loading: "読み込み中...",
+    calendarId: "カレンダーID",
+    calendarIdExample: "例）your-account@gmail.com",
+    gcalApiKey: "APIキー（登録済みの場合は空欄でも構いません）",
+    gcalApiKeyPlaceholder: "Google Cloud Consoleで発行したAPIキー",
+    saveSettings: "設定を保存",
+    processing: "処理中...",
+    apiKeyDesc: "AI機能をご利用いただくには、ご自身のGemini APIキーを入力してください。キーはこのブラウザ内（localStorage）にのみ保存され、サーバーへはAIリクエスト時だけ送信されます。",
+    apiKeyWarning: "AI機能を利用する前に、APIキーを入力してください。",
+    apiKeyLabel: "APIキー",
+    apiKeyPlaceholder: "AIza... または Gemini APIキー",
+    cancel: "キャンセル",
+    save: "保存",
+    progressDone: "{done}/{total} 完了",
+    overdueBanner: "{count}件のタスクが期限を超過しています（最大{days}日超過）",
+    overdueDays: "期限超過（{days}日）",
+    noTasks: "表示できるタスクがありません。",
+    dashboardTitle: "{name} ダッシュボード",
+    projectDashboard: "プロジェクトダッシュボード",
+    noProjectTasks: "このプロジェクトにはまだタスクがありません。",
+    noSubtasks: "サブタスクはありません。",
+    unset: "未設定",
+    noSchedulable: "スケジュール可能なタスクはありません。",
+    toggleDoneTitle: "クリックで完了/未完了を切り替え",
+    openDetailTitle: "クリックで詳細を開く",
+    taskCount: "タスク件数",
+    greetingMorning: "おはようございます！",
+    greetingAfternoon: "こんにちは！",
+    greetingEvening: "お疲れ様です！",
+    splashNoTasks: "本日期日のタスクはありません。個人目標の達成に時間を使いましょう！",
+    splashHasTasks: "本日は期日のタスクが{count}件あります。一緒に頑張りましょう！",
+    agentNoTasks: "本日期日のタスクはありません。個人目標に集中しましょう！",
+    agentTodayStatus: "本日のタスク: {done}/{total} 完了です。",
+    apiKeySavedStatus: "このブラウザにAPIキーが保存されています。上書きする場合は新しいキーを入力してください。",
+    needApiKey: "AI機能を利用する前に、APIキーを入力してください。",
+    enterApiKey: "APIキーを入力してください。",
+    apiKeySaved: "APIキーをこのブラウザに保存しました。",
+    gcalConfigured: "✅ 設定済みです。「Google同期」ボタンで最新の予定を取り込めます。",
+    gcalNotConfigured: "⚠️ 未設定です。カレンダーIDとAPIキーを登録してください。",
+    gcalLoadFailed: "⚠️ 設定状態を取得できませんでした。",
+  },
+  en: {
+    pageTitle: "GROWTH PARTNER | Workspace",
+    menu: "Menu",
+    notifications: "Notifications",
+    userRole: "BrSE / Insurance systems",
+    addTask: "Add task",
+    search: "Search",
+    searchPlaceholder: "Search tasks...",
+    today: "Today",
+    calendar: "Calendar",
+    projects: "Projects (WBS)",
+    addNew: "Add new",
+    aiTools: "AI tools",
+    wbsImport: "Import WBS",
+    nippo: "Daily report",
+    offshore: "Offshore support",
+    apiKeySettings: "API key",
+    settings: "Display settings",
+    aiAutoSchedule: "AI auto-schedule",
+    sos: "Emergency SOS",
+    backToToday: "Back to today's tasks",
+    statTodo: "To do",
+    statInProgress: "In progress",
+    statDone: "Done",
+    statOverdue: "Overdue",
+    chartCompletion: "Task completion",
+    chartPriority: "Tasks by priority",
+    taskList: "Task list",
+    colDone: "Done",
+    colTaskName: "Task name (click for details)",
+    colDue: "Due date",
+    colPriority: "Priority",
+    googleSync: "Google sync",
+    aiAnalyze: "AI analysis",
+    legendTask: "Task",
+    legendLearning: "AI learning suggestion",
+    legendMeeting: "Meeting",
+    legendGoogle: "Google Calendar",
+    dragToSchedule: "Drag to schedule",
+    taskDetailEmpty: "Select a task to view its details here.",
+    close: "Close",
+    taskName: "Task name",
+    project: "Project",
+    dueDate: "Due date",
+    priority: "Priority",
+    priorityHigh: "High",
+    priorityMedium: "Medium",
+    priorityLow: "Low",
+    memo: "Memo",
+    memoPlaceholder: "Handover notes and extra details...",
+    subtasks: "Subtasks",
+    addSubtaskPlaceholder: "Add a subtask...",
+    add: "Add",
+    markDone: "Mark as done",
+    markUndone: "Mark as not done",
+    autoReschedule: "Auto reschedule",
+    chatEmpty: "AI agent logs and conversation appear here.",
+    chatPlaceholder: "Talk to AI (e.g. Organize this week's tasks)",
+    talkToAi: "Talk to GROWTH PARTNER",
+    splashStart: "Start work",
+    languageLabel: "🌐 言語 / Language / Ngôn ngữ",
+    settingsSubtitle: "Choose your preferred theme. Settings are saved automatically.",
+    themeLight: "Light",
+    themeDark: "Dark",
+    themeGlass: "Glassmorphism",
+    accentColor: "Accent color",
+    bgImage: "Background image",
+    selectImage: "Choose image",
+    delete: "Remove",
+    bgHint: "A background image appears faintly behind the UI while keeping cards readable.",
+    sosResultTitle: "Emergency SOS - AI analysis",
+    riskSummary: "Risk summary",
+    sosEmailLabel: "Message to PM / senior (editable)",
+    sosSend: "Send to PM / senior (Gmail)",
+    newTask: "New task",
+    taskNameExample: "e.g. Implement premium calculation logic",
+    addSubmit: "Add",
+    newProject: "New project",
+    projectName: "Project name",
+    projectNameExample: "e.g. Surrender value system update",
+    color: "Color",
+    nippoTitle: "Daily report generation",
+    nippoLogLabel: "Today's work log (Git commits, notes, etc.)",
+    nippoLogPlaceholder: "Paste like: git commit -m \"feat: implement premium calculation\"",
+    nippoGenerate: "Generate report with AI",
+    nippoOutputLabel: "Generated report (editable)",
+    nippoOutputPlaceholder: "Press “Generate report with AI” to create a draft you can edit before sending.",
+    nippoSend: "Send report to manager (Gmail)",
+    tabSpecDiff: "Spec vs code",
+    tabShadow: "Client question review",
+    tabTest: "Test support",
+    specFileLabel: "Specification files (PDF / text, multiple)",
+    selectFile: "Choose file",
+    selectFolder: "Choose folder",
+    fileStatusSample: "None selected (sample will be used)",
+    codeFolderLabel: "Code folder (folder select, multiple files)",
+    specDiffNote: "Press “Compare with AI” to analyze spec/code mismatches and security risks.",
+    runSpecDiff: "Compare with AI",
+    rawQuestionPlaceholder: "Enter the customer question in your language or simple Japanese...",
+    reviewQuestion: "Review and translate with AI",
+    businessJp: "Business Japanese draft",
+    aiRisk: "AI risk warning",
+    sendQA: "Send question to customer (Gmail)",
+    testSupportIntro: "Create risk-based test cases from requirements and unit tests from source code. Samples are used if nothing is entered.",
+    reqFileLabel: "Requirement files (PDF / Markdown, optional)",
+    reqStatusDefault: "None selected (text below or sample will be used)",
+    reqTextLabel: "Requirements / acceptance criteria",
+    reqTextPlaceholder: "Enter module, acceptance criteria, and happy / alternate / exception paths...",
+    sourceCodeLabel: "Source code (folder selectable)",
+    unittestStatusDefault: "None selected (sample code will be used)",
+    frameworkLabel: "Unit test framework",
+    frameworkAuto: "Auto-detect (Java→JUnit5 / JS,TS→Jest)",
+    frameworkJunit: "JUnit5 + Mockito (Java)",
+    frameworkJest: "Jest (JavaScript / TypeScript)",
+    genTestCases: "Generate test cases",
+    genUnitTests: "Generate unit tests",
+    outputLabel: "Result (editable / copyable)",
+    outputPlaceholder: "Generated test cases or test code will appear here...",
+    copyResult: "Copy result",
+    gcalTitle: "Google Calendar settings",
+    gcalSettingsTitle: "Google Calendar settings",
+    loading: "Loading...",
+    calendarId: "Calendar ID",
+    calendarIdExample: "e.g. your-account@gmail.com",
+    gcalApiKey: "API key (leave blank if already saved)",
+    gcalApiKeyPlaceholder: "API key from Google Cloud Console",
+    saveSettings: "Save settings",
+    processing: "Processing...",
+    apiKeyDesc: "Enter your own Gemini API key to use AI features. The key is stored only in this browser (localStorage) and sent only with AI requests.",
+    apiKeyWarning: "Please enter an API key before using AI features.",
+    apiKeyLabel: "API key",
+    apiKeyPlaceholder: "AIza... or Gemini API key",
+    cancel: "Cancel",
+    save: "Save",
+    progressDone: "{done}/{total} done",
+    overdueBanner: "{count} task(s) are overdue (max {days} day(s))",
+    overdueDays: "Overdue ({days} days)",
+    noTasks: "No tasks to display.",
+    dashboardTitle: "{name} dashboard",
+    projectDashboard: "Project dashboard",
+    noProjectTasks: "This project has no tasks yet.",
+    noSubtasks: "No subtasks.",
+    unset: "Not set",
+    noSchedulable: "No tasks available to schedule.",
+    toggleDoneTitle: "Click to toggle done / not done",
+    openDetailTitle: "Click to open details",
+    taskCount: "Task count",
+    greetingMorning: "Good morning!",
+    greetingAfternoon: "Good afternoon!",
+    greetingEvening: "Good evening!",
+    splashNoTasks: "No tasks due today. Use the time for your personal goals!",
+    splashHasTasks: "You have {count} task(s) due today. Let's get started!",
+    agentNoTasks: "No tasks due today. Focus on your personal goals!",
+    agentTodayStatus: "Today's tasks: {done}/{total} done.",
+    apiKeySavedStatus: "An API key is saved in this browser. Enter a new key to replace it.",
+    needApiKey: "Please enter an API key before using AI features.",
+    enterApiKey: "Please enter an API key.",
+    apiKeySaved: "API key saved in this browser.",
+    gcalConfigured: "✅ Configured. Use “Google sync” to import the latest events.",
+    gcalNotConfigured: "⚠️ Not configured. Please register a Calendar ID and API key.",
+    gcalLoadFailed: "⚠️ Could not load the settings status.",
+  },
+  vi: {
+    pageTitle: "GROWTH PARTNER | Không gian làm việc",
+    menu: "Menu",
+    notifications: "Thông báo",
+    userRole: "BrSE / Hệ thống bảo hiểm",
+    addTask: "Thêm task",
+    search: "Tìm kiếm",
+    searchPlaceholder: "Tìm task...",
+    today: "Hôm nay",
+    calendar: "Lịch",
+    projects: "Dự án (WBS)",
+    addNew: "Thêm mới",
+    aiTools: "Công cụ AI",
+    wbsImport: "Nhập WBS",
+    nippo: "Báo cáo ngày",
+    offshore: "Hỗ trợ offshore",
+    apiKeySettings: "Cài đặt API key",
+    settings: "Cài đặt giao diện",
+    aiAutoSchedule: "AI tự điều chỉnh lịch",
+    sos: "SOS khẩn cấp",
+    backToToday: "Quay lại task hôm nay",
+    statTodo: "Chưa làm",
+    statInProgress: "Đang làm",
+    statDone: "Hoàn thành",
+    statOverdue: "Quá hạn",
+    chartCompletion: "Tỷ lệ hoàn thành",
+    chartPriority: "Số task theo ưu tiên",
+    taskList: "Danh sách task",
+    colDone: "Xong",
+    colTaskName: "Tên task (bấm để xem chi tiết)",
+    colDue: "Hạn",
+    colPriority: "Ưu tiên",
+    googleSync: "Đồng bộ Google",
+    aiAnalyze: "Phân tích AI",
+    legendTask: "Task",
+    legendLearning: "Gợi ý học tập AI",
+    legendMeeting: "Họp",
+    legendGoogle: "Google Calendar",
+    dragToSchedule: "Kéo để xếp lịch",
+    taskDetailEmpty: "Chọn một task để xem chi tiết tại đây.",
+    close: "Đóng",
+    taskName: "Tên task",
+    project: "Dự án",
+    dueDate: "Hạn",
+    priority: "Ưu tiên",
+    priorityHigh: "Cao",
+    priorityMedium: "Trung bình",
+    priorityLow: "Thấp",
+    memo: "Ghi chú",
+    memoPlaceholder: "Nội dung bàn giao và thông tin bổ sung...",
+    subtasks: "Task con",
+    addSubtaskPlaceholder: "Thêm task con...",
+    add: "Thêm",
+    markDone: "Đánh dấu hoàn thành",
+    markUndone: "Đưa về chưa hoàn thành",
+    autoReschedule: "Tự sắp xếp lại lịch",
+    chatEmpty: "Nhật ký và hội thoại với AI sẽ hiện ở đây.",
+    chatPlaceholder: "Nói với AI (ví dụ: Sắp xếp task tuần này)",
+    talkToAi: "Trò chuyện với GROWTH PARTNER",
+    splashStart: "Bắt đầu công việc",
+    languageLabel: "🌐 言語 / Language / Ngôn ngữ",
+    settingsSubtitle: "Chọn giao diện bạn thích. Cài đặt được lưu tự động.",
+    themeLight: "Sáng",
+    themeDark: "Tối",
+    themeGlass: "Kính mờ",
+    accentColor: "Màu nhấn",
+    bgImage: "Ảnh nền",
+    selectImage: "Chọn ảnh",
+    delete: "Xóa",
+    bgHint: "Ảnh nền hiển thị mờ phía sau, vẫn đảm bảo chữ trên thẻ dễ đọc.",
+    sosResultTitle: "SOS khẩn cấp - Kết quả AI",
+    riskSummary: "Tóm tắt rủi ro",
+    sosEmailLabel: "Nội dung gửi PM / tiền bối (có thể sửa)",
+    sosSend: "Gửi PM / tiền bối (Gmail)",
+    newTask: "Task mới",
+    taskNameExample: "VD) Implement logic tính phí bảo hiểm",
+    addSubmit: "Thêm",
+    newProject: "Dự án mới",
+    projectName: "Tên dự án",
+    projectNameExample: "VD) Cải tiến hệ thống hoàn phí",
+    color: "Màu",
+    nippoTitle: "Tạo báo cáo ngày",
+    nippoLogLabel: "Nhật ký công việc hôm nay (Git commit, ghi chú...)",
+    nippoLogPlaceholder: "Dán như: git commit -m \"feat: implement premium calculation\"",
+    nippoGenerate: "AI tạo báo cáo ngày",
+    nippoOutputLabel: "Báo cáo đã tạo (có thể sửa)",
+    nippoOutputPlaceholder: "Bấm “AI tạo báo cáo ngày” để sinh bản nháp, rồi chỉnh trước khi gửi.",
+    nippoSend: "Gửi báo cáo cho cấp trên (Gmail)",
+    tabSpecDiff: "So sánh spec và code",
+    tabShadow: "Rà soát câu hỏi khách",
+    tabTest: "Hỗ trợ test",
+    specFileLabel: "File đặc tả (PDF / text, chọn nhiều)",
+    selectFile: "Chọn file",
+    selectFolder: "Chọn thư mục",
+    fileStatusSample: "Chưa chọn (sẽ dùng mẫu)",
+    codeFolderLabel: "Thư mục code (chọn folder, nhiều file)",
+    specDiffNote: "Bấm “AI so sánh” để phân tích lệch spec/code và rủi ro bảo mật.",
+    runSpecDiff: "AI so sánh",
+    rawQuestionPlaceholder: "Nhập câu hỏi gửi khách bằng tiếng mẹ đẻ hoặc tiếng Nhật đơn giản...",
+    reviewQuestion: "AI kiểm tra và dịch",
+    businessJp: "Bản dịch tiếng Nhật business",
+    aiRisk: "Cảnh báo rủi ro từ AI",
+    sendQA: "Gửi câu hỏi cho khách (Gmail)",
+    testSupportIntro: "Tạo test case theo rủi ro từ yêu cầu và unit test từ source. Nếu để trống sẽ dùng mẫu hệ thống bảo hiểm.",
+    reqFileLabel: "File yêu cầu (PDF / Markdown, tùy chọn)",
+    reqStatusDefault: "Chưa chọn (dùng text bên dưới hoặc mẫu)",
+    reqTextLabel: "Yêu cầu / tiêu chí nghiệm thu",
+    reqTextPlaceholder: "Nhập module, tiêu chí, luồng bình thường / thay thế / ngoại lệ...",
+    sourceCodeLabel: "Source code (có thể chọn folder)",
+    unittestStatusDefault: "Chưa chọn (sẽ dùng code mẫu)",
+    frameworkLabel: "Framework unit test",
+    frameworkAuto: "Tự nhận diện (Java→JUnit5 / JS,TS→Jest)",
+    frameworkJunit: "JUnit5 + Mockito (Java)",
+    frameworkJest: "Jest (JavaScript / TypeScript)",
+    genTestCases: "Tạo test case",
+    genUnitTests: "Tạo unit test",
+    outputLabel: "Kết quả (sửa / sao chép được)",
+    outputPlaceholder: "Test case hoặc mã test sẽ hiện ở đây...",
+    copyResult: "Sao chép kết quả",
+    gcalTitle: "Cài đặt Google Calendar",
+    gcalSettingsTitle: "Cài đặt Google Calendar",
+    loading: "Đang tải...",
+    calendarId: "Calendar ID",
+    calendarIdExample: "VD) your-account@gmail.com",
+    gcalApiKey: "API key (để trống nếu đã lưu)",
+    gcalApiKeyPlaceholder: "API key từ Google Cloud Console",
+    saveSettings: "Lưu cài đặt",
+    processing: "Đang xử lý...",
+    apiKeyDesc: "Nhập API Key của bạn để sử dụng các tính năng AI. Key sẽ được lưu an toàn trên trình duyệt của bạn (localStorage).",
+    apiKeyWarning: "Vui lòng nhập API Key trước khi sử dụng tính năng AI!",
+    apiKeyLabel: "API key",
+    apiKeyPlaceholder: "AIza... hoặc Gemini API key",
+    cancel: "Hủy",
+    save: "Lưu",
+    progressDone: "{done}/{total} hoàn thành",
+    overdueBanner: "{count} task đã quá hạn (tối đa {days} ngày)",
+    overdueDays: "Quá hạn ({days} ngày)",
+    noTasks: "Không có task để hiển thị.",
+    dashboardTitle: "Bảng điều khiển {name}",
+    projectDashboard: "Bảng điều khiển dự án",
+    noProjectTasks: "Dự án này chưa có task.",
+    noSubtasks: "Không có task con.",
+    unset: "Chưa đặt",
+    noSchedulable: "Không có task để xếp lịch.",
+    toggleDoneTitle: "Bấm để đổi hoàn thành / chưa xong",
+    openDetailTitle: "Bấm để mở chi tiết",
+    taskCount: "Số task",
+    greetingMorning: "Chào buổi sáng!",
+    greetingAfternoon: "Xin chào!",
+    greetingEvening: "Chào buổi tối!",
+    splashNoTasks: "Hôm nay không có task đến hạn. Hãy dùng thời gian cho mục tiêu cá nhân!",
+    splashHasTasks: "Hôm nay có {count} task đến hạn. Cùng bắt đầu nhé!",
+    agentNoTasks: "Hôm nay không có task đến hạn. Tập trung mục tiêu cá nhân nhé!",
+    agentTodayStatus: "Task hôm nay: {done}/{total} hoàn thành.",
+    apiKeySavedStatus: "API key đã lưu trên trình duyệt này. Nhập key mới nếu muốn thay.",
+    needApiKey: "Vui lòng nhập API Key trước khi sử dụng tính năng AI!",
+    enterApiKey: "Vui lòng nhập API key.",
+    apiKeySaved: "Đã lưu API key trên trình duyệt này.",
+    gcalConfigured: "✅ Đã cấu hình. Bấm “Đồng bộ Google” để lấy lịch mới nhất.",
+    gcalNotConfigured: "⚠️ Chưa cấu hình. Hãy đăng ký Calendar ID và API key.",
+    gcalLoadFailed: "⚠️ Không lấy được trạng thái cài đặt.",
+  },
+  zh: {
+    pageTitle: "GROWTH PARTNER | 工作区",
+    menu: "菜单",
+    notifications: "通知",
+    userRole: "BrSE / 保险系统开发",
+    addTask: "添加任务",
+    search: "搜索",
+    searchPlaceholder: "搜索任务...",
+    today: "今天",
+    calendar: "日历",
+    projects: "项目（WBS）",
+    addNew: "新建",
+    aiTools: "AI工具",
+    wbsImport: "导入WBS",
+    nippo: "日报",
+    offshore: "离岸支援",
+    apiKeySettings: "API密钥设置",
+    settings: "显示设置",
+    aiAutoSchedule: "AI自动调整任务",
+    sos: "紧急SOS",
+    backToToday: "返回今日任务",
+    statTodo: "未开始",
+    statInProgress: "进行中",
+    statDone: "已完成",
+    statOverdue: "已逾期",
+    chartCompletion: "任务完成率",
+    chartPriority: "按优先级统计",
+    taskList: "任务一览",
+    colDone: "完成",
+    colTaskName: "任务名（点击查看详情）",
+    colDue: "截止日期",
+    colPriority: "优先级",
+    googleSync: "Google同步",
+    aiAnalyze: "AI分析",
+    legendTask: "任务",
+    legendLearning: "AI学习建议",
+    legendMeeting: "会议",
+    legendGoogle: "Google日历",
+    dragToSchedule: "拖拽以安排日程",
+    taskDetailEmpty: "选择任务后，详情将显示在此处。",
+    close: "关闭",
+    taskName: "任务名",
+    project: "项目",
+    dueDate: "截止日期",
+    priority: "优先级",
+    priorityHigh: "高",
+    priorityMedium: "中",
+    priorityLow: "低",
+    memo: "备注",
+    memoPlaceholder: "请填写交接事项和补充信息...",
+    subtasks: "子任务",
+    addSubtaskPlaceholder: "添加子任务...",
+    add: "添加",
+    markDone: "标为完成",
+    markUndone: "标为未完成",
+    autoReschedule: "自动重新排期",
+    chatEmpty: "AI代理的执行日志和对话将显示在这里。",
+    chatPlaceholder: "向AI提问（例如：整理本周任务）",
+    talkToAi: "与GROWTH PARTNER对话",
+    splashStart: "开始工作",
+    languageLabel: "🌐 言語 / Language / Ngôn ngữ",
+    settingsSubtitle: "请选择喜欢的主题。设置会自动保存。",
+    themeLight: "浅色",
+    themeDark: "深色",
+    themeGlass: "玻璃拟态",
+    accentColor: "强调色",
+    bgImage: "背景图片",
+    selectImage: "选择图片",
+    delete: "删除",
+    bgHint: "设置背景图后，画面会淡淡显示，同时保持卡片上的文字可读。",
+    sosResultTitle: "紧急SOS - AI分析结果",
+    riskSummary: "风险摘要",
+    sosEmailLabel: "发给PM／前辈的文案（可编辑）",
+    sosSend: "发送给PM／前辈（Gmail）",
+    newTask: "新任务",
+    taskNameExample: "例）实现保费计算逻辑",
+    addSubmit: "添加",
+    newProject: "新项目",
+    projectName: "项目名",
+    projectNameExample: "例）解约返还金系统改造",
+    color: "颜色",
+    nippoTitle: "自动生成日报",
+    nippoLogLabel: "今日工作日志（Git commit、备忘等）",
+    nippoLogPlaceholder: "请粘贴，例如：git commit -m \"feat: 实现保费计算\"",
+    nippoGenerate: "用AI生成日报",
+    nippoOutputLabel: "已生成的日报（可编辑）",
+    nippoOutputPlaceholder: "点击“用AI生成日报”后，将在此生成草稿，发送前可自由修改。",
+    nippoSend: "向上司发送报告（Gmail）",
+    tabSpecDiff: "规格与代码对比",
+    tabShadow: "客户提问审阅",
+    tabTest: "测试支援",
+    specFileLabel: "规格书文件（PDF / 文本，可多选）",
+    selectFile: "选择文件",
+    selectFolder: "选择文件夹",
+    fileStatusSample: "未选择（将使用示例）",
+    codeFolderLabel: "代码文件夹（可选文件夹、多文件）",
+    specDiffNote: "点击“用AI对比”后，AI将分析规格与代码的不一致及安全风险。",
+    runSpecDiff: "用AI对比",
+    rawQuestionPlaceholder: "请用母语或简单日语输入给客户的提问...",
+    reviewQuestion: "用AI确认并翻译",
+    businessJp: "商务日语译文",
+    aiRisk: "AI风险提醒",
+    sendQA: "向客户发送提问（Gmail）",
+    testSupportIntro: "根据需求生成基于风险的测试用例，并根据源代码生成单元测试。未输入时使用保险系统示例。",
+    reqFileLabel: "需求文件（PDF / Markdown，可选）",
+    reqStatusDefault: "未选择（将使用下方文本或示例）",
+    reqTextLabel: "需求 / 验收条件",
+    reqTextPlaceholder: "请填写模块、验收条件、正常／替代／异常路径...",
+    sourceCodeLabel: "源代码（可选择文件夹）",
+    unittestStatusDefault: "未选择（将使用示例代码）",
+    frameworkLabel: "单元测试框架",
+    frameworkAuto: "自动判断（Java→JUnit5 / JS,TS→Jest）",
+    frameworkJunit: "JUnit5 + Mockito（Java）",
+    frameworkJest: "Jest（JavaScript / TypeScript）",
+    genTestCases: "生成测试用例",
+    genUnitTests: "生成单元测试",
+    outputLabel: "生成结果（可编辑／复制）",
+    outputPlaceholder: "点击生成后，测试用例或测试代码将显示在这里...",
+    copyResult: "复制结果",
+    gcalTitle: "Google日历联动设置",
+    gcalSettingsTitle: "Google联动设置",
+    loading: "加载中...",
+    calendarId: "日历ID",
+    calendarIdExample: "例）your-account@gmail.com",
+    gcalApiKey: "API密钥（若已保存可留空）",
+    gcalApiKeyPlaceholder: "在Google Cloud Console发行的API密钥",
+    saveSettings: "保存设置",
+    processing: "处理中...",
+    apiKeyDesc: "使用AI功能请输入您自己的Gemini API密钥。密钥仅保存在本浏览器（localStorage），并仅在AI请求时发送。",
+    apiKeyWarning: "使用AI功能前，请先输入API密钥。",
+    apiKeyLabel: "API密钥",
+    apiKeyPlaceholder: "AIza... 或 Gemini API密钥",
+    cancel: "取消",
+    save: "保存",
+    progressDone: "{done}/{total} 已完成",
+    overdueBanner: "有{count}个任务已逾期（最长逾期{days}天）",
+    overdueDays: "已逾期（{days}天）",
+    noTasks: "没有可显示的任务。",
+    dashboardTitle: "{name} 仪表板",
+    projectDashboard: "项目仪表板",
+    noProjectTasks: "此项目还没有任务。",
+    noSubtasks: "没有子任务。",
+    unset: "未设置",
+    noSchedulable: "没有可安排的任务。",
+    toggleDoneTitle: "点击切换完成／未完成",
+    openDetailTitle: "点击打开详情",
+    taskCount: "任务数",
+    greetingMorning: "早上好！",
+    greetingAfternoon: "你好！",
+    greetingEvening: "辛苦了！",
+    splashNoTasks: "今天没有到期任务。可以把时间用于个人目标！",
+    splashHasTasks: "今天有{count}个到期任务。一起加油！",
+    agentNoTasks: "今天没有到期任务。请专注个人目标！",
+    agentTodayStatus: "今日任务：{done}/{total} 已完成。",
+    apiKeySavedStatus: "此浏览器已保存API密钥。如需覆盖请输入新密钥。",
+    needApiKey: "使用AI功能前，请先输入API密钥。",
+    enterApiKey: "请输入API密钥。",
+    apiKeySaved: "已将API密钥保存在此浏览器。",
+    gcalConfigured: "✅ 已设置。请点击“Google同步”导入最新日程。",
+    gcalNotConfigured: "⚠️ 尚未设置。请登记日历ID和API密钥。",
+    gcalLoadFailed: "⚠️ 无法获取设置状态。",
+  },
+};
+
+let currentLang = I18N_DEFAULT;
+
+function t(key, vars) {
+  const pack = translations[currentLang] || translations[I18N_DEFAULT];
+  let text = (pack && pack[key]) || translations[I18N_DEFAULT][key] || key;
+  if (vars) {
+    Object.keys(vars).forEach((name) => {
+      text = text.replaceAll(`{${name}}`, String(vars[name]));
+    });
+  }
+  return text;
+}
+
+function getFullCalendarLocale() {
+  if (currentLang === "zh") return "zh-cn";
+  if (currentLang === "vi") return "vi";
+  if (currentLang === "en") return "en";
+  return "ja";
+}
+
+function applyI18n() {
+  document.documentElement.lang = currentLang === "zh" ? "zh-CN" : currentLang;
+  document.title = t("pageTitle");
+
+  document.querySelectorAll("[data-i18n]").forEach((el) => {
+    const key = el.getAttribute("data-i18n");
+    if (!key) return;
+    el.textContent = t(key);
+  });
+  document.querySelectorAll("[data-i18n-placeholder]").forEach((el) => {
+    el.placeholder = t(el.getAttribute("data-i18n-placeholder"));
+  });
+  document.querySelectorAll("[data-i18n-title]").forEach((el) => {
+    el.title = t(el.getAttribute("data-i18n-title"));
+  });
+
+  const select = $("languageSelect");
+  if (select) select.value = currentLang;
+
+  if (mainCalendar) {
+    mainCalendar.setOption("locale", getFullCalendarLocale());
+  }
+  if (typeof donutChartInstance !== "undefined" && donutChartInstance) {
+    donutChartInstance.data.labels = [t("statInProgress"), t("statDone"), t("statOverdue")];
+    donutChartInstance.update();
+  }
+  if (typeof barChartInstance !== "undefined" && barChartInstance) {
+    barChartInstance.data.labels = [t("priorityHigh"), t("priorityMedium"), t("priorityLow")];
+    if (barChartInstance.data.datasets[0]) barChartInstance.data.datasets[0].label = t("taskCount");
+    barChartInstance.update();
+  }
+}
+
+function changeLanguage(lang) {
+  currentLang = translations[lang] ? lang : I18N_DEFAULT;
+  try {
+    localStorage.setItem(I18N_STORAGE_KEY, currentLang);
+  } catch (e) {
+    /* プライベートモード等で保存できない場合 */
+  }
+  applyI18n();
+  if (typeof refreshAll === "function") refreshAll();
+  if (typeof loadCalendarSettings === "function") loadCalendarSettings();
+}
+
+function initLanguage() {
+  try {
+    const saved = localStorage.getItem(I18N_STORAGE_KEY);
+    currentLang = translations[saved] ? saved : I18N_DEFAULT;
+  } catch (e) {
+    currentLang = I18N_DEFAULT;
+  }
+  applyI18n();
+}
+
+// Date をローカル日付の YYYY-MM-DD に変換（toISOString のタイムゾーンずれを避ける）
 function toDateKey(date) {
   const y = date.getFullYear();
   const m = String(date.getMonth() + 1).padStart(2, "0");
@@ -30,7 +759,7 @@ function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-// Định dạng dung lượng file dễ đọc (dùng cho UI xử lý file lớn, WBS/Offshore import).
+// ファイルサイズを人が読める単位に変換（WBS／オフショアの大容量処理表示用）
 function formatFileSize(bytes) {
   if (!bytes || bytes <= 0) return "0 B";
   const units = ["B", "KB", "MB", "GB"];
@@ -42,12 +771,15 @@ function formatFileSize(bytes) {
 const TODAY = new Date();
 TODAY.setHours(0, 0, 0, 0);
 
-const PRIORITY_LABELS = { high: "高", medium: "中", low: "低" };
+function getPriorityLabel(priority) {
+  if (priority === "high") return t("priorityHigh");
+  if (priority === "low") return t("priorityLow");
+  return t("priorityMedium");
+}
 
-/* ---------- 2. MOCK DATA CỤC BỘ (Project WBS / Task / Meeting) ----------
-   Đây KHÔNG phải mock cho phản hồi AI - đây là dữ liệu Project/Task hiển thị
-   trên Sidebar/Center/Right Panel, không có endpoint CRUD nào được yêu cầu
-   cho phần này nên vẫn giữ ở phía client. */
+/* ---------- 2. 画面用のモックデータ（プロジェクト／タスク／会議） ----------
+   AI応答のモックではない。サイドバー・中央・右パネル表示用の案件データ。
+   対応する CRUD API が無いためクライアント側で保持する。 */
 
 const PROJECTS_SEED = [
   { id: "proj1", name: "保険システム開発（新契約）", color: "#4d8fe8" },
@@ -55,7 +787,7 @@ const PROJECTS_SEED = [
   { id: "proj3", name: "個人成長目標（MBO）", color: "#f5b74f" },
 ];
 
-/* ---------- 2a. PROJECT DO NGƯỜI DÙNG THÊM (➕ 新規追加) - lưu localStorage ---------- */
+/* ---------- 2a. ユーザー追加プロジェクト（➕ 新規追加）- localStorage に保存 ---------- */
 const USER_PROJECTS_STORAGE_KEY = "brseCopilotUserProjects";
 
 function loadUserProjects() {
@@ -87,16 +819,16 @@ const TASKS_SEED = [
   { id: "t7", projectId: "proj3", title: "更新ロジックのQ&Aを自走でこなす（中期目標）", priority: "medium", dueDate: toDateKey(addDays(TODAY, 20)), category: "learning" },
 ];
 
-// Sự kiện họp/công việc cố định - chỉ hiển thị trên Calendar (không phải Task nên không có checkbox).
+// 固定の会議イベント。カレンダー表示のみ（タスクではないためチェックボックスなし）。
 const FIXED_MEETINGS = [
   { id: "mt1", title: "🗣 朝会（デイリースクラム）", start: `${toDateKey(TODAY)}T09:30:00`, end: `${toDateKey(TODAY)}T09:45:00` },
   { id: "mt2", title: "🧑‍🏫 PMとの1on1", start: `${toDateKey(addDays(TODAY, 2))}T16:00:00`, end: `${toDateKey(addDays(TODAY, 2))}T16:30:00` },
 ];
 
-// Task lấy về từ Google Calendar sau khi bấm "Google同期" (state cục bộ, thay thế mỗi lần sync)
+// 「Google同期」後に取り込んだ予定。セッション内の状態で、同期のたびに置き換える。
 let GOOGLE_SYNCED_TASKS = [];
 
-/* ---------- 2b. TASK DO NGƯỜI DÙNG THÊM (➕ タスク追加) - lưu localStorage ---------- */
+/* ---------- 2b. ユーザー追加タスク（➕ タスク追加）- localStorage に保存 ---------- */
 const USER_TASKS_STORAGE_KEY = "brseCopilotUserTasks";
 
 function loadUserTasks() {
@@ -114,7 +846,7 @@ function saveUserTasks() {
 
 let USER_ADDED_TASKS = loadUserTasks();
 
-/* ---------- 2c. TRẠNG THÁI "ĐÃ HOÀN THÀNH" CỦA TASK (lưu localStorage) ---------- */
+/* ---------- 2c. タスク完了状態（localStorage に保存） ---------- */
 const DONE_TASKS_STORAGE_KEY = "brseCopilotDoneTaskIds";
 
 function loadDoneTaskIds() {
@@ -132,13 +864,13 @@ function saveDoneTaskIds() {
   localStorage.setItem(DONE_TASKS_STORAGE_KEY, JSON.stringify([...DONE_TASK_IDS]));
 }
 
-// Ghi nhớ task vừa được tick để phát hiệu ứng "bounce" đúng vào đúng phần tử đó khi vẽ lại.
+// 直前に完了にしたタスクID。再描画時にその行へ bounce 演出を付ける。
 let lastToggledTaskId = null;
 
-// ID của các task vừa được AI dời lịch (hiệu ứng pulse tạm thời trên Calendar, không cần persist).
+// AIが期日を動かしたタスクID。カレンダー上のパルス演出用（永続化しない）。
 let AI_NEW_TASK_IDS = new Set();
 
-/* ---------- 2d. TASK HELPERS (dùng chung cho Sidebar/Center/Right Panel) ---------- */
+/* ---------- 2d. タスク共通ヘルパー（サイドバー／中央／右パネル） ---------- */
 
 function getAllTasksCombined() {
   return [...TASKS_SEED, ...USER_ADDED_TASKS, ...GOOGLE_SYNCED_TASKS].map(applyTaskOverrides);
@@ -156,8 +888,8 @@ function getOverdueTasks() {
   return getAllTasksCombined().filter((task) => isTaskOverdue(task));
 }
 
-// Nếu task đến từ danh sách người dùng tự thêm -> lưu lại localStorage sau khi sửa đổi
-// (task mock/Google Calendar không cần persist vì chỉ tồn tại trong phiên hiện tại).
+// ユーザー追加タスクなら変更後に localStorage へ保存する。
+// シード／Google同期タスクはセッション内のみのため永続化しない。
 function persistIfUserTask(task) {
   if (USER_ADDED_TASKS.some((t) => t.id === task.id)) {
     saveUserTasks();
@@ -200,8 +932,8 @@ function applyTaskOverrides(task) {
   return task;
 }
 
-// Danh sách Task hiển thị ở Center Panel: mặc định là "Hôm nay" (đến hạn hôm nay hoặc quá hạn),
-// hoặc toàn bộ Task của 1 Project nếu đang lọc theo Project (WBS), có áp thêm từ khoá tìm kiếm.
+// 中央パネルの一覧。初期は「今日」（本日期日または期限超過）。
+// プロジェクト絞り込み時はそのWBS配下。検索語があればさらに絞り込む。
 let activeProjectFilter = null;
 let searchQuery = "";
 
@@ -223,7 +955,7 @@ function getVisibleTasks() {
   return [...list].sort((a, b) => a.dueDate.localeCompare(b.dueDate));
 }
 
-/* ---------- 3. API CLIENT (fetch thật) ---------- */
+/* ---------- 3. APIクライアント（実fetch） ---------- */
 
 const API_TIMEOUT_MS = 30000;
 
@@ -235,15 +967,97 @@ class ApiError extends Error {
   }
 }
 
+/* ---------- 3a. BYOK：ユーザーAPIキー（localStorage） ---------- */
+const USER_API_KEY_STORAGE_KEY = "user_custom_api_key";
+
+function getStoredUserApiKey() {
+  try {
+    return (localStorage.getItem(USER_API_KEY_STORAGE_KEY) || "").trim();
+  } catch (e) {
+    return "";
+  }
+}
+
+function isAiEndpoint(url) {
+  return typeof url === "string" && url.includes("/api/v1/copilot/");
+}
+
+function openApiKeyModal(options = {}) {
+  const input = $("userApiKeyInput");
+  const warning = $("apiKeyModalWarning");
+  const status = $("apiKeyModalStatus");
+  const stored = getStoredUserApiKey();
+
+  if (input) input.value = stored;
+  if (warning) warning.classList.toggle("hidden", !options.required);
+  if (status) {
+    status.textContent = stored ? t("apiKeySavedStatus") : "";
+  }
+
+  $("apiKeyModal")?.classList.remove("hidden");
+  if (options.required) {
+    showToast("⚠️", t("needApiKey"), "error");
+  }
+}
+
+function closeApiKeyModal() {
+  $("apiKeyModal")?.classList.add("hidden");
+  $("apiKeyModalWarning")?.classList.add("hidden");
+}
+
+function saveUserApiKey() {
+  const input = $("userApiKeyInput");
+  const keyValue = (input?.value || "").trim();
+  if (!keyValue) {
+    alert(t("enterApiKey"));
+    return;
+  }
+
+  try {
+    localStorage.setItem(USER_API_KEY_STORAGE_KEY, keyValue);
+  } catch (e) {
+    showToast("⚠️ 保存できませんでした", "ブラウザの保存領域を利用できません。", "error");
+    return;
+  }
+
+  closeApiKeyModal();
+  showToast("✅", t("apiKeySaved"), "success");
+}
+
+function ensureUserApiKeyForAi(url) {
+  if (!isAiEndpoint(url)) return true;
+  if (getStoredUserApiKey()) return true;
+  openApiKeyModal({ required: true });
+  return false;
+}
+
+function buildRequestHeaders(baseHeaders, url) {
+  const headers = { ...(baseHeaders || {}) };
+  if (!isAiEndpoint(url)) return headers;
+
+  const apiKey = getStoredUserApiKey();
+  if (!apiKey) return headers;
+
+  headers.Authorization = `Bearer ${apiKey}`;
+  headers["x-goog-api-key"] = apiKey;
+  headers["X-User-Api-Key"] = apiKey;
+  return headers;
+}
+
 async function requestJson(url, method, body) {
+  if (!ensureUserApiKeyForAi(url)) {
+    throw new ApiError(t("needApiKey"));
+  }
+
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), API_TIMEOUT_MS);
+  const headers = buildRequestHeaders(body !== undefined ? { "Content-Type": "application/json" } : {}, url);
 
   let response;
   try {
     response = await fetch(url, {
       method,
-      headers: body !== undefined ? { "Content-Type": "application/json" } : undefined,
+      headers,
       body: body !== undefined ? JSON.stringify(body) : undefined,
       signal: controller.signal,
     });
@@ -284,12 +1098,17 @@ function getJson(url) {
 }
 
 async function postFormData(url, formData) {
+  if (!ensureUserApiKeyForAi(url)) {
+    throw new ApiError(t("needApiKey"));
+  }
+
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), API_TIMEOUT_MS);
+  const headers = buildRequestHeaders({}, url);
 
   let response;
   try {
-    response = await fetch(url, { method: "POST", body: formData, signal: controller.signal });
+    response = await fetch(url, { method: "POST", headers, body: formData, signal: controller.signal });
   } catch (networkError) {
     if (networkError.name === "AbortError") {
       throw new ApiError("応答がタイムアウトしました。しばらくしてから再度お試しください。");
@@ -313,7 +1132,7 @@ async function postFormData(url, formData) {
   return payload;
 }
 
-/* ---------- 4. TOAST NOTIFICATION ---------- */
+/* ---------- 4. トースト通知 ---------- */
 let toastHideTimer = null;
 
 function showToast(title, message, variant = "info") {
@@ -341,10 +1160,9 @@ function notifyAiFailure(err) {
   showToast("⚠️ エラー", err.message || "AIエージェントとの通信に失敗しました。", "error");
 }
 
-/* ---------- 4b. PROCESSING OVERLAY（プロジェクト大規模ファイル処理のシミュレーション UI） ---------- */
-// Dùng chung cho WBS Import và Offshore Folder Upload để mô phỏng việc xử lý project có quy mô
-// lớn (tối đa ~1GB) mà không làm treo UI: hiển thị 1 progress bar cập nhật dần theo % thực tế
-// của từng bước xử lý (chunk lọc file / chunk render tree / giả lập đọc file lớn).
+/* ---------- 4b. 処理オーバーレイ（大規模ファイル処理のシミュレーション） ---------- */
+// WBS取込とオフショアフォルダ選択で共用。大規模案件（最大約1GB想定）でもUIを止めないため、
+// ファイル絞り込み・ツリー描画・大容量読込の各段階で進捗バーを更新する。
 function showProcessingOverlay(label) {
   const overlay = $("fileProcessingOverlay");
   if (!overlay) return;
@@ -366,9 +1184,8 @@ function hideProcessingOverlay() {
   $("fileProcessingOverlay")?.classList.add("hidden");
 }
 
-// Giả lập tiến trình "đọc/phân tích" 1 file có dung lượng lớn (thời gian mô phỏng tỉ lệ với
-// kích thước thật của file, không đọc toàn bộ nội dung file nặng vào bộ nhớ trình duyệt) -
-// luôn giới hạn trong khoảng 0.6s~3.5s để không làm chậm bản demo dù file thật lên đến ~1GB.
+// 大容量ファイルの「読込／解析」をサイズに応じて模擬する（実体をメモリへは読み込まない）。
+// デモが長くなり過ぎないよう、所要時間は 0.6〜3.5 秒に収める。
 async function simulateStreamProgress(totalBytes, label) {
   showProcessingOverlay(label);
   const simulatedDurationMs = Math.min(3500, Math.max(600, (totalBytes / (80 * 1024 * 1024)) * 1000));
@@ -380,7 +1197,7 @@ async function simulateStreamProgress(totalBytes, label) {
   hideProcessingOverlay();
 }
 
-/* ---------- 5. ĐIỀU HƯỚNG TRUNG TÂM (今日 / カレンダー) ---------- */
+/* ---------- 5. 中央ビュー切替（今日／カレンダー） ---------- */
 function switchCenterView(viewName) {
   document.querySelectorAll(".nav-item").forEach((btn) => {
     btn.classList.toggle("is-active", btn.dataset.view === viewName);
@@ -389,13 +1206,13 @@ function switchCenterView(viewName) {
     view.classList.toggle("is-active", view.id === `view-${viewName}`);
   });
 
-  // FullCalendar được khởi tạo khi tab đang ẩn ở lần chuyển tab trước đó -> cần tính lại kích thước.
+  // 非表示中に初期化した FullCalendar はサイズが崩れるため、表示時に再計算する。
   if (viewName === "calendar" && mainCalendar) {
     setTimeout(() => mainCalendar.updateSize(), 50);
   }
 }
 
-/* ---------- 6. SIDEBAR: QUICK ACTIONS (Tìm kiếm) ---------- */
+/* ---------- 6. サイドバー：クイック操作（検索） ---------- */
 
 function toggleSearchBox() {
   const input = $("sidebarSearchInput");
@@ -419,10 +1236,10 @@ function handleSearchInput(value) {
   renderTodayList();
 }
 
-/* ---------- 7. MODAL: タスク追加 (➕ タスク追加) ---------- */
+/* ---------- 7. モーダル：タスク追加 ---------- */
 
-// presetProjectId: mở modal và chọn sẵn Project (dùng bởi nút "➕ Task追加" trong Project Dashboard).
-// presetDueDate ("YYYY-MM-DD"): điền sẵn ngày (dùng bởi dateClick trên FullCalendar).
+// presetProjectId: ダッシュボードの「タスク追加」から開いたとき、所属プロジェクトを先に選ぶ。
+// presetDueDate: FullCalendar の空セルクリック時に、その日を期日として入れる。
 function openAddTaskModal(presetProjectId, presetDueDate) {
   const projectSelect = $("newTaskProjectSelect");
   if (projectSelect) {
@@ -475,7 +1292,7 @@ function submitNewTask() {
   showToast("✅ 追加完了", `「${title}」を追加しました。`, "success");
 }
 
-/* ---------- 8. SIDEBAR: PROJECTS (WBS) ---------- */
+/* ---------- 8. サイドバー：プロジェクト（WBS） ---------- */
 
 function computeProjectProgress(projectId) {
   const tasks = getAllTasksCombined().filter((task) => task.projectId === projectId);
@@ -506,7 +1323,7 @@ function renderProjectList() {
   });
 }
 
-// Modal "➕ 新規プロジェクト追加"
+// モーダル「➕ 新規プロジェクト追加」
 function openAddProjectModal() {
   const nameInput = $("newProjectNameInput");
   const colorInput = $("newProjectColorInput");
@@ -543,14 +1360,14 @@ function clearProjectFilter() {
   renderTodayList();
 }
 
-/* ---------- 9. CENTER PANEL: TODAY LIST (今日のタスク) ---------- */
+/* ---------- 9. 中央：今日のタスク一覧 ---------- */
 
 function formatDeadlineLabel(dueDate, overdue) {
   if (overdue) {
     const diffDays = Math.round((TODAY - new Date(`${dueDate}T00:00:00`)) / 86400000);
-    return `期限超過（${diffDays}日）`;
+    return t("overdueDays", { days: diffDays });
   }
-  if (dueDate === toDateKey(TODAY)) return "今日";
+  if (dueDate === toDateKey(TODAY)) return t("today");
   return dueDate;
 }
 
@@ -567,13 +1384,13 @@ function buildTaskRow(task) {
   checkbox.type = "checkbox";
   checkbox.className = "task-checkbox";
   checkbox.checked = done;
-  checkbox.title = "クリックで完了/未完了を切り替え";
+  checkbox.title = t("toggleDoneTitle");
   checkbox.addEventListener("click", (event) => event.stopPropagation());
   checkbox.addEventListener("change", () => toggleTaskDoneRow(task.id));
 
   const main = document.createElement("div");
   main.className = "task-main";
-  main.title = "クリックで詳細を開く";
+  main.title = t("openDetailTitle");
   main.innerHTML = '<span class="task-title"></span><span class="task-project-tag"></span>';
   main.querySelector(".task-title").textContent = task.title;
   main.querySelector(".task-project-tag").textContent = project ? project.name : "";
@@ -585,7 +1402,7 @@ function buildTaskRow(task) {
 
   const badge = document.createElement("span");
   badge.className = `priority-badge priority-badge-${task.priority}`;
-  badge.textContent = PRIORITY_LABELS[task.priority] || "中";
+  badge.textContent = getPriorityLabel(task.priority);
 
   row.appendChild(checkbox);
   row.appendChild(main);
@@ -612,18 +1429,18 @@ function renderTodayList() {
 
   if (activeProjectFilter) {
     const project = getAllProjects().find((p) => p.id === activeProjectFilter);
-    titleEl.textContent = project ? project.name : "今日";
+    titleEl.textContent = project ? project.name : t("today");
     if (filterChip && filterLabel) {
       filterChip.classList.remove("hidden");
       filterLabel.textContent = project ? project.name : "";
     }
   } else {
-    titleEl.textContent = "今日";
+    titleEl.textContent = t("today");
     filterChip?.classList.add("hidden");
   }
 
   progressFill.style.width = `${percent}%`;
-  progressLabel.textContent = `${doneCount}/${totalCount} 完了`;
+  progressLabel.textContent = t("progressDone", { done: doneCount, total: totalCount });
 
   const overdueVisible = visible.filter((task) => isTaskOverdue(task));
   if (overdueVisible.length > 0) {
@@ -631,14 +1448,14 @@ function renderTodayList() {
     const maxDelay = Math.max(
       ...overdueVisible.map((task) => Math.round((TODAY - new Date(`${task.dueDate}T00:00:00`)) / 86400000))
     );
-    alertText.textContent = `${overdueVisible.length}件のタスクが期限を超過しています（最大${maxDelay}日超過）`;
+    alertText.textContent = t("overdueBanner", { count: overdueVisible.length, days: maxDelay });
   } else {
     alertBanner.classList.add("hidden");
   }
 
   listEl.innerHTML = "";
   if (totalCount === 0) {
-    listEl.innerHTML = '<div class="task-list-empty">表示できるタスクがありません。</div>';
+    listEl.innerHTML = `<div class="task-list-empty">${t("noTasks")}</div>`;
   } else {
     visible.forEach((task) => listEl.appendChild(buildTaskRow(task)));
   }
@@ -647,7 +1464,7 @@ function renderTodayList() {
   updateNotifBadge();
 }
 
-// Toggle trạng thái hoàn thành của 1 task, rồi vẽ lại toàn bộ nơi hiển thị liên quan.
+// 完了状態を切り替え、関連する表示をすべて再描画する。
 function toggleTaskDoneRow(taskId) {
   if (DONE_TASK_IDS.has(taskId)) {
     DONE_TASK_IDS.delete(taskId);
@@ -671,14 +1488,13 @@ function updateNotifBadge() {
   }
 }
 
-/* ---------- 9b. PROJECT DASHBOARD (khi click 1 Project ở Sidebar) ---------- */
+/* ---------- 9b. プロジェクトダッシュボード（サイドバーのプロジェクト押下） ---------- */
 
 let donutChartInstance = null;
 let barChartInstance = null;
 
-// Trạng thái "để hiển thị" của Task được suy ra từ dữ liệu hiện có (done/dueDate), không cần
-// thêm field status riêng: quá hạn (chưa xong + qua hạn) / đang thực hiện (chưa xong + đến hạn
-// hôm nay) / chưa thực hiện (chưa xong + hạn ở tương lai) / hoàn tất (đã tick done).
+// 表示用ステータスは done／dueDate から算出する（専用statusフィールドは持たない）。
+// 期限超過／対応中（本日期日）／未着手（未来日）／完了。
 function computeProjectDashboardStats(projectId) {
   const tasks = getAllTasksCombined().filter((task) => task.projectId === projectId);
   const todayKey = toDateKey(TODAY);
@@ -703,8 +1519,8 @@ function computeProjectDashboardStats(projectId) {
   return { overdue, todo, inProgress, done };
 }
 
-// Số task theo mức độ ưu tiên trong 1 Project - dùng làm dữ liệu thật cho Bar Chart
-// (thay cho mock "công đoạn" trước đây, vì Task model hiện tại không có field "công đoạn").
+// プロジェクト内の優先度別件数。棒グラフの実データ。
+// 現行タスクモデルに工程フィールドが無いため、工程モックは使わない。
 function computeProjectPriorityBreakdown(projectId) {
   const tasks = getAllTasksCombined().filter((task) => task.projectId === projectId);
   const counts = { high: 0, medium: 0, low: 0 };
@@ -720,16 +1536,14 @@ function openProjectDashboardView(projectId) {
   switchCenterView("project-dashboard");
   renderProjectDashboard(projectId);
 
-  // Canvas Chart.js có thể đã bị co kích thước về 0 trong lúc View này ẩn (display:none) ->
-  // cần resize lại sau khi hiển thị để biểu đồ không bị vẽ méo/mất tỷ lệ.
+  // 非表示中の Chart.js canvas は幅0になることがある。表示後に resize して比率を直す。
   setTimeout(() => {
     donutChartInstance?.resize();
     barChartInstance?.resize();
   }, 50);
 }
 
-// Được gọi lại từ refreshAll() mỗi khi dữ liệu Task thay đổi (tick done, sửa, thêm mới, kéo-thả
-// lịch...) để Dashboard của Project đang mở luôn phản ánh đúng số liệu + biểu đồ theo thời gian thực.
+// refreshAll() から呼ぶ。完了・編集・追加・カレンダーD&Dのあと、開いているダッシュボードを即時更新する。
 function refreshActiveProjectDashboardIfVisible() {
   const view = $("view-project-dashboard");
   if (activeProjectFilter && view && view.classList.contains("is-active")) {
@@ -741,7 +1555,7 @@ function renderProjectDashboard(projectId) {
   const project = getAllProjects().find((p) => p.id === projectId);
 
   const titleEl = $("dashboardProjectTitle");
-  if (titleEl) titleEl.textContent = project ? `${project.name} ダッシュボード` : "プロジェクトダッシュボード";
+  if (titleEl) titleEl.textContent = project ? t("dashboardTitle", { name: project.name }) : t("projectDashboard");
 
   const stats = computeProjectDashboardStats(projectId);
   const overdueEl = $("dashboardOverdueCount");
@@ -757,10 +1571,8 @@ function renderProjectDashboard(projectId) {
   renderProjectTaskTable(projectId);
 }
 
-// Khởi tạo (lần đầu) hoặc cập nhật dữ liệu (.update()) 2 biểu đồ Chart.js dựa trên trạng thái
-// Task THẬT của Project (không còn dùng số liệu mock cố định). Vì canvas luôn tồn tại sẵn trong
-// DOM (chỉ ẩn/hiện qua View), ta chỉ tạo Chart 1 lần rồi tái sử dụng - tránh phải destroy/recreate
-// liên tục, đồng thời giúp biểu đồ tự "động" (reactive) mỗi khi trạng thái Task thay đổi.
+// 実タスク状態でドーナツ／棒グラフを初回生成、以降は .update() のみ。
+// canvas はDOMに常駐するため destroy/recreate せず、変更のたびに追従させる。
 function renderProjectCharts(projectId) {
   const donutCanvas = $("progressDonutChart");
   const barCanvas = $("teamPerformanceChart");
@@ -772,13 +1584,14 @@ function renderProjectCharts(projectId) {
   const barData = [priorityBreakdown.high, priorityBreakdown.medium, priorityBreakdown.low];
 
   if (donutChartInstance) {
+    donutChartInstance.data.labels = [t("statInProgress"), t("statDone"), t("statOverdue")];
     donutChartInstance.data.datasets[0].data = donutData;
     donutChartInstance.update();
   } else {
     donutChartInstance = new Chart(donutCanvas, {
       type: "doughnut",
       data: {
-        labels: ["対応中", "完了", "期限超過"],
+        labels: [t("statInProgress"), t("statDone"), t("statOverdue")],
         datasets: [
           {
             data: donutData,
@@ -799,16 +1612,18 @@ function renderProjectCharts(projectId) {
   }
 
   if (barChartInstance) {
+    barChartInstance.data.labels = [t("priorityHigh"), t("priorityMedium"), t("priorityLow")];
+    if (barChartInstance.data.datasets[0]) barChartInstance.data.datasets[0].label = t("taskCount");
     barChartInstance.data.datasets[0].data = barData;
     barChartInstance.update();
   } else {
     barChartInstance = new Chart(barCanvas, {
       type: "bar",
       data: {
-        labels: ["高", "中", "低"],
+        labels: [t("priorityHigh"), t("priorityMedium"), t("priorityLow")],
         datasets: [
           {
-            label: "タスク件数",
+            label: t("taskCount"),
             data: barData,
             backgroundColor: ["#e0524a", "#f5a623", "#22b8a0"],
             borderRadius: 6,
@@ -829,9 +1644,9 @@ function renderProjectCharts(projectId) {
   }
 }
 
-/* ---------- 9c. PROJECT DASHBOARD > TASK 一覧（Project riêng: inline edit + Task 追加 riêng） ---------- */
+/* ---------- 9c. プロジェクトダッシュボード > タスク一覧（インライン編集／追加） ---------- */
 
-// Task đang được mở trong Sidebar Task Detail Panel (null nếu Panel đang đóng).
+// 右パネルで開いているタスクID。閉じていれば null。
 let taskDetailModalTaskId = null;
 
 function buildProjectTaskRow(task) {
@@ -845,13 +1660,13 @@ function buildProjectTaskRow(task) {
   checkbox.type = "checkbox";
   checkbox.className = "task-checkbox";
   checkbox.checked = done;
-  checkbox.title = "クリックで完了/未完了を切り替え";
+  checkbox.title = t("toggleDoneTitle");
   checkbox.addEventListener("change", () => toggleTaskDoneRow(task.id));
 
   const titleCell = document.createElement("span");
   titleCell.className = "project-task-title";
   titleCell.textContent = task.title;
-  titleCell.title = "クリックで詳細を開く";
+  titleCell.title = t("openDetailTitle");
   titleCell.addEventListener("click", () => openTaskDetail(task.id));
 
   const dueDateInput = document.createElement("input");
@@ -868,7 +1683,7 @@ function buildProjectTaskRow(task) {
   const prioritySelect = document.createElement("select");
   prioritySelect.className = "project-task-priority-select";
   prioritySelect.innerHTML =
-    '<option value="high">高</option><option value="medium">中</option><option value="low">低</option>';
+    `<option value="high">${t("priorityHigh")}</option><option value="medium">${t("priorityMedium")}</option><option value="low">${t("priorityLow")}</option>`;
   prioritySelect.value = task.priority;
   prioritySelect.addEventListener("change", () => {
     task.priority = prioritySelect.value;
@@ -883,8 +1698,7 @@ function buildProjectTaskRow(task) {
   return row;
 }
 
-// Danh sách Task hiển thị TRONG Project Dashboard: chỉ lấy Task thuộc đúng Project đang mở
-// (khác với "Hôm nay" ở Center Panel View 1 - nơi luôn lọc theo hạn đến hôm nay/quá hạn).
+// ダッシュボード内一覧は、開いているプロジェクト配下のみ（今日ビューの期日フィルタとは別）。
 function renderProjectTaskTable(projectId) {
   const body = $("projectTaskTableBody");
   if (!body) return;
@@ -895,19 +1709,18 @@ function renderProjectTaskTable(projectId) {
 
   body.innerHTML = "";
   if (tasks.length === 0) {
-    body.innerHTML = '<div class="project-task-table-empty">このプロジェクトにはまだタスクがありません。</div>';
+    body.innerHTML = `<div class="project-task-table-empty">${t("noProjectTasks")}</div>`;
     return;
   }
   tasks.forEach((task) => body.appendChild(buildProjectTaskRow(task)));
 }
 
-// Nút "➕ Task追加" bên trong Project Dashboard: mở lại Modal タスク追加 chung nhưng luôn
-// preselect đúng Project đang mở, để không phải chọn lại từ đầu.
+// ダッシュボードの「タスク追加」は共通モーダルを開き、所属プロジェクトを先に選んでおく。
 function openAddTaskModalForProject() {
   openAddTaskModal(activeProjectFilter);
 }
 
-/* ---------- 9d. RIGHT SIDEBAR: タスク詳細 ---------- */
+/* ---------- 9d. 右サイドバー：タスク詳細 ---------- */
 
 function getSelectedTask() {
   if (!taskDetailModalTaskId) return null;
@@ -922,7 +1735,7 @@ function ensureTaskSubtasks(task) {
 function updateTaskDetailDoneButton(task) {
   const btn = $("taskDetailToggleDoneBtn");
   if (!btn) return;
-  btn.textContent = isTaskDone(task) ? "↩ 未完了に戻す" : "✓ 完了にする";
+  btn.textContent = isTaskDone(task) ? `↩ ${t("markUndone")}` : `✓ ${t("markDone")}`;
 }
 
 function renderTaskDetailSubtasks(task) {
@@ -931,7 +1744,7 @@ function renderTaskDetailSubtasks(task) {
   const subtasks = ensureTaskSubtasks(task);
   list.innerHTML = "";
   if (subtasks.length === 0) {
-    list.innerHTML = '<p class="task-detail-subtask-empty">サブタスクはありません。</p>';
+    list.innerHTML = `<p class="task-detail-subtask-empty">${t("noSubtasks")}</p>`;
     return;
   }
   subtasks.forEach((item, index) => {
@@ -961,7 +1774,7 @@ function fillTaskDetailPanel(task) {
   const prioritySelect = $("taskDetailPrioritySelect");
   const memoInput = $("taskDetailMemoInput");
   if (titleInput) titleInput.value = task.title;
-  if (projectLabel) projectLabel.textContent = project ? project.name : "未設定";
+  if (projectLabel) projectLabel.textContent = project ? project.name : t("unset");
   if (dueDateInput) dueDateInput.value = task.dueDate;
   if (prioritySelect) prioritySelect.value = task.priority;
   if (memoInput) memoInput.value = task.memo || "";
@@ -1045,7 +1858,7 @@ function handleNewSubtaskKeydown(event) {
   }
 }
 
-/* ---------- 10. REFRESH TỔNG (gọi sau mỗi lần dữ liệu thay đổi) ---------- */
+/* ---------- 10. 一括再描画（データ変更後） ---------- */
 function refreshAll() {
   renderProjectList();
   renderTodayList();
@@ -1055,7 +1868,7 @@ function refreshAll() {
   refreshTaskDetailIfOpen();
 }
 
-/* ---------- 11. CENTER PANEL: CALENDAR (FullCalendar Week + Drag & Drop) ---------- */
+/* ---------- 11. 中央：カレンダー（週表示＋ドラッグ＆ドロップ） ---------- */
 
 let mainCalendar = null;
 
@@ -1091,7 +1904,7 @@ function initFullCalendar() {
   if (!el || typeof FullCalendar === "undefined") return;
 
   mainCalendar = new FullCalendar.Calendar(el, {
-    locale: "ja",
+    locale: getFullCalendarLocale(),
     initialView: "timeGridWeek",
     headerToolbar: { left: "prev,next today", center: "title", right: "timeGridWeek,dayGridMonth" },
     height: "100%",
@@ -1100,8 +1913,7 @@ function initFullCalendar() {
     droppable: true,
     events: buildCalendarEvents(),
 
-    // Click vào 1 ô ngày/giờ còn trống (không phải click lên Event có sẵn - FullCalendar tự
-    // phân biệt 2 trường hợp này) -> mở nhanh Modal タスク追加 với ngày đã chọn được điền sẵn.
+    // 空きセルのクリック（既存イベント以外）。選択日を期日にしたタスク追加モーダルを開く。
     dateClick: function (info) {
       openAddTaskModal(activeProjectFilter, toDateKey(info.date));
     },
@@ -1129,7 +1941,7 @@ function initFullCalendar() {
 
     // ドラッグ元（未完了タスクのチップ）をドロップした時に呼ばれる。ドロップ位置の日付を
     // そのタスクの新しい期日として反映し、FullCalendarが自動生成した一時イベントは削除
-    // （再描画は Task データを Single Source of Truth とする refreshAll() に任せる）。
+    // （再描画はタスクデータを正として refreshAll() に任せる）。
     eventReceive: function (info) {
       const taskId = info.event.extendedProps.taskId;
       const startDate = info.event.start;
@@ -1149,8 +1961,7 @@ function initFullCalendar() {
   mainCalendar.render();
 }
 
-// Dải chip có thể kéo (draggable) hiển thị trên View 3、để người dùng kéo trực tiếp vào
-// FullCalendar nhằm đặt/dời lịch cho task (chỉ hiển thị task chưa hoàn thành).
+// 未完了タスクをチップ化し、カレンダーへドロップして期日を置く／動かす。
 function renderCalendarDragRail() {
   const container = $("calendarDragRailItems");
   if (!container) return;
@@ -1162,7 +1973,7 @@ function renderCalendarDragRail() {
 
   container.innerHTML = "";
   if (candidates.length === 0) {
-    container.innerHTML = '<span class="calendar-drag-rail-empty">スケジュール可能なタスクはありません。</span>';
+    container.innerHTML = `<span class="calendar-drag-rail-empty">${t("noSchedulable")}</span>`;
     return;
   }
 
@@ -1178,9 +1989,8 @@ function renderCalendarDragRail() {
 
 let taskDraggableInstance = null;
 
-// Khởi tạo FullCalendar.Draggable đúng 1 lần trên container cố định (#calendarDragRailItems).
-// Vì Draggable lắng nghe sự kiện theo cơ chế delegation trên chính container, việc render lại
-// các chip con bên trong (renderCalendarDragRail) không cần init lại instance này.
+// FullCalendar.Draggable は #calendarDragRailItems に一度だけ付ける。
+// 子チップの再描画は委譲で拾えるため、インスタンスの再初期化は不要。
 function initTaskDragDrop() {
   const container = $("calendarDragRailItems");
   if (!container || typeof FullCalendar === "undefined" || !FullCalendar.Draggable || taskDraggableInstance) return;
@@ -1200,7 +2010,7 @@ function initTaskDragDrop() {
   });
 }
 
-/* ---------- 12. MODAL: Googleカレンダー連携設定 ---------- */
+/* ---------- 12. モーダル：Googleカレンダー連携設定 ---------- */
 
 function openGcalSettingsModal() {
   $("gcalSettingsModal")?.classList.remove("hidden");
@@ -1219,13 +2029,15 @@ async function loadCalendarSettings() {
     if (idInput && settings.calendarId) idInput.value = settings.calendarId;
 
     if (statusEl) {
+      statusEl.removeAttribute("data-i18n");
       const isConfigured = Boolean(settings.calendarId) && settings.apiKeyConfigured;
-      statusEl.textContent = isConfigured
-        ? "✅ 設定済みです。「Google同期」ボタンで最新の予定を取り込めます。"
-        : "⚠️ 未設定です。カレンダーIDとAPIキーを登録してください。";
+      statusEl.textContent = isConfigured ? t("gcalConfigured") : t("gcalNotConfigured");
     }
   } catch (err) {
-    if (statusEl) statusEl.textContent = "⚠️ 設定状態を取得できませんでした。";
+    if (statusEl) {
+      statusEl.removeAttribute("data-i18n");
+      statusEl.textContent = t("gcalLoadFailed");
+    }
   }
 }
 
@@ -1287,7 +2099,7 @@ async function syncGoogleCalendar(buttonEl) {
   }
 }
 
-/* ---------- 13. AI AGENT CHAT（マスコット押下時のみオーバーレイ表示） ---------- */
+/* ---------- 13. AIチャット（マスコット押下時のみオーバーレイ表示） ---------- */
 
 function openAgentChat() {
   document.body.classList.add("agent-chat-open");
@@ -1316,8 +2128,7 @@ function appendTimelineStep(text) {
   return el;
 }
 
-// Chạy tuần tự nhiều bước timeline (giả lập quá trình suy nghĩ của AI Agent) trước khi có
-// kết quả thật từ backend, để trông giống 1 Agent thực sự đang xử lý từng bước.
+// バックエンド応答の前に、思考過程を示すタイムラインを順に進める。
 async function runTimelineSteps(stepTexts) {
   for (const text of stepTexts) {
     const el = appendTimelineStep(text);
@@ -1358,8 +2169,7 @@ function appendChatBubble(role, text, options = {}) {
   feed.scrollTop = feed.scrollHeight;
 }
 
-// Áp dụng đề xuất dời lịch của AI (RebalancedTaskDto[]): cập nhật thẳng dueDate + category của
-// Task tương ứng (learning/AI đề xuất), rồi làm nổi bật tạm thời trên Calendar.
+// AIの再配置案（RebalancedTaskDto[]）を dueDate／category に反映し、カレンダーで一時強調する。
 function applyRebalancedTasks(rebalancedTasks) {
   if (!Array.isArray(rebalancedTasks) || rebalancedTasks.length === 0) return;
 
@@ -1384,8 +2194,8 @@ function applyRebalancedTasks(rebalancedTasks) {
   }, 3000);
 }
 
-// Nút "✨ AIタスク自動調整"（今日ビュー）/ "✨ AI分析"（カレンダービュー）/ chip "自動リスケジュール"
-// (Right Sidebar) dùng chung 1 luồng: gọi thật /api/v1/copilot/analyze-schedule.
+// 「AIタスク自動調整」「AI分析」「自動リスケジュール」は同一処理。
+// /api/v1/copilot/analyze-schedule を呼び出す。
 async function runAiAutoSchedule(buttonEl) {
   const triggerButtons = [$("btnAiAutoSchedule"), $("btnAiAnalyzeCalendar"), $("btnQuickRebalance")].filter(
     Boolean
@@ -1446,8 +2256,7 @@ function handleAgentInputKeydown(event) {
   }
 }
 
-// Ô chat tự do: tái sử dụng nghiệp vụ Auto-Rebalance (endpoint AI phù hợp nhất cho câu hỏi kiểu
-// "hãy sắp xếp giúp tôi lịch tuần này"), hiển thị đúng câu người dùng gõ.
+// 自由入力チャットは自動リスケジュール業務を再利用し、入力文をそのまま会話に出す。
 async function sendAgentChatMessage() {
   const input = $("agentChatInput");
   const sendBtn = $("btnAgentSend");
@@ -1491,14 +2300,13 @@ function updateAgentStatusLine() {
   const doneCount = todayTasks.filter((task) => isTaskDone(task)).length;
   el.textContent =
     todayTasks.length === 0
-      ? "本日期日のタスクはありません。個人目標に集中しましょう！"
-      : `本日のタスク: ${doneCount}/${todayTasks.length} 完了です。`;
+      ? t("agentNoTasks")
+      : t("agentTodayStatus", { done: doneCount, total: todayTasks.length });
 }
 
-/* ---------- 14. SOS: 🆘 緊急SOS（スピナー → Action Modal） ---------- */
+/* ---------- 14. SOS：緊急SOS（スピナー → 結果モーダル） ---------- */
 
-// Bấm SOS ở Today View hoặc chip trong Right Sidebar: hiện spinner tối thiểu 1.5s (giả lập AI
-// phân tích), sau đó gọi thật /api/v1/copilot/sos-alert và mở Modal kết quả (risk + email draft).
+// SOSは最低1.5秒の分析表示のあと /api/v1/copilot/sos-alert を呼び、結果モーダルを開く。
 async function runQuickSos(buttonEl) {
   const triggerButtons = [$("btnQuickSos"), $("btnQuickSos2")].filter(Boolean);
   if (triggerButtons.some((b) => b.disabled)) return;
@@ -1550,7 +2358,7 @@ function sendSosMail(buttonEl) {
   });
 }
 
-/* ---------- 15. MODAL: 日報作成 (📝 Viết Nippo) ---------- */
+/* ---------- 15. モーダル：日報作成 ---------- */
 
 function openNippoModal() {
   $("nippoModal")?.classList.remove("hidden");
@@ -1596,7 +2404,7 @@ async function generateNippoReport() {
   }
 }
 
-/* ---------- 16. MODAL: オフショア支援 (Spec vs Code + Shadow Client) ---------- */
+/* ---------- 16. モーダル：オフショア支援（仕様比較／顧客質問／テスト） ---------- */
 
 function openOffshoreModal() {
   const reqInput = $("requirementTextInput");
@@ -1637,11 +2445,10 @@ const OFFSHORE_EXCLUDED_DIR_SEGMENTS = [
   "node_modules", ".git", "target", "build", "dist", ".idea", ".vscode",
   "venv", "__pycache__", ".gradle", "vendor", "coverage", ".next", "out",
 ];
-// Giới hạn số file thực sự được gửi lên AI để trích xuất/phân tích nội dung (giữ ở mức hợp lý vì
-// LLM có giới hạn context - gửi quá nhiều sẽ bị cắt/kém chính xác). Việc DUYỆT & HIỂN THỊ folder
-// tree thì KHÔNG bị giới hạn bởi số này - xem renderFolderTreeChunked()/filterOffshoreFilesChunked().
+// AIへ送るファイル数の上限（コンテキスト制限のため）。フォルダツリーの閲覧・表示はこの上限の対象外。
+// 大量表示は renderFolderTreeChunked()／filterOffshoreFilesChunked() を参照。
 const OFFSHORE_MAX_BATCH_FILES = 300;
-// Ngưỡng số file để coi là "project lớn" và cần xử lý theo chunk (tránh treo UI) + hiện Progress Overlay.
+// この件数を超えたら大規模案件とみなし、チャンク処理と進捗オーバーレイを使う。
 const OFFSHORE_LARGE_SELECTION_THRESHOLD = 300;
 const OFFSHORE_SPEC_SAMPLE = {
   specText: "第3.2節：保険料計算における成人の定義は「18歳以上」とする。",
@@ -1688,9 +2495,8 @@ function isOffshoreFileAllowed(file, kind) {
   return OFFSHORE_CODE_EXTENSIONS.some((ext) => path.endsWith(ext));
 }
 
-// Lọc danh sách file theo chunk (không xử lý toàn bộ trong 1 vòng lặp đồng bộ) + nhường lại main
-// thread giữa các chunk (await sleep(0)) - giúp browser không bị "đơ" khi người dùng chọn cả 1
-// project rất lớn (hàng chục nghìn file, quy mô mô phỏng tới ~1GB).
+// ファイル絞り込みをチャンク分割し、チャンク間でメインスレッドを返す（await sleep(0)）。
+// 数万ファイル級の選択でも画面が固まりにくくする。
 async function filterOffshoreFilesChunked(allFiles, kind, onProgress) {
   const CHUNK_SIZE = 500;
   const result = [];
@@ -1710,9 +2516,8 @@ async function filterOffshoreFilesChunked(allFiles, kind, onProgress) {
   return result;
 }
 
-// Hiển thị dạng "tree/list" trực quan của folder code đã chọn (thu gọn theo thư mục cha). Việc
-// dựng DOM được chia theo lô (chunk) + requestAnimationFrame giữa các lô để không block main
-// thread dù danh sách hiển thị lớn hơn nhiều so với trước đây (MAX_VISIBLE tăng lên 300).
+// 選択フォルダを親ディレクトリ単位のツリー／リストで示す。DOM構築はチャンク＋rAFで分割し、
+// 表示上限（MAX_VISIBLE=300）でもメインスレッドをブロックしにくくする。
 async function renderFolderTreeChunked(files, treeId = "codeFolderTree") {
   const treeEl = $(treeId);
   if (!treeEl) return;
@@ -1761,7 +2566,7 @@ async function renderFolderTreeChunked(files, treeId = "codeFolderTree") {
     });
 
     treeEl.appendChild(fragment);
-    // Chờ 1 khung hình trước khi dựng lô tiếp theo, giữ UI mượt khi hiển thị project lớn.
+    // 次チャンクの前に1フレーム待ち、大規模表示でも描画を滑らかにする。
     await new Promise((resolve) => requestAnimationFrame(resolve));
   }
 
@@ -1797,6 +2602,7 @@ async function handleOffshoreFileSelect(inputEl, kind) {
 
   if (filteredFiles.length === 0) {
     if (statusEl) {
+      statusEl.removeAttribute("data-i18n");
       statusEl.textContent = "⚠️ 対応する形式のファイルが見つかりませんでした。";
     }
     if (treeId) await renderFolderTreeChunked([], treeId);
@@ -1810,6 +2616,7 @@ async function handleOffshoreFileSelect(inputEl, kind) {
   const skippedCount = filteredFiles.length - uploadTargets.length;
 
   if (statusEl) {
+    statusEl.removeAttribute("data-i18n");
     statusEl.textContent =
       uploadTargets.length === 1
         ? "⏳ ファイルを読み込み中..."
@@ -2026,7 +2833,7 @@ function copyUnitTestOutput(buttonEl) {
   });
 }
 
-/* ---------- 17. GMAIL DEEP-LINK & CHỐNG SPAM CLICK ---------- */
+/* ---------- 17. Gmailディープリンクと連打防止 ---------- */
 
 function openGmailDeepLink(to, subject, bodyContent) {
   const params = new URLSearchParams({
@@ -2077,12 +2884,10 @@ function sendQAMail(buttonEl) {
   });
 }
 
-/* ---------- 18. WBS IMPORT (📁 WBSインポート) ---------- */
+/* ---------- 18. WBSインポート ---------- */
 
-// Giả lập AI phân tích file WBS được chọn (không parse nội dung thật - đúng như yêu cầu demo):
-// hiện Progress Overlay mô phỏng việc "đọc" file theo dung lượng thật (hỗ trợ hình dung tới quy
-// mô project ~1GB mà không đọc toàn bộ nội dung vào bộ nhớ), rồi tự động thêm 3 task mock vào
-// Project đang được lọc (hoặc Project đầu tiên nếu chưa chọn Project nào) và cập nhật lại UI.
+// WBS取込のデモ。実ファイルは解析せず、サイズに応じた進捗表示のあと、
+// 絞り込み中（なければ先頭）のプロジェクトへサンプルタスク3件を追加する。
 async function handleWbsFileImport(inputEl) {
   const file = inputEl.files && inputEl.files[0];
   if (!file) return;
@@ -2108,7 +2913,7 @@ async function handleWbsFileImport(inputEl) {
   inputEl.value = "";
 }
 
-/* ---------- 19. THEME (⚙️ 表示設定: Light / Dark / Glassmorphism) ---------- */
+/* ---------- 19. テーマ（表示設定：ライト／ダーク／グラス） ---------- */
 
 const THEME_STORAGE_KEY = "brseCopilotTheme";
 
@@ -2139,13 +2944,13 @@ function closeThemeModal() {
   $("themeModal")?.classList.add("hidden");
 }
 
-/* ---------- 19b. ACCENT COLOR（表示設定：アクセントカラーを自由に選択） ---------- */
+/* ---------- 19b. アクセントカラー（表示設定） ---------- */
 
 const ACCENT_COLOR_STORAGE_KEY = "brseCopilotAccentColor";
 const DEFAULT_ACCENT_COLOR = "#4d8fe8";
 
-// Làm tối 1 màu hex theo tỷ lệ (0~1) để dùng cho --blue-dark (hover/active state) - tính thủ công
-// thay vì dùng color-mix() ở đây vì cần set qua JS (style.setProperty), không phải trong CSS tĩnh.
+// hover/active 用の --blue-dark を、hex を割合で暗くして求める。
+// JSの style.setProperty 向けのため、ここでは color-mix() を使わない。
 function darkenHexColor(hex, amount) {
   const clean = hex.replace("#", "");
   const r = parseInt(clean.substring(0, 2), 16);
@@ -2233,9 +3038,8 @@ function clearBgImage() {
   showToast("✅ 削除完了", "背景画像を削除しました。", "success");
 }
 
-// Khôi phục Accent Color + Background Image đã lưu khi tải lại trang (theme Light/Dark/Glass đã
-// được áp dụng SỚM bằng inline <script> trong <head> để tránh flash; 2 setting này áp dụng ở đây
-// vì cần chạy sau khi DOM đã sẵn sàng, mức độ ưu tiên chống-flash thấp hơn theme chính).
+// 再読込時にアクセントカラーと背景画像を復元する。
+// テーマ本体は head のインラインスクリプトで先に当て、ちらつきを防ぐ。こちらはDOM準備後でよい。
 function restoreSavedAppearanceSettings() {
   try {
     const savedAccent = localStorage.getItem(ACCENT_COLOR_STORAGE_KEY);
@@ -2248,19 +3052,19 @@ function restoreSavedAppearanceSettings() {
     const savedBgImage = localStorage.getItem(BG_IMAGE_STORAGE_KEY);
     if (savedBgImage) applyBgImage(savedBgImage);
   } catch (e) {
-    /* localStorage bị chặn (private mode...) - bỏ qua, dùng mặc định */
+    /* プライベートモード等で localStorage が使えない場合は既定値を使う */
   }
 }
 
-/* ---------- 20. WELCOME SPLASH - Chào hỏi đầu ngày (chỉ hiện 1 lần/ngày) ---------- */
+/* ---------- 20. 初日あいさつ（1日1回） ---------- */
 
 const LAST_GREETED_STORAGE_KEY = "brseCopilotLastGreetedDate";
 
 function buildGreetingHeadline() {
   const hour = new Date().getHours();
-  if (hour < 11) return "おはようございます！";
-  if (hour < 18) return "こんにちは！";
-  return "お疲れ様です！";
+  if (hour < 11) return t("greetingMorning");
+  if (hour < 18) return t("greetingAfternoon");
+  return t("greetingEvening");
 }
 
 function checkAndShowWelcomeSplash() {
@@ -2276,8 +3080,8 @@ function checkAndShowWelcomeSplash() {
   headlineEl.textContent = buildGreetingHeadline();
   textEl.textContent =
     todayTaskCount === 0
-      ? "本日期日のタスクはありません。個人目標の達成に時間を使いましょう！"
-      : `本日は期日のタスクが${todayTaskCount}件あります。一緒に頑張りましょう！`;
+      ? t("splashNoTasks")
+      : t("splashHasTasks", { count: todayTaskCount });
 
   splash.classList.remove("is-hidden");
   localStorage.setItem(LAST_GREETED_STORAGE_KEY, todayKey);
@@ -2287,7 +3091,7 @@ function closeSplashScreen() {
   $("welcomeSplash")?.classList.add("is-hidden");
 }
 
-/* ---------- 21. HAMBURGER & OFF-CANVAS PANELS (Tablet/Mobile) ---------- */
+/* ---------- 21. ハンバーガーとオフキャンバス（タブレット／モバイル） ---------- */
 
 function toggleLeftSidebar() {
   document.body.classList.toggle("sidebar-left-open");
@@ -2300,12 +3104,13 @@ function closeOffCanvasPanels() {
 }
 
 function initSidebarRightDefaultState() {
-  /* Cột phải là Task Detail: luôn hiện trên desktop; chat không dùng class này. */
+  /* 右列はタスク詳細。デスクトップでは常時表示。チャットはこのクラスを使わない。 */
 }
 
-/* ---------- 22. INIT ---------- */
+/* ---------- 22. 初期化 ---------- */
 
 document.addEventListener("DOMContentLoaded", () => {
+  initLanguage();
   initSidebarRightDefaultState();
   restoreSavedAppearanceSettings();
   renderProjectList();

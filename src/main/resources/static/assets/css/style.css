@@ -1,9 +1,9 @@
 /* ==========================================================================
-   AI PARTNER - Calendar-Centric SaaS Workspace
-   Layout cứng: sidebar-left(260px) / main-content(flex) / sidebar-right(320px)
+   GROWTH PARTNER - カレンダー中心のSaaSワークスペース
+   固定レイアウト: 左260px / 中央flex / 右320px
    ========================================================================== */
 
-/* ---------- 1. THEME VARIABLES (Light / Dark / Glassmorphism) ---------- */
+/* ---------- 1. テーマ変数（ライト／ダーク／グラス） ---------- */
 :root {
   --blue: #4d8fe8;
   --blue-dark: #2f6fd0;
@@ -76,7 +76,7 @@ html[data-theme="glass"] .app-toast {
   -webkit-backdrop-filter: blur(18px);
 }
 
-/* ---------- 2. RESET & BASE ---------- */
+/* ---------- 2. リセットと基本指定 ---------- */
 * {
   box-sizing: border-box;
 }
@@ -112,7 +112,7 @@ button {
   display: none !important;
 }
 
-/* Thanh cuộn gọn gàng */
+/* スクロールバーを細くする */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -125,7 +125,7 @@ button {
   background: rgba(120, 130, 145, 0.55);
 }
 
-/* ---------- 3. LAYOUT CỨNG 3 CỘT ---------- */
+/* ---------- 3. 3カラム固定レイアウト ---------- */
 .app-container {
   height: 100vh;
   display: flex;
@@ -134,7 +134,7 @@ button {
   z-index: 1;
 }
 
-/* ===== 3.1 Left Sidebar (260px cố định) ===== */
+/* ===== 3.1 左サイドバー（260px固定） ===== */
 .sidebar-left {
   width: 260px;
   flex-shrink: 0;
@@ -446,7 +446,7 @@ button {
   color: var(--blue);
 }
 
-/* ===== 3.2 Main Center Panel (flex 1) ===== */
+/* ===== 3.2 中央メイン（flex 1） ===== */
 .main-content {
   flex: 1;
   min-width: 0;
@@ -592,7 +592,7 @@ button {
   font-size: 11.5px;
 }
 
-/* Today progress */
+/* 今日ビューの進捗バー */
 .today-progress {
   display: flex;
   align-items: center;
@@ -655,7 +655,7 @@ button {
   font-size: 11px;
 }
 
-/* Task list */
+/* タスク一覧 */
 .task-list {
   display: flex;
   flex-direction: column;
@@ -786,7 +786,7 @@ button {
   font-size: 13px;
 }
 
-/* Project Dashboard */
+/* プロジェクトダッシュボード */
 .dashboard-cards-row {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -859,7 +859,7 @@ button {
   position: relative;
 }
 
-/* Project Dashboard > danh sách Task riêng của Project (thêm/sửa/đánh dấu hoàn thành inline) */
+/* ダッシュボード内のプロジェクト別タスク（インライン編集） */
 .project-task-section {
   background: var(--paper);
   border: 1px solid var(--border);
@@ -970,7 +970,7 @@ button {
   justify-content: center;
 }
 
-/* Calendar view */
+/* カレンダービュー */
 .calendar-legend {
   display: flex;
   gap: 16px;
@@ -1106,7 +1106,7 @@ button {
   padding: 1px 4px !important;
 }
 
-/* Màu sắc riêng cho từng loại block trên Calendar (khớp với calendar-legend) */
+/* カレンダー予定の種別色（凡例と対応） */
 .fc-event-work {
   background-color: var(--blue) !important;
 }
@@ -1138,7 +1138,7 @@ button {
   }
 }
 
-/* ===== 3.3 Right Sidebar: タスク詳細 (320px cố định) ===== */
+/* ===== 3.3 右サイドバー：タスク詳細（320px固定） ===== */
 .sidebar-right {
   width: 320px;
   flex-shrink: 0;
@@ -1508,7 +1508,7 @@ button {
   filter: brightness(1.08);
 }
 
-/* AI Chat overlay: chỉ hiện khi click mascot (không chiếm cột phải) */
+/* AIチャット重ね表示。マスコット押下時のみ。右列は占有しない。 */
 .agent-chat-overlay {
   position: fixed;
   right: 24px;
@@ -1534,7 +1534,7 @@ body.agent-chat-open .mascot-fab {
   box-shadow: 0 0 0 3px var(--paper), 0 0 0 6px var(--blue);
 }
 
-/* ---------- 4. FLOATING MASCOT ---------- */
+/* ---------- 4. フローティングマスコット ---------- */
 .mascot-fab {
   position: fixed;
   bottom: 24px;
@@ -1575,7 +1575,7 @@ body.agent-chat-open .mascot-fab {
   }
 }
 
-/* ---------- 5. WELCOME SPLASH ---------- */
+/* ---------- 5. 起動時あいさつ ---------- */
 .welcome-splash {
   position: fixed;
   inset: 0;
@@ -1663,7 +1663,7 @@ body.agent-chat-open .mascot-fab {
   font-size: 13.5px;
 }
 
-/* ---------- 6. MODALS (dùng chung) ---------- */
+/* ---------- 6. モーダル（共通） ---------- */
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -1748,11 +1748,46 @@ body.agent-chat-open .mascot-fab {
   line-height: 1.6;
 }
 
+/* APIキー設定モーダル：既存モーダルと同じ骨格＋背景ぼかしのみ追加 */
+#apiKeyModal {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.api-key-modal-warning {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--coral);
+  background: color-mix(in srgb, var(--coral) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--coral) 28%, transparent);
+}
+
+.api-key-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 8px;
+}
+
 .field-label {
   font-size: 12px;
   font-weight: 700;
   color: var(--muted);
   margin-top: 4px;
+}
+
+.form-select {
+  appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%),
+    linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+  background-position: calc(100% - 16px) calc(50% - 3px), calc(100% - 11px) calc(50% - 3px);
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+  padding-right: 32px;
+  cursor: pointer;
 }
 
 .input-base,
@@ -1816,7 +1851,7 @@ body.agent-chat-open .mascot-fab {
   color: #a3312b;
 }
 
-/* Theme picker modal */
+/* テーマ選択モーダル */
 .theme-option-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -1867,8 +1902,7 @@ body.agent-chat-open .mascot-fab {
   background: linear-gradient(135deg, #667eea, #764ba2, #f093fb);
 }
 
-/* Accent Color（表示設定モーダル）- cho phép đổi màu chủ đạo (--blue/--blue-dark) độc lập với
-   Theme Light/Dark/Glass, áp dụng ngay qua applyAccentColor() trong app.js. */
+/* アクセントカラー（表示設定）。テーマと独立して --blue／--blue-dark を変え、即時反映する。 */
 .accent-color-grid {
   display: flex;
   flex-wrap: wrap;
@@ -1915,7 +1949,7 @@ body.agent-chat-open .mascot-fab {
   cursor: pointer;
 }
 
-/* Background Image（表示設定モーダル）- ảnh nền tuỳ chọn, phủ mờ toàn màn hình phía sau UI. */
+/* 背景画像（表示設定）。画面全体の背後に薄く敷く。 */
 .bg-image-controls {
   display: flex;
   gap: 8px;
@@ -1926,9 +1960,8 @@ body.agent-chat-open .mascot-fab {
   margin-top: 4px;
 }
 
-/* opacity luôn = 0.32 một cách vô điều kiện: khi --custom-bg-image chưa được set (mặc định
-   "none"), sẽ không có gì được render dù opacity là bao nhiêu - nên không cần class riêng để
-   gate hiển thị, tránh 1 nhịp "flash" trước khi app.js gán class kịp lúc DOMContentLoaded. */
+/* 背景レイヤーの不透明度は常に指定する。--custom-bg-image 未設定（none）なら描画されない。
+   表示用クラスでゲートしないことで、app.js 適用前の一瞬のちらつきを避ける。 */
 body::before {
   content: "";
   position: fixed;
@@ -1951,7 +1984,7 @@ html.has-custom-bg .sidebar-right {
   background-color: color-mix(in srgb, var(--paper) 88%, transparent);
 }
 
-/* Offshore modal specifics */
+/* オフショア支援モーダル固有 */
 .modal-tabs {
   display: flex;
   flex-wrap: wrap;
@@ -2024,6 +2057,10 @@ html.has-custom-bg .sidebar-right {
   font-size: 11.5px;
 }
 
+.file-pick-btn {
+  align-self: flex-start;
+}
+
 .file-upload-status {
   font-size: 11px;
   color: var(--muted);
@@ -2075,7 +2112,7 @@ html.has-custom-bg .sidebar-right {
   background: var(--paper-soft);
 }
 
-/* ---------- 7. TOAST ---------- */
+/* ---------- 7. トースト ---------- */
 .app-toast {
   position: fixed;
   bottom: 24px;
@@ -2117,7 +2154,7 @@ html.has-custom-bg .sidebar-right {
   line-height: 1.5;
 }
 
-/* ---------- 7b. PROCESSING OVERLAY（WBS/オフショア フォルダ取込：大容量ファイル処理シミュレーション） ---------- */
+/* ---------- 7b. 処理オーバーレイ（WBS／オフショアの大容量ファイル処理シミュレーション） ---------- */
 .processing-overlay {
   position: fixed;
   inset: 0;
@@ -2177,7 +2214,7 @@ html.has-custom-bg .sidebar-right {
   color: var(--muted);
 }
 
-/* ---------- 8. HAMBURGER + OFF-CANVAS BACKDROP ---------- */
+/* ---------- 8. ハンバーガーとオフキャンバス背景 ---------- */
 .hamburger-btn {
   display: none;
   position: fixed;
@@ -2204,7 +2241,7 @@ html.has-custom-bg .sidebar-right {
   z-index: 1240;
 }
 
-/* ---------- 9. RESPONSIVE: TABLET (<1024px) - Right Sidebar off-canvas ---------- */
+/* ---------- 9. レスポンシブ：タブレット（<1024px）右サイドバーをオフキャンバス ---------- */
 @media (max-width: 1024px) {
   .sidebar-right {
     position: fixed;
@@ -2256,7 +2293,7 @@ html.has-custom-bg .sidebar-right {
   }
 }
 
-/* ---------- 10. RESPONSIVE: MOBILE (<768px) - Left Sidebar off-canvas + hamburger ---------- */
+/* ---------- 10. レスポンシブ：モバイル（<768px）左サイドバー＋ハンバーガー ---------- */
 @media (max-width: 767px) {
   .hamburger-btn {
     display: flex;

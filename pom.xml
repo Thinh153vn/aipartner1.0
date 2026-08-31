@@ -15,7 +15,7 @@
   <artifactId>brse-copilot-backend</artifactId>
   <version>0.1.0</version>
   <name>brse-copilot-backend</name>
-  <description>Backend Spring Boot + Spring AI cho BrSE Copilot - Autonomous AI Agent Dashboard</description>
+  <description>GROWTH PARTNER バックエンド（Spring Boot + Spring AI）</description>
 
   <properties>
     <java.version>17</java.version>
@@ -50,7 +50,7 @@
       <artifactId>spring-ai-starter-model-google-genai</artifactId>
     </dependency>
 
-    <!-- Đọc text từ file PDF (仕様書/design doc) để so sánh Spec vs Code -->
+    <!-- PDFからテキストを抽出し、仕様とコード比較に使う -->
     <dependency>
       <groupId>org.apache.pdfbox</groupId>
       <artifactId>pdfbox</artifactId>

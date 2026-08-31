@@ -4,7 +4,7 @@ import java.time.Instant;
 import java.util.List;
 
 /**
- * Kết quả của 1 lần đồng bộ Google Calendar.
+ * Googleカレンダー同期1回分の結果。
  */
 public record CalendarSyncResponse(
         List<SyncedTaskDto> tasks,

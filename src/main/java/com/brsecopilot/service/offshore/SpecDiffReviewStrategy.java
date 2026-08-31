@@ -10,7 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-/** Nghiệp vụ "Spec vs Code": so sánh tài liệu thiết kế với source code, phát hiện điểm không khớp + rủi ro bảo mật. */
+/** 仕様とコードを比較し、不整合とセキュリティリスクを指摘する。 */
 @Component
 public class SpecDiffReviewStrategy implements OffshoreReviewStrategy {
 

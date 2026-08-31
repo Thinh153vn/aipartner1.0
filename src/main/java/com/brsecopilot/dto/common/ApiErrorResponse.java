@@ -3,7 +3,7 @@ package com.brsecopilot.dto.common;
 import java.time.Instant;
 
 /**
- * Định dạng lỗi chuẩn trả về cho toàn bộ REST API.
+ * REST API 共通のエラー応答形式。
  */
 public record ApiErrorResponse(
         int code,

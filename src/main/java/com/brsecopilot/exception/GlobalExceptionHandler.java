@@ -16,16 +16,14 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 import java.util.stream.Collectors;
 
 /**
- * Xử lý lỗi tập trung cho toàn bộ REST API (/api/v1/copilot/**).
- * Luôn trả về JSON chuẩn {code, message, timestamp} để frontend hiển thị
- * Toast lỗi thân thiện, không bao giờ để lộ stack trace ra ngoài.
+ * REST API の例外を集約する。応答は {code, message, timestamp}。スタックトレースは返さない。
  */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
-    /** Lỗi @Valid trên các field đơn lẻ của request DTO (record). */
+    /** DTO 単項目の @Valid エラー。 */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiErrorResponse> handleValidation(MethodArgumentNotValidException ex) {
         String message = ex.getBindingResult().getFieldErrors().stream()
@@ -42,7 +40,7 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(ApiErrorResponse.of(HttpStatus.BAD_REQUEST.value(), message));
     }
 
-    /** Request body gửi lên không phải JSON hợp lệ, hoặc thiếu body. */
+    /** JSON 不正、または body 欠落。 */
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ApiErrorResponse> handleUnreadableBody(HttpMessageNotReadableException ex) {
         log.warn("リクエストボディの解析に失敗しました: {}", ex.getMessage());
@@ -50,7 +48,7 @@ public class GlobalExceptionHandler {
                 "リクエストの形式が正しくありません。入力内容をご確認ください。"));
     }
 
-    /** Path/Query variable sai kiểu dữ liệu (ví dụ truyền chữ vào field số). */
+    /** パス／クエリの型不一致。 */
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<ApiErrorResponse> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
         log.warn("パラメータの型が不正です: {}", ex.getMessage());
@@ -58,7 +56,7 @@ public class GlobalExceptionHandler {
                 "パラメータ「" + ex.getName() + "」の形式が正しくありません。"));
     }
 
-    /** Lỗi validate chéo giữa nhiều field (ví dụ thiếu field theo mode). */
+    /** 複数項目の交差検証エラー。 */
     @ExceptionHandler(InvalidRequestException.class)
     public ResponseEntity<ApiErrorResponse> handleInvalidRequest(InvalidRequestException ex) {
         log.warn("不正なリクエスト: {}", ex.getMessage());
@@ -66,7 +64,7 @@ public class GlobalExceptionHandler {
                 .body(ApiErrorResponse.of(HttpStatus.BAD_REQUEST.value(), ex.getMessage()));
     }
 
-    /** Lỗi gọi AI thất bại (timeout, API key sai, JSON response sai schema...). */
+    /** AI呼び出し失敗（タイムアウト、キー不正、スキーマ不一致など）。 */
     @ExceptionHandler(AiAgentException.class)
     public ResponseEntity<ApiErrorResponse> handleAiAgentError(AiAgentException ex) {
         log.error("AIエージェント呼び出しに失敗しました: {}", ex.getMessage(), ex);
@@ -76,9 +74,7 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Lỗi đồng bộ Google Calendar: chưa cấu hình, API Key/Calendar ID sai, hoặc calendar
-     * chưa public. Khác với AiAgentException, message ở đây được hiển thị trực tiếp cho
-     * người dùng vì đã được viết rõ nguyên nhân + hướng xử lý ngay tại GoogleCalendarService.
+     * Googleカレンダー同期エラー。原因と対処は GoogleCalendarService のメッセージをそのまま返す。
      */
     @ExceptionHandler(CalendarSyncException.class)
     public ResponseEntity<ApiErrorResponse> handleCalendarSyncError(CalendarSyncException ex) {
@@ -87,7 +83,7 @@ public class GlobalExceptionHandler {
                 .body(ApiErrorResponse.of(HttpStatus.BAD_GATEWAY.value(), ex.getMessage()));
     }
 
-    /** Lỗi trích xuất text từ file upload (PDF/text): file rỗng, quá lớn, hoặc PDF lỗi. */
+    /** アップロードファイルのテキスト抽出失敗。 */
     @ExceptionHandler(FileExtractionException.class)
     public ResponseEntity<ApiErrorResponse> handleFileExtractionError(FileExtractionException ex) {
         log.warn("ファイルからのテキスト抽出に失敗しました: {}", ex.getMessage());
@@ -95,7 +91,7 @@ public class GlobalExceptionHandler {
                 .body(ApiErrorResponse.of(HttpStatus.BAD_REQUEST.value(), ex.getMessage()));
     }
 
-    /** File upload vượt quá dung lượng cho phép (cấu hình ở application.yml). */
+    /** アップロードサイズ超過（application.yml の上限）。 */
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     public ResponseEntity<ApiErrorResponse> handleMaxUploadSize(MaxUploadSizeExceededException ex) {
         log.warn("アップロードされたファイルのサイズが上限を超えています: {}", ex.getMessage());
@@ -104,9 +100,7 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Static resource không tồn tại (ví dụ browser tự động GET /favicon.ico).
-     * Đây KHÔNG phải lỗi nghiệp vụ nên chỉ log ở mức DEBUG và trả 404 gọn,
-     * tránh làm nhiễu log ERROR của ứng dụng với những request vô hại này.
+     * 静的リソース欠落（favicon 自動取得など）。業務エラーではないため DEBUG と 404 のみ。
      */
     @ExceptionHandler(NoResourceFoundException.class)
     public ResponseEntity<ApiErrorResponse> handleStaticResourceNotFound(NoResourceFoundException ex) {
@@ -115,7 +109,7 @@ public class GlobalExceptionHandler {
                 .body(ApiErrorResponse.of(HttpStatus.NOT_FOUND.value(), "リソースが見つかりません。"));
     }
 
-    /** Fallback cho mọi lỗi không lường trước, tránh lộ thông tin nội bộ. */
+    /** 想定外エラーのフォールバック。内部情報は出さない。 */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiErrorResponse> handleUnexpected(Exception ex) {
         log.error("予期しないエラーが発生しました", ex);

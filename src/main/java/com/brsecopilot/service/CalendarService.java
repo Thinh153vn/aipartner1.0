@@ -10,20 +10,15 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 
 /**
- * Orchestration layer cho nghiệp vụ "liên kết + đồng bộ Google Calendar".
- * Tách riêng khỏi Controller để Controller chỉ đóng vai trò nhận/trả HTTP,
- * không chứa logic nghiệp vụ (validate cấu hình, tính khoảng ngày đồng bộ...).
- *
- * Phụ thuộc (composition) vào 2 service chuyên biệt hơn:
- *  - CalendarSettingsService: đọc/ghi cấu hình (calendarId, apiKey) trên đĩa.
- *  - GoogleCalendarService: gọi Google Calendar API v3 thật.
+ * Googleカレンダー連携のオーケストレーション。
+ * 設定の読み書きは CalendarSettingsService、API呼び出しは GoogleCalendarService。
  */
 @Service
 public class CalendarService {
 
     private static final Logger log = LoggerFactory.getLogger(CalendarService.class);
 
-    /** Đồng bộ ±1 tháng quanh hôm nay theo yêu cầu nghiệp vụ đã xác nhận với người dùng. */
+    /** 本日前後1か月を同期する。 */
     private static final int SYNC_RANGE_MONTHS = 1;
 
     private final CalendarSettingsService settingsService;
@@ -34,22 +29,21 @@ public class CalendarService {
         this.googleCalendarService = googleCalendarService;
     }
 
-    /** Trạng thái cấu hình hiện tại (không bao giờ trả lại apiKey thật). */
+    /** 現在の設定状態（実APIキーは返さない）。 */
     public CalendarSettingsResponse getSettingsStatus() {
         return settingsService.load()
                 .map(CalendarSettingsResponse::from)
                 .orElseGet(CalendarSettingsResponse::empty);
     }
 
-    /** Lưu/cập nhật cấu hình liên kết Google Calendar. */
+    /** Googleカレンダー連携設定を保存する。 */
     public CalendarSettingsResponse saveSettings(String calendarId, String apiKey) {
         var saved = settingsService.save(calendarId, apiKey);
         return CalendarSettingsResponse.from(saved);
     }
 
     /**
-     * Đồng bộ ngay: kiểm tra cấu hình đã đầy đủ, lấy toàn bộ event trong khoảng
-     * ±1 tháng quanh hôm nay từ Google Calendar, trả về danh sách Task tương ứng.
+     * 設定を確認し、本日前後1か月の予定をタスク一覧として返す。
      */
     public CalendarSyncResponse syncNow() {
         var settings = settingsService.load()

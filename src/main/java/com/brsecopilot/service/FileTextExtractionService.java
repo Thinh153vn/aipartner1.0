@@ -17,31 +17,23 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Trích xuất nội dung text từ file người dùng upload (仕様書/design doc hoặc source code)
- * để đưa vào tính năng so sánh Spec vs Code (Offshore Support).
- *
- * Hỗ trợ:
- *  - PDF (.pdf): dùng Apache PDFBox để đọc text (chỉ hỗ trợ PDF dạng text, không OCR ảnh scan).
- *  - Mọi file khác (.txt, .md, .java, .js, .py, .cs, .sql, ...): đọc thẳng dưới dạng UTF-8 text.
- *
- * Có 2 chế độ:
- *  - extract(file): 1 file duy nhất, lỗi sẽ throw ngay (dùng cho 仕様書 đơn lẻ).
- *  - extractBatch(files): nhiều file cùng lúc (ví dụ cả 1 thư mục project source code),
- *    file lỗi/rỗng sẽ bị bỏ qua (skip) thay vì làm hỏng toàn bộ request, rồi ghép nội dung
- *    các file hợp lệ lại kèm tên file để AI biết đoạn nào thuộc file nào.
+ * アップロードファイルからテキストを抽出する（仕様比較用）。
+ * PDF は PDFBox（テキストPDFのみ。スキャン画像のOCRは対象外）。
+ * その他は UTF-8 テキストとして読む。
+ * extract は1件で失敗時に即例外。extractBatch は失敗ファイルをスキップして結合する。
  */
 @Service
 public class FileTextExtractionService {
 
     private static final Logger log = LoggerFactory.getLogger(FileTextExtractionService.class);
 
-    private static final long MAX_FILE_SIZE_BYTES = 10L * 1024 * 1024; // 10MB / file
-    private static final int MAX_TEXT_LENGTH = 3000; // Giới hạn cho 1 file đơn (spec đơn lẻ)
-    private static final int MAX_BATCH_TEXT_LENGTH = 6000; // Giới hạn cho nội dung ghép nhiều file
-    // Đồng bộ với OFFSHORE_MAX_BATCH_FILES ở frontend (app.js) - cho phép duyệt/hiển thị cả
-    // project lớn, nhưng chỉ số lượng này thực sự được gửi lên AI để trích xuất nội dung.
+    private static final long MAX_FILE_SIZE_BYTES = 10L * 1024 * 1024; // 1ファイルあたり10MB
+    private static final int MAX_TEXT_LENGTH = 3000; // 単一ファイル（仕様書）の上限
+    private static final int MAX_BATCH_TEXT_LENGTH = 6000; // 複数ファイル結合後の上限
+    // フロントの OFFSHORE_MAX_BATCH_FILES と揃える。表示は大規模でも、AI抽出はこの件数まで。
     private static final int MAX_BATCH_FILE_COUNT = 300;
 
+    /** 1ファイルを抽出し、上限超過時は切り詰めて返す。失敗時は即例外。 */
     public ExtractedTextResponse extract(MultipartFile file) {
         String filename = safeFilename(file);
         log.info("単一ファイルのテキスト抽出を開始します filename={}", filename);
@@ -55,6 +47,7 @@ public class FileTextExtractionService {
         return new ExtractedTextResponse(finalText, truncated, filename);
     }
 
+    /** 複数ファイルを結合する。読めないファイルはスキップし、件数上限を超えた分は送らない。 */
     public BatchExtractedTextResponse extractBatch(List<MultipartFile> files) {
         if (files == null || files.isEmpty()) {
             throw new FileExtractionException("ファイルが選択されていません。");

@@ -3,9 +3,7 @@ package com.brsecopilot.dto.file;
 import java.util.List;
 
 /**
- * Kết quả trích xuất + ghép text từ NHIỀU file upload cùng lúc (ví dụ: cả 1 thư mục
- * project chứa nhiều file source code). Mỗi file được đánh dấu bằng tên trong nội dung
- * ghép (text), giúp AI biết đoạn code nào thuộc file nào khi so sánh với Spec.
+ * 複数ファイル抽出の結合結果。本文中にファイル名を残し、AIが仕様比較で出所を判別できるようにする。
  */
 public record BatchExtractedTextResponse(
         String text,

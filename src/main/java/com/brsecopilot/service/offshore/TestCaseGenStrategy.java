@@ -11,8 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 /**
- * Nghiệp vụ "テストケース生成": sinh bộ test case theo RBT từ tài liệu yêu cầu
- * (và tuỳ chọn source code), dùng methodology trong thư mục test/prompt_templates.
+ * 要件（任意でソース）からリスクベースのテストケース一式を生成する。
  */
 @Component
 public class TestCaseGenStrategy implements OffshoreReviewStrategy {

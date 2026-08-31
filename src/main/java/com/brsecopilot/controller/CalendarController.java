@@ -14,11 +14,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * REST API cho tính năng "tự đồng bộ Google Calendar vào Task", giúp người dùng
- * không cần nhập lại thủ công lịch trình đã có trên Google Calendar.
- *
- * Toàn bộ logic nghiệp vụ (validate cấu hình, tính khoảng ngày đồng bộ, gọi Google
- * API) được uỷ quyền cho CalendarService; Controller chỉ nhận/trả HTTP.
+ * Googleカレンダーをタスクへ取り込む API。
+ * 設定検証・同期期間・Google呼び出しは CalendarService に委譲する。
  */
 @RestController
 @RequestMapping("/api/v1/calendar")
@@ -30,22 +27,20 @@ public class CalendarController {
         this.calendarService = calendarService;
     }
 
-    /** Trả trạng thái cấu hình hiện tại (không trả lại apiKey thật). */
+    /** 現在の設定状態（実APIキーは返さない）。 */
     @GetMapping("/settings")
     public ResponseEntity<CalendarSettingsResponse> getSettings() {
         return ResponseEntity.ok(calendarService.getSettingsStatus());
     }
 
-    /** Lưu/cập nhật calendarId + apiKey vào file cấu hình cục bộ. */
+    /** calendarId と apiKey をローカル設定へ保存する。 */
     @PutMapping("/settings")
     public ResponseEntity<CalendarSettingsResponse> saveSettings(@Valid @RequestBody CalendarSettingsRequest request) {
         return ResponseEntity.ok(calendarService.saveSettings(request.calendarId(), request.apiKey()));
     }
 
     /**
-     * Đồng bộ ngay: lấy toàn bộ event trong khoảng ±1 tháng quanh hôm nay từ
-     * Google Calendar đã cấu hình, trả về danh sách Task tương ứng cho frontend
-     * gắn vào lịch (calendar-grid) mà không cần nhập tay.
+     * 即時同期。本日前後約1か月の予定を取得し、フロントのカレンダーへ載せる。
      */
     @PostMapping("/sync")
     public ResponseEntity<CalendarSyncResponse> sync() {

@@ -20,13 +20,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * REST API cho AI PARTNER Autonomous AI Agent Dashboard.
- *
- * Mỗi nghiệp vụ AI (schedule analysis, SOS alert, nippo generation, offshore
- * review) có 1 Service riêng biệt (Single Responsibility) thay vì dùng chung
- * 1 "God Service" như trước; Controller chỉ nhận request đã validate (@Valid)
- * và uỷ quyền toàn bộ xử lý cho Service tương ứng, không chứa business logic.
- * Lỗi được xử lý tập trung ở GlobalExceptionHandler.
+ * GROWTH PARTNER の REST API。
+ * スケジュール分析・SOS・日報・オフショアはそれぞれ専用 Service に委譲する（Controller に業務ロジックを置かない）。
+ * 例外は GlobalExceptionHandler で集約する。
  */
 @RestController
 @RequestMapping("/api/v1/copilot")
@@ -48,27 +44,27 @@ public class CopilotController {
         this.offshoreReviewService = offshoreReviewService;
     }
 
-    /** Auto-Rebalance: phân tích WBS, phát hiện task trễ hạn và đề xuất dời lịch. */
+    /** 遅延タスクを検出し、再スケジュール案を返す。 */
     @PostMapping("/analyze-schedule")
     public ResponseEntity<ScheduleAnalysisResponse> analyzeSchedule(
             @Valid @RequestBody ScheduleAnalysisRequest request) {
         return ResponseEntity.ok(scheduleAnalysisService.analyze(request));
     }
 
-    /** Auto SOS: phát hiện kẹt logic lâu, soạn tin nhắn cầu cứu Senior. */
+    /** 実装停滞を想定し、先輩への相談文面を用意する。 */
     @PostMapping("/sos-alert")
     public ResponseEntity<SosAlertResponse> sosAlert(@Valid @RequestBody SosAlertRequest request) {
         return ResponseEntity.ok(sosAlertService.generateAlert(request));
     }
 
-    /** Git to Nippo: sinh báo cáo ngày từ log Git/công việc thô. */
+    /** Git／作業ログから日報を生成する。 */
     @PostMapping("/generate-nippo")
     public ResponseEntity<NippoGenerationResponse> generateNippo(
             @Valid @RequestBody NippoGenerationRequest request) {
         return ResponseEntity.ok(nippoGenerationService.generate(request.rawLogs()));
     }
 
-    /** Trợ lý Offshore: SPEC_DIFF / SHADOW_CLIENT / UNIT_TEST_GEN / TEST_CASE_GEN. */
+    /** オフショア支援：仕様比較／顧客質問／ユニットテスト／テストケース。 */
     @PostMapping("/review-offshore")
     public ResponseEntity<OffshoreReviewResponse> reviewOffshore(
             @Valid @RequestBody OffshoreReviewRequest request) {

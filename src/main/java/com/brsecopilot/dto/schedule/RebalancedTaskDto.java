@@ -3,7 +3,7 @@ package com.brsecopilot.dto.schedule;
 import java.time.LocalDate;
 
 /**
- * Kết quả AI đề xuất cho 1 Task bị dời lịch.
+ * AIが期日を動かした1件分の提案。
  */
 public record RebalancedTaskDto(
         String taskId,

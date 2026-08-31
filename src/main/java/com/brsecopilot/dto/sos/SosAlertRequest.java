@@ -4,6 +4,7 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 
+/** SOS生成リクエスト。停滞ファイル名と停滞時間（分）を渡す。 */
 public record SosAlertRequest(
         @NotBlank(message = "ファイル名は必須です") String fileName,
         @Min(value = 1, message = "停滞時間は1分以上を指定してください")

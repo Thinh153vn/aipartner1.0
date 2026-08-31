@@ -3,10 +3,9 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AI PARTNER | Workspace</title>
+    <title>GROWTH PARTNER | ワークスペース</title>
 
-    <!-- Áp dụng Theme + Accent Color + Background Image đã lưu SỚM NHẤT có thể để tránh
-         "flash" giao diện mặc định trước khi app.js tải xong. -->
+    <!-- 保存済みのテーマ・アクセントカラー・背景画像を最速で適用し、初期テーマのちらつきを防ぐ -->
     <script>
       (function () {
         try {
@@ -23,13 +22,18 @@
             document.documentElement.style.setProperty("--custom-bg-image", 'url("' + savedBgImage + '")');
             document.documentElement.classList.add("has-custom-bg");
           }
+
+          var savedLang = localStorage.getItem("app_language");
+          if (savedLang === "en" || savedLang === "vi" || savedLang === "zh" || savedLang === "ja") {
+            document.documentElement.setAttribute("lang", savedLang === "zh" ? "zh-CN" : savedLang);
+          }
         } catch (e) {
-          /* localStorage bị chặn (private mode...) - bỏ qua, dùng mặc định */
+          /* プライベートモード等で localStorage が使えない場合は既定値を使う */
         }
       })();
     </script>
 
-    <!-- favicon rỗng: tránh browser tự động GET /favicon.ico (gây log lỗi 404 phía backend) -->
+    <!-- 空のfavicon: ブラウザの自動GET /favicon.ico（バックエンドの404ログ）を防ぐ -->
     <link rel="icon" href="data:," />
 
     <!-- Google Fonts: BIZ UDPGothic（日本語ビジネス文書用）+ Inter（英数字・UI用） -->
@@ -56,41 +60,41 @@
     <link rel="stylesheet" href="assets/css/style.css" />
   </head>
   <body>
-    <!-- ハンバーガーメニュー（モバイル <768px でのみ表示、左Sidebarをオフキャンバス表示） -->
-    <button class="hamburger-btn" id="hamburgerBtn" type="button" onclick="toggleLeftSidebar()" title="メニュー">
+    <!-- ハンバーガーメニュー（モバイル <768px でのみ表示、左サイドバーをオフキャンバス表示） -->
+    <button class="hamburger-btn" id="hamburgerBtn" type="button" onclick="toggleLeftSidebar()" data-i18n-title="menu" title="メニュー">
       <i class="fa-solid fa-bars"></i>
     </button>
 
-    <!-- タブレット/モバイルでオフキャンバスPanelが開いている時の背景オーバーレイ -->
+    <!-- タブレット／モバイルでオフキャンバスパネルが開いている時の背景オーバーレイ -->
     <div class="mobile-backdrop" id="mobileBackdrop" onclick="closeOffCanvasPanels()"></div>
 
     <div class="app-container">
-      <!-- ================= LEFT SIDEBAR (固定 260px) ================= -->
+      <!-- ================= 左サイドバー（固定 260px） ================= -->
       <aside class="sidebar-left" id="sidebarLeft">
         <div class="sidebar-brand">
-          <span class="sidebar-brand-mark">AI</span>
-          <span class="sidebar-brand-name">AI PARTNER</span>
+          <span class="sidebar-brand-mark">GP</span>
+          <span class="sidebar-brand-name">GROWTH PARTNER</span>
         </div>
 
-        <!-- Header: Avatar + Name + Notification Bell -->
+        <!-- ヘッダー：アバター／氏名／通知 -->
         <div class="sidebar-header">
           <div class="user-avatar">田</div>
           <div class="user-info">
             <div class="user-name">田中 太郎</div>
-            <div class="user-role">BrSE / 保険システム開発</div>
+            <div class="user-role" data-i18n="userRole">BrSE / 保険システム開発</div>
           </div>
-          <button class="notif-bell" id="notifBell" type="button" onclick="switchCenterView('today')" title="通知">
+          <button class="notif-bell" id="notifBell" type="button" onclick="switchCenterView('today')" data-i18n-title="notifications" title="通知">
             <i class="fa-regular fa-bell"></i>
             <span class="notif-badge hidden" id="notifBadge">0</span>
           </button>
         </div>
 
-        <!-- Quick Actions -->
+        <!-- クイック操作 -->
         <div class="quick-actions">
           <button class="quick-action-btn" type="button" onclick="openAddTaskModal()">
-            <i class="fa-solid fa-plus"></i> タスク追加
+            <i class="fa-solid fa-plus"></i> <span data-i18n="addTask">タスク追加</span>
           </button>
-          <button class="quick-action-btn quick-action-icon" type="button" onclick="toggleSearchBox()" title="検索">
+          <button class="quick-action-btn quick-action-icon" type="button" onclick="toggleSearchBox()" data-i18n-title="search" title="検索">
             <i class="fa-solid fa-magnifying-glass"></i>
           </button>
         </div>
@@ -99,31 +103,32 @@
           id="sidebarSearchInput"
           class="input-base sidebar-search-input hidden"
           placeholder="タスクを検索..."
+          data-i18n-placeholder="searchPlaceholder"
           oninput="handleSearchInput(this.value)"
         />
 
-        <!-- Main Navigation -->
+        <!-- メインナビ -->
         <nav class="sidebar-nav">
           <button class="nav-item is-active" data-view="today" type="button" onclick="switchCenterView('today')">
-            <i class="fa-solid fa-list-check"></i> 今日
+            <i class="fa-solid fa-list-check"></i> <span data-i18n="today">今日</span>
           </button>
           <button class="nav-item" data-view="calendar" type="button" onclick="switchCenterView('calendar')">
-            <i class="fa-regular fa-calendar-days"></i> カレンダー
+            <i class="fa-regular fa-calendar-days"></i> <span data-i18n="calendar">カレンダー</span>
           </button>
         </nav>
 
-        <!-- Projects (WBS) -->
+        <!-- プロジェクト（WBS） -->
         <div class="sidebar-section-head sidebar-section-head-with-action">
-          <h3>プロジェクト（WBS）</h3>
+          <h3 data-i18n="projects">プロジェクト（WBS）</h3>
           <button id="btnAddProject" class="btn-text" type="button" onclick="openAddProjectModal()">
-            ➕ 新規追加
+            ➕ <span data-i18n="addNew">新規追加</span>
           </button>
         </div>
         <div class="project-list" id="projectList"></div>
 
-        <!-- AI Tools -->
+        <!-- AIツール -->
         <div class="sidebar-section-head">
-          <h3>AIツール</h3>
+          <h3 data-i18n="aiTools">AIツール</h3>
         </div>
         <div class="ai-tools-list">
           <input
@@ -134,36 +139,39 @@
             onchange="handleWbsFileImport(this)"
           />
           <button class="sidebar-tool-btn" type="button" onclick="$('wbsFileInput').click()">
-            <i class="fa-solid fa-file-import"></i> WBSインポート
+            <i class="fa-solid fa-file-import"></i> <span data-i18n="wbsImport">WBSインポート</span>
           </button>
           <button class="sidebar-tool-btn" type="button" onclick="openNippoModal()">
-            <i class="fa-solid fa-pen-to-square"></i> 日報作成
+            <i class="fa-solid fa-pen-to-square"></i> <span data-i18n="nippo">日報作成</span>
           </button>
           <button class="sidebar-tool-btn" type="button" onclick="openOffshoreModal()">
-            <i class="fa-solid fa-globe"></i> オフショア支援
+            <i class="fa-solid fa-globe"></i> <span data-i18n="offshore">オフショア支援</span>
           </button>
         </div>
 
-        <!-- Footer: 表示設定（テーマ切替） -->
+        <!-- フッター：APIキー設定／表示設定 -->
         <div class="sidebar-footer">
+          <button class="sidebar-tool-btn" type="button" onclick="openApiKeyModal()">
+            <i class="fa-solid fa-key"></i> <span data-i18n="apiKeySettings">APIキー設定</span>
+          </button>
           <button class="sidebar-tool-btn" type="button" onclick="openThemeModal()">
-            <i class="fa-solid fa-gear"></i> ⚙️ 表示設定
+            <i class="fa-solid fa-gear"></i> <span data-i18n="settings">表示設定</span>
           </button>
         </div>
       </aside>
 
-      <!-- ================= MAIN CENTER PANEL (可変幅) ================= -->
+      <!-- ================= 中央メイン（可変幅） ================= -->
       <main class="main-content">
-        <!-- ---------- VIEW 1: 今日のタスク（デフォルト） ---------- -->
+        <!-- ---------- ビュー1：今日のタスク（初期表示） ---------- -->
         <section class="center-view is-active" id="view-today">
           <div class="view-topbar">
             <h2 id="todayViewTitle">今日</h2>
             <div class="view-topbar-actions">
               <button class="btn btn-ai" id="btnAiAutoSchedule" type="button" onclick="runAiAutoSchedule(this)">
-                ✨ AIタスク自動調整
+                ✨ <span data-i18n="aiAutoSchedule">AIタスク自動調整</span>
               </button>
               <button class="btn btn-danger-outline" id="btnQuickSos" type="button" onclick="runQuickSos(this)">
-                🆘 緊急SOS
+                🆘 <span data-i18n="sos">緊急SOS</span>
               </button>
             </div>
           </div>
@@ -189,49 +197,49 @@
           <div class="task-list" id="todayTaskList"></div>
         </section>
 
-        <!-- ---------- VIEW 2: プロジェクト Dashboard（Chart.js） ---------- -->
+        <!-- ---------- ビュー2：プロジェクトダッシュボード（Chart.js） ---------- -->
         <section class="center-view" id="view-project-dashboard">
           <div class="view-topbar">
-            <h2 id="dashboardProjectTitle">プロジェクト Dashboard</h2>
+            <h2 id="dashboardProjectTitle">プロジェクトダッシュボード</h2>
             <div class="view-topbar-actions">
               <button
                 class="btn btn-secondary"
                 type="button"
                 onclick="clearProjectFilter(); switchCenterView('today');"
               >
-                <i class="fa-solid fa-arrow-left"></i> 今日のタスクへ戻る
+                <i class="fa-solid fa-arrow-left"></i> <span data-i18n="backToToday">今日のタスクへ戻る</span>
               </button>
             </div>
           </div>
 
           <div class="dashboard-cards-row">
             <div class="dashboard-card">
-              <span class="dashboard-card-label">未着手</span>
+              <span class="dashboard-card-label" data-i18n="statTodo">未着手</span>
               <span class="dashboard-card-value stat-todo" id="dashboardTodoCount">0</span>
             </div>
             <div class="dashboard-card">
-              <span class="dashboard-card-label">対応中</span>
+              <span class="dashboard-card-label" data-i18n="statInProgress">対応中</span>
               <span class="dashboard-card-value stat-inprogress" id="dashboardInProgressCount">0</span>
             </div>
             <div class="dashboard-card">
-              <span class="dashboard-card-label">完了</span>
+              <span class="dashboard-card-label" data-i18n="statDone">完了</span>
               <span class="dashboard-card-value stat-done" id="dashboardDoneCount">0</span>
             </div>
             <div class="dashboard-card">
-              <span class="dashboard-card-label">期限超過</span>
+              <span class="dashboard-card-label" data-i18n="statOverdue">期限超過</span>
               <span class="dashboard-card-value stat-overdue" id="dashboardOverdueCount">0</span>
             </div>
           </div>
 
           <div class="dashboard-charts-row">
             <div class="dashboard-chart-box">
-              <h4>タスク完了率</h4>
+              <h4 data-i18n="chartCompletion">タスク完了率</h4>
               <div class="dashboard-chart-canvas-wrap">
                 <canvas id="progressDonutChart"></canvas>
               </div>
             </div>
             <div class="dashboard-chart-box">
-              <h4>優先度別タスク件数</h4>
+              <h4 data-i18n="chartPriority">優先度別タスク件数</h4>
               <div class="dashboard-chart-canvas-wrap">
                 <canvas id="teamPerformanceChart"></canvas>
               </div>
@@ -241,50 +249,50 @@
           <!-- このプロジェクトに紐づくタスクのみを表示・インライン編集できる一覧 -->
           <div class="project-task-section">
             <div class="project-task-section-head">
-              <h3>タスク一覧</h3>
+              <h3 data-i18n="taskList">タスク一覧</h3>
               <button class="btn btn-primary btn-sm" type="button" onclick="openAddTaskModalForProject()">
-                <i class="fa-solid fa-plus"></i> Task追加
+                <i class="fa-solid fa-plus"></i> <span data-i18n="addTask">タスク追加</span>
               </button>
             </div>
             <div class="project-task-table">
               <div class="project-task-table-head">
-                <span>完了</span>
-                <span>タスク名（クリックで詳細）</span>
-                <span>期日</span>
-                <span>優先度</span>
+                <span data-i18n="colDone">完了</span>
+                <span data-i18n="colTaskName">タスク名（クリックで詳細）</span>
+                <span data-i18n="colDue">期日</span>
+                <span data-i18n="colPriority">優先度</span>
               </div>
               <div class="project-task-table-body" id="projectTaskTableBody"></div>
             </div>
           </div>
         </section>
 
-        <!-- ---------- VIEW 3: カレンダー（FullCalendar + ドラッグ&ドロップ） ---------- -->
+        <!-- ---------- ビュー3：カレンダー（週表示＋ドラッグ＆ドロップ） ---------- -->
         <section class="center-view" id="view-calendar">
           <div class="view-topbar">
-            <h2>カレンダー</h2>
+            <h2 data-i18n="calendar">カレンダー</h2>
             <div class="view-topbar-actions">
-              <button class="btn btn-secondary btn-icon-only" type="button" onclick="openGcalSettingsModal()" title="Google連携設定">
+              <button class="btn btn-secondary btn-icon-only" type="button" onclick="openGcalSettingsModal()" data-i18n-title="gcalSettingsTitle" title="Google連携設定">
                 <i class="fa-solid fa-gear"></i>
               </button>
               <button class="btn btn-secondary" id="btnSyncGcal" type="button" onclick="syncGoogleCalendar(this)">
-                <i class="fa-brands fa-google"></i> Google同期
+                <i class="fa-brands fa-google"></i> <span data-i18n="googleSync">Google同期</span>
               </button>
               <button class="btn btn-ai" id="btnAiAnalyzeCalendar" type="button" onclick="runAiAutoSchedule(this)">
-                ✨ AI分析
+                ✨ <span data-i18n="aiAnalyze">AI分析</span>
               </button>
             </div>
           </div>
 
           <div class="calendar-legend">
-            <span class="legend-item"><i class="legend-dot dot-blue"></i>タスク</span>
-            <span class="legend-item"><i class="legend-dot dot-mint"></i>AIおすすめ学習</span>
-            <span class="legend-item"><i class="legend-dot dot-slate"></i>会議・打ち合わせ</span>
-            <span class="legend-item"><i class="legend-dot dot-google"></i>Googleカレンダー</span>
+            <span class="legend-item"><i class="legend-dot dot-blue"></i><span data-i18n="legendTask">タスク</span></span>
+            <span class="legend-item"><i class="legend-dot dot-mint"></i><span data-i18n="legendLearning">AIおすすめ学習</span></span>
+            <span class="legend-item"><i class="legend-dot dot-slate"></i><span data-i18n="legendMeeting">会議・打ち合わせ</span></span>
+            <span class="legend-item"><i class="legend-dot dot-google"></i><span data-i18n="legendGoogle">Googleカレンダー</span></span>
           </div>
 
           <!-- ドラッグ元: 未完了タスクをチップ表示し、そのままカレンダーの時間枠へドロップして予定を組める -->
           <div class="calendar-drag-rail" id="calendarDragRail">
-            <span class="calendar-drag-rail-label"><i class="fa-solid fa-hand-pointer"></i> ドラッグしてスケジュール</span>
+            <span class="calendar-drag-rail-label"><i class="fa-solid fa-hand-pointer"></i> <span data-i18n="dragToSchedule">ドラッグしてスケジュール</span></span>
             <div class="calendar-drag-rail-items" id="calendarDragRailItems"></div>
           </div>
 
@@ -292,11 +300,11 @@
         </section>
       </main>
 
-      <!-- ================= RIGHT SIDEBAR: タスク詳細 (固定 320px) ================= -->
+      <!-- ================= 右サイドバー：タスク詳細（固定 320px） ================= -->
       <aside class="sidebar-right" id="sidebarRight">
         <div class="task-detail-empty" id="taskDetailEmpty">
           <i class="fa-regular fa-square-check"></i>
-          <p>タスクを選択すると、ここに詳細が表示されます。</p>
+          <p data-i18n="taskDetailEmpty">タスクを選択すると、ここに詳細が表示されます。</p>
         </div>
 
         <div class="task-detail-panel hidden" id="taskDetailPanel">
@@ -310,7 +318,7 @@
               />
               <span class="mascot-fallback-emoji mascot-fallback-small">🤖</span>
             </span>
-            <button class="detail-close" type="button" onclick="closeTaskDetail()" title="閉じる">
+            <button class="detail-close" type="button" onclick="closeTaskDetail()" data-i18n-title="close" title="閉じる">
               <i class="fa-solid fa-xmark"></i>
             </button>
           </div>
@@ -321,18 +329,19 @@
               id="taskDetailTitleInput"
               class="task-detail-title-input"
               placeholder="タスク名"
+              data-i18n-placeholder="taskName"
               onchange="saveTaskDetail()"
             />
 
             <div class="task-detail-meta-row">
               <i class="fa-solid fa-diagram-project"></i>
-              <span class="task-detail-meta-label">プロジェクト</span>
+              <span class="task-detail-meta-label" data-i18n="project">プロジェクト</span>
               <span class="task-detail-meta-value" id="taskDetailProjectLabel">-</span>
             </div>
 
             <div class="task-detail-meta-row">
               <i class="fa-regular fa-calendar"></i>
-              <span class="task-detail-meta-label">期日</span>
+              <span class="task-detail-meta-label" data-i18n="dueDate">期日</span>
               <input
                 type="date"
                 id="taskDetailDueDateInput"
@@ -343,28 +352,29 @@
 
             <div class="task-detail-meta-row">
               <i class="fa-solid fa-flag"></i>
-              <span class="task-detail-meta-label">優先度</span>
+              <span class="task-detail-meta-label" data-i18n="priority">優先度</span>
               <select
                 id="taskDetailPrioritySelect"
                 class="task-detail-inline-input"
                 onchange="saveTaskDetail()"
               >
-                <option value="high">高</option>
-                <option value="medium">中</option>
-                <option value="low">低</option>
+                <option value="high" data-i18n="priorityHigh">高</option>
+                <option value="medium" data-i18n="priorityMedium">中</option>
+                <option value="low" data-i18n="priorityLow">低</option>
               </select>
             </div>
 
-            <label class="task-detail-section-label" for="taskDetailMemoInput">メモ</label>
+            <label class="task-detail-section-label" for="taskDetailMemoInput" data-i18n="memo">メモ</label>
             <textarea
               id="taskDetailMemoInput"
               class="textarea-base task-detail-memo"
               rows="5"
               placeholder="引き継ぎ事項や補足情報を記入..."
+              data-i18n-placeholder="memoPlaceholder"
               onchange="saveTaskDetail()"
             ></textarea>
 
-            <div class="task-detail-section-label">サブタスク</div>
+            <div class="task-detail-section-label" data-i18n="subtasks">サブタスク</div>
             <div class="task-detail-subtasks" id="taskDetailSubtaskList"></div>
             <div class="task-detail-subtask-add">
               <input
@@ -372,22 +382,23 @@
                 id="taskDetailNewSubtaskInput"
                 class="input-base"
                 placeholder="サブタスクを追加..."
+                data-i18n-placeholder="addSubtaskPlaceholder"
                 onkeydown="handleNewSubtaskKeydown(event)"
               />
-              <button class="btn btn-secondary btn-sm" type="button" onclick="addTaskDetailSubtask()">追加</button>
+              <button class="btn btn-secondary btn-sm" type="button" onclick="addTaskDetailSubtask()" data-i18n="add">追加</button>
             </div>
           </div>
 
           <div class="task-detail-footer">
             <button class="btn btn-primary btn-block" id="taskDetailToggleDoneBtn" type="button" onclick="toggleTaskDetailDone()">
-              ✓ 完了にする
+              ✓ <span data-i18n="markDone">完了にする</span>
             </button>
           </div>
         </div>
       </aside>
     </div>
 
-    <!-- ================= AI CHAT OVERLAY（マスコット押下時のみ表示） ================= -->
+    <!-- ================= AIチャット重ね表示（マスコット押下時のみ） ================= -->
     <aside class="agent-chat-overlay" id="agentChatPanel">
       <div class="agent-chat-panel-head">
         <div class="agent-chat-panel-title">
@@ -401,28 +412,28 @@
             <span class="mascot-fallback-emoji mascot-fallback-small">🤖</span>
           </span>
           <div>
-            <h4>AI PARTNER</h4>
+            <h4>GROWTH PARTNER</h4>
             <p id="agentStatusLine">今日も一緒に頑張りましょう！</p>
           </div>
         </div>
-        <button class="detail-close" type="button" onclick="toggleAgentChat()" title="閉じる">
+        <button class="detail-close" type="button" onclick="toggleAgentChat()" data-i18n-title="close" title="閉じる">
           <i class="fa-solid fa-xmark"></i>
         </button>
       </div>
 
       <div class="agent-quick-actions">
         <button class="agent-chip" id="btnQuickRebalance" type="button" onclick="runAiAutoSchedule(this)">
-          <i class="fa-solid fa-scale-balanced"></i> 自動リスケジュール
+          <i class="fa-solid fa-scale-balanced"></i> <span data-i18n="autoReschedule">自動リスケジュール</span>
         </button>
         <button class="agent-chip agent-chip-danger" id="btnQuickSos2" type="button" onclick="runQuickSos(this)">
-          <i class="fa-solid fa-triangle-exclamation"></i> 緊急SOS
+          <i class="fa-solid fa-triangle-exclamation"></i> <span data-i18n="sos">緊急SOS</span>
         </button>
       </div>
 
       <div class="agent-feed" id="agentFeed">
         <div class="agent-feed-empty" id="agentFeedEmpty">
           <i class="fa-solid fa-robot"></i>
-          <p>ここにAIエージェントの実行ログと会話が表示されます。</p>
+          <p data-i18n="chatEmpty">ここにAIエージェントの実行ログと会話が表示されます。</p>
         </div>
       </div>
 
@@ -432,6 +443,7 @@
           id="agentChatInput"
           class="agent-chat-input"
           placeholder="AIに話しかける（例：今週のタスクを整理して）"
+          data-i18n-placeholder="chatPlaceholder"
           onkeydown="handleAgentInputKeydown(event)"
         />
         <button class="agent-send-btn" id="btnAgentSend" type="button" onclick="sendAgentChatMessage()">
@@ -440,18 +452,18 @@
       </div>
     </aside>
 
-    <!-- ================= FLOATING MASCOT（チャットのトグル専用） ================= -->
-    <button class="mascot-fab" id="mascotFab" type="button" onclick="toggleAgentChat()" title="AI PARTNERに話しかける">
+    <!-- ================= フローティングマスコット（チャット開閉専用） ================= -->
+    <button class="mascot-fab" id="mascotFab" type="button" onclick="toggleAgentChat()" data-i18n-title="talkToAi" title="GROWTH PARTNERに話しかける">
       <img
         src="assets/img/mascot.png"
-        alt="AI"
+        alt="GP"
         class="mascot-fab-img"
         onerror="this.style.display='none'; this.nextElementSibling.style.display='grid';"
       />
       <span class="mascot-fallback-emoji mascot-fallback-fab">🤖</span>
     </button>
 
-    <!-- ================= WELCOME SPLASH（本日最初の起動時のみ） ================= -->
+    <!-- ================= 起動時あいさつ（本日初回のみ） ================= -->
     <div class="welcome-splash is-hidden" id="welcomeSplash">
       <div class="welcome-splash-inner">
         <span class="avatar-with-fallback splash-mascot-wrap">
@@ -464,37 +476,45 @@
           <span class="mascot-fallback-emoji mascot-fallback-large">🤖</span>
         </span>
         <h1 id="splashHeadline">おはようございます！</h1>
-        <p class="splash-brand">AI PARTNER</p>
+        <p class="splash-brand">GROWTH PARTNER</p>
         <p id="splashText"></p>
-        <button class="btn btn-primary" type="button" onclick="closeSplashScreen()">業務を開始する</button>
+        <button class="btn btn-primary" type="button" onclick="closeSplashScreen()" data-i18n="splashStart">業務を開始する</button>
       </div>
     </div>
 
-    <!-- ================= MODAL: 表示設定（テーマ切替） ================= -->
+    <!-- ================= モーダル：表示設定（テーマ切替） ================= -->
     <div class="modal-overlay hidden" id="themeModal">
       <div class="modal-box">
         <div class="modal-topbar">
-          <h3>⚙️ 表示設定</h3>
+          <h3>⚙️ <span data-i18n="settings">表示設定</span></h3>
           <button class="modal-close" type="button" onclick="closeThemeModal()">✕</button>
         </div>
         <div class="modal-body">
-          <p class="subtitle">お好みのテーマを選択してください。設定は自動的に保存されます。</p>
+          <label class="field-label" for="languageSelect" data-i18n="languageLabel">🌐 言語 / Language / Ngôn ngữ</label>
+          <select id="languageSelect" class="input-base form-select" onchange="changeLanguage(this.value)">
+            <option value="ja">日本語</option>
+            <option value="en">English</option>
+            <option value="vi">Tiếng Việt</option>
+            <option value="zh">中文</option>
+          </select>
+
+          <p class="subtitle" data-i18n="settingsSubtitle">お好みのテーマを選択してください。設定は自動的に保存されます。</p>
           <div class="theme-option-grid" id="themeOptionGrid">
             <button class="theme-option-card" data-theme-value="light" type="button" onclick="applyTheme('light')">
               <span class="theme-swatch theme-swatch-light"></span>
-              <span>ライト</span>
+              <span data-i18n="themeLight">ライト</span>
             </button>
             <button class="theme-option-card" data-theme-value="dark" type="button" onclick="applyTheme('dark')">
               <span class="theme-swatch theme-swatch-dark"></span>
-              <span>ダーク</span>
+              <span data-i18n="themeDark">ダーク</span>
             </button>
             <button class="theme-option-card" data-theme-value="glass" type="button" onclick="applyTheme('glass')">
               <span class="theme-swatch theme-swatch-glass"></span>
-              <span>グラスモーフィズム</span>
+              <span data-i18n="themeGlass">グラスモーフィズム</span>
             </button>
           </div>
 
-          <label class="field-label">アクセントカラー</label>
+          <label class="field-label" data-i18n="accentColor">アクセントカラー</label>
           <div class="accent-color-grid" id="accentColorGrid">
             <button class="accent-color-swatch" data-accent-value="#4d8fe8" style="--swatch-color:#4d8fe8" type="button" onclick="applyAccentColor('#4d8fe8')" title="ブルー"></button>
             <button class="accent-color-swatch" data-accent-value="#cf2e2e" style="--swatch-color:#cf2e2e" type="button" onclick="applyAccentColor('#cf2e2e')" title="バーガンディ"></button>
@@ -513,188 +533,197 @@
             </label>
           </div>
 
-          <label class="field-label">背景画像</label>
+          <label class="field-label" data-i18n="bgImage">背景画像</label>
           <input type="file" id="bgImageInput" class="hidden" accept="image/*" onchange="handleBgImageSelect(this)" />
           <div class="bg-image-controls">
             <button class="btn btn-secondary btn-sm" type="button" onclick="$('bgImageInput').click()">
-              <i class="fa-solid fa-image"></i> 画像を選択
+              <i class="fa-solid fa-image"></i> <span data-i18n="selectImage">画像を選択</span>
             </button>
             <button class="btn btn-secondary btn-sm" type="button" onclick="clearBgImage()">
-              <i class="fa-solid fa-xmark"></i> 削除
+              <i class="fa-solid fa-xmark"></i> <span data-i18n="delete">削除</span>
             </button>
           </div>
-          <p class="subtitle bg-image-hint">
+          <p class="subtitle bg-image-hint" data-i18n="bgHint">
             背景画像を設定すると、画面全体にうっすらと表示されます（カード等の可読性は保たれます）。
           </p>
         </div>
       </div>
     </div>
 
-    <!-- ================= MODAL: SOS 結果（リスク要約 + メール案） ================= -->
+    <!-- ================= モーダル：SOS結果（リスク要約＋メール案） ================= -->
     <div class="modal-overlay hidden" id="sosResultModal">
       <div class="modal-box">
         <div class="modal-topbar">
-          <h3>🆘 緊急SOS - AI分析結果</h3>
+          <h3>🆘 <span data-i18n="sosResultTitle">緊急SOS - AI分析結果</span></h3>
           <button class="modal-close" type="button" onclick="closeSosResultModal()">✕</button>
         </div>
         <div class="modal-body">
-          <label class="field-label">リスク要約</label>
+          <label class="field-label" data-i18n="riskSummary">リスク要約</label>
           <div class="result-block coral-block" id="sosRiskSummaryBox">-</div>
 
-          <label class="field-label" for="sosEmailDraftInput">PM／先輩への連絡文面（編集可能）</label>
+          <label class="field-label" for="sosEmailDraftInput" data-i18n="sosEmailLabel">PM／先輩への連絡文面（編集可能）</label>
           <textarea id="sosEmailDraftInput" class="textarea-base" rows="7"></textarea>
 
           <button class="btn btn-primary btn-block" id="btnSosSendMail" type="button" onclick="sendSosMail(this)">
-            📧 PM・先輩へ送信（Gmail）
+            📧 <span data-i18n="sosSend">PM・先輩へ送信（Gmail）</span>
           </button>
         </div>
       </div>
     </div>
 
-    <!-- ================= MODAL: タスク追加 ================= -->
+    <!-- ================= モーダル：タスク追加 ================= -->
     <div class="modal-overlay hidden" id="addTaskModal">
       <div class="modal-box add-task-box">
         <div class="modal-topbar">
-          <h3>➕ 新しいタスク</h3>
+          <h3>➕ <span data-i18n="newTask">新しいタスク</span></h3>
           <button class="modal-close" type="button" onclick="closeAddTaskModal()">✕</button>
         </div>
         <div class="modal-body">
-          <label class="field-label" for="newTaskTitleInput">タスク名</label>
-          <input type="text" id="newTaskTitleInput" class="input-base" placeholder="例）保険料計算ロジックの実装" />
+          <label class="field-label" for="newTaskTitleInput" data-i18n="taskName">タスク名</label>
+          <input type="text" id="newTaskTitleInput" class="input-base" placeholder="例）保険料計算ロジックの実装" data-i18n-placeholder="taskNameExample" />
 
-          <label class="field-label" for="newTaskProjectSelect">プロジェクト</label>
+          <label class="field-label" for="newTaskProjectSelect" data-i18n="project">プロジェクト</label>
           <select id="newTaskProjectSelect" class="input-base"></select>
 
-          <label class="field-label" for="newTaskDueDateInput">期日</label>
+          <label class="field-label" for="newTaskDueDateInput" data-i18n="dueDate">期日</label>
           <input type="date" id="newTaskDueDateInput" class="input-base" />
 
-          <label class="field-label" for="newTaskPrioritySelect">優先度</label>
+          <label class="field-label" for="newTaskPrioritySelect" data-i18n="priority">優先度</label>
           <select id="newTaskPrioritySelect" class="input-base">
-            <option value="high">高</option>
-            <option value="medium" selected>中</option>
-            <option value="low">低</option>
+            <option value="high" data-i18n="priorityHigh">高</option>
+            <option value="medium" selected data-i18n="priorityMedium">中</option>
+            <option value="low" data-i18n="priorityLow">低</option>
           </select>
 
-          <button class="btn btn-primary btn-block" type="button" onclick="submitNewTask()">
+          <button class="btn btn-primary btn-block" type="button" onclick="submitNewTask()" data-i18n="addSubmit">
             追加する
           </button>
         </div>
       </div>
     </div>
 
-    <!-- ================= MODAL: 新規プロジェクト追加 ================= -->
+    <!-- ================= モーダル：新規プロジェクト追加 ================= -->
     <div class="modal-overlay hidden" id="addProjectModal">
       <div class="modal-box">
         <div class="modal-topbar">
-          <h3>➕ 新規プロジェクト</h3>
+          <h3>➕ <span data-i18n="newProject">新規プロジェクト</span></h3>
           <button class="modal-close" type="button" onclick="closeAddProjectModal()">✕</button>
         </div>
         <div class="modal-body">
-          <label class="field-label" for="newProjectNameInput">プロジェクト名</label>
+          <label class="field-label" for="newProjectNameInput" data-i18n="projectName">プロジェクト名</label>
           <input
             type="text"
             id="newProjectNameInput"
             class="input-base"
             placeholder="例）解約返戻金システム改修"
+            data-i18n-placeholder="projectNameExample"
           />
 
-          <label class="field-label" for="newProjectColorInput">カラー</label>
+          <label class="field-label" for="newProjectColorInput" data-i18n="color">カラー</label>
           <input type="color" id="newProjectColorInput" class="input-base color-input" value="#4d8fe8" />
 
           <button class="btn btn-primary btn-block" type="button" onclick="submitNewProject()">
-            追加する
+            <span data-i18n="addSubmit">追加する</span>
           </button>
         </div>
       </div>
     </div>
 
-    <!-- ================= MODAL: 日報作成 ================= -->
+    <!-- ================= モーダル：日報作成 ================= -->
     <div class="modal-overlay hidden" id="nippoModal">
       <div class="modal-box nippo-box">
         <div class="modal-topbar">
-          <h3><i class="fa-solid fa-pen-to-square"></i> 日報 Nippo 自動生成</h3>
+          <h3><i class="fa-solid fa-pen-to-square"></i> <span data-i18n="nippoTitle">日報の自動生成</span></h3>
           <button class="modal-close" type="button" onclick="closeNippoModal()">✕</button>
         </div>
         <div class="modal-body">
-          <label class="field-label" for="nippoLogInput">本日の作業ログ（Git commit・メモなど）</label>
+          <label class="field-label" for="nippoLogInput" data-i18n="nippoLogLabel">本日の作業ログ（Git commit・メモなど）</label>
           <textarea
             id="nippoLogInput"
             class="textarea-base mono"
             rows="4"
             placeholder="git commit -m &quot;feat: 保険料計算ロジックの実装&quot; のように貼り付けてください..."
+            data-i18n-placeholder="nippoLogPlaceholder"
           ></textarea>
 
           <button class="btn btn-secondary" id="btnGenerateNippo" type="button" onclick="generateNippoReport()">
-            🤖 AIで日報を自動作成
+            🤖 <span data-i18n="nippoGenerate">AIで日報を自動作成</span>
           </button>
 
-          <label class="field-label" for="nippoOutput">生成された日報（編集可能）</label>
+          <label class="field-label" for="nippoOutput" data-i18n="nippoOutputLabel">生成された日報（編集可能）</label>
           <textarea
             id="nippoOutput"
             class="textarea-base mono nippo-output-textarea"
             rows="10"
             placeholder="「AIで日報を自動作成」を押すと、ここに日報が生成されます。送信前に自由に編集できます..."
+            data-i18n-placeholder="nippoOutputPlaceholder"
           ></textarea>
 
           <button id="btnSendNippo" class="btn btn-primary btn-block" type="button" onclick="sendNippoMail(this)">
-            📧 上司へ報告書を送信（Gmail）
+            📧 <span data-i18n="nippoSend">上司へ報告書を送信（Gmail）</span>
           </button>
         </div>
       </div>
     </div>
 
-    <!-- ================= MODAL: オフショア支援 ================= -->
+    <!-- ================= モーダル：オフショア支援 ================= -->
     <div class="modal-overlay hidden" id="offshoreModal">
       <div class="modal-box offshore-box">
         <div class="modal-topbar">
-          <h3><i class="fa-solid fa-globe"></i> オフショア支援</h3>
+          <h3><i class="fa-solid fa-globe"></i> <span data-i18n="offshore">オフショア支援</span></h3>
           <button class="modal-close" type="button" onclick="closeOffshoreModal()">✕</button>
         </div>
 
         <div class="modal-tabs">
           <button class="modal-tab is-active" type="button" onclick="switchOffshorePane('specdiff', this)">
-            🔬 Spec vs Code
+            🔬 <span data-i18n="tabSpecDiff">仕様とコード比較</span>
           </button>
           <button class="modal-tab" type="button" onclick="switchOffshorePane('shadow', this)">
-            🎭 Shadow Client
+            🎭 <span data-i18n="tabShadow">顧客質問レビュー</span>
           </button>
           <button class="modal-tab" type="button" onclick="switchOffshorePane('unittest', this)">
-            🧪 テスト支援
+            🧪 <span data-i18n="tabTest">テスト支援</span>
           </button>
         </div>
 
         <div class="modal-body">
-          <!-- Pane 1: Spec vs Code -->
+          <!-- ペイン1：仕様とコード比較 -->
           <div class="modal-pane is-active" id="pane-specdiff">
             <div class="file-upload-row">
               <div class="file-upload-field">
-                <label class="field-label" for="specFileInput">仕様書ファイル（PDF / テキスト・複数選択可）</label>
+                <label class="field-label" for="specFileInput" data-i18n="specFileLabel">仕様書ファイル（PDF / テキスト・複数選択可）</label>
                 <input
                   type="file"
                   id="specFileInput"
-                  class="file-input"
+                  class="hidden"
                   accept=".pdf,.txt,.md"
                   multiple
                   onchange="handleOffshoreFileSelect(this, 'spec')"
                 />
-                <p class="file-upload-status" id="specFileStatus">未選択（サンプルを使用）</p>
+                <button class="btn btn-secondary btn-sm file-pick-btn" type="button" onclick="$('specFileInput').click()">
+                  <i class="fa-solid fa-file-arrow-up"></i> <span data-i18n="selectFile">ファイルを選択</span>
+                </button>
+                <p class="file-upload-status" id="specFileStatus" data-i18n="fileStatusSample">未選択（サンプルを使用）</p>
               </div>
               <div class="file-upload-field">
-                <label class="field-label" for="codeFileInput">コードフォルダ（フォルダ選択・複数ファイル可）</label>
+                <label class="field-label" for="codeFileInput" data-i18n="codeFolderLabel">コードフォルダ（フォルダ選択・複数ファイル可）</label>
                 <input
                   type="file"
                   id="codeFileInput"
-                  class="file-input"
+                  class="hidden"
                   multiple
                   webkitdirectory
                   directory
                   onchange="handleOffshoreFileSelect(this, 'code')"
                 />
-                <p class="file-upload-status" id="codeFileStatus">未選択（サンプルを使用）</p>
+                <button class="btn btn-secondary btn-sm file-pick-btn" type="button" onclick="$('codeFileInput').click()">
+                  <i class="fa-solid fa-folder-open"></i> <span data-i18n="selectFolder">フォルダを選択</span>
+                </button>
+                <p class="file-upload-status" id="codeFileStatus" data-i18n="fileStatusSample">未選択（サンプルを使用）</p>
               </div>
             </div>
 
-            <!-- Visual tree/list của folder đã chọn -->
+            <!-- 選択したフォルダのツリー表示 -->
             <div class="folder-tree hidden" id="codeFolderTree"></div>
 
             <div class="diff-box" id="specDiffBox">
@@ -704,136 +733,146 @@
               >
             </div>
             <p class="diff-note" id="specDiffNote">
-              「🤖 AIで比較する」を押すと、仕様書とコードの不整合・セキュリティリスクをAIが分析します。
+              <span data-i18n="specDiffNote">「🤖 AIで比較する」を押すと、仕様書とコードの不整合・セキュリティリスクをAIが分析します。</span>
             </p>
             <button class="btn btn-secondary" id="btnRunSpecDiff" type="button" onclick="runSpecDiffReview()">
-              🤖 AIで比較する
+              🤖 <span data-i18n="runSpecDiff">AIで比較する</span>
             </button>
           </div>
 
-          <!-- Pane 2: Shadow Client -->
+          <!-- ペイン2：顧客質問レビュー -->
           <div class="modal-pane" id="pane-shadow">
             <textarea
               id="rawQuestionInput"
               class="textarea-base"
               rows="3"
               placeholder="お客様への質問を、母国語または簡単な日本語で入力..."
+              data-i18n-placeholder="rawQuestionPlaceholder"
             ></textarea>
 
             <button class="btn btn-secondary" id="btnReviewQuestion" type="button" onclick="runShadowClientReview()">
-              🔍 AIで確認・翻訳
+              🔍 <span data-i18n="reviewQuestion">AIで確認・翻訳</span>
             </button>
 
             <div class="shadow-result hidden" id="shadowResult">
               <div class="result-block mint-block">
-                <h4>✅ ビジネス日本語訳</h4>
+                <h4>✅ <span data-i18n="businessJp">ビジネス日本語訳</span></h4>
                 <p id="shadowDraftText"></p>
               </div>
               <div class="result-block coral-block">
-                <h4>⚠️ AIによるリスク警告</h4>
+                <h4>⚠️ <span data-i18n="aiRisk">AIによるリスク警告</span></h4>
                 <p id="shadowRiskText"></p>
               </div>
             </div>
 
             <button id="btnSendQA" class="btn btn-primary btn-block" type="button" onclick="sendQAMail(this)">
-              📧 お客様へ質問を送信（Gmail）
+              📧 <span data-i18n="sendQA">お客様へ質問を送信（Gmail）</span>
             </button>
           </div>
 
-          <!-- Pane 3: Unit Test / テストケース生成（test/ フォルダのRBT手法をオフショア支援に統合） -->
+          <!-- ペイン3：テスト支援（リスクベースのテストケース／ユニットテスト生成） -->
           <div class="modal-pane" id="pane-unittest">
-            <p class="subtitle">
-              要件からテストケース（RBT）を作成し、ソースコードから Unit Test を自動生成します。未入力の場合は保険システムのサンプルを使用します。
+            <p class="subtitle" data-i18n="testSupportIntro">
+              要件からテストケース（リスクベース）を作成し、ソースコードからユニットテストを自動生成します。未入力の場合は保険システムのサンプルを使用します。
             </p>
 
-            <label class="field-label" for="requirementFileInput">要件ファイル（PDF / Markdown・任意）</label>
+            <label class="field-label" for="requirementFileInput" data-i18n="reqFileLabel">要件ファイル（PDF / Markdown・任意）</label>
             <input
               type="file"
               id="requirementFileInput"
-              class="file-input"
+              class="hidden"
               accept=".pdf,.txt,.md"
               multiple
               onchange="handleOffshoreFileSelect(this, 'requirement')"
             />
-            <p class="file-upload-status" id="requirementFileStatus">未選択（下のテキストまたはサンプルを使用）</p>
+            <button class="btn btn-secondary btn-sm file-pick-btn" type="button" onclick="$('requirementFileInput').click()">
+              <i class="fa-solid fa-file-arrow-up"></i> <span data-i18n="selectFile">ファイルを選択</span>
+            </button>
+            <p class="file-upload-status" id="requirementFileStatus" data-i18n="reqStatusDefault">未選択（下のテキストまたはサンプルを使用）</p>
 
-            <label class="field-label" for="requirementTextInput">要件・受け入れ条件</label>
+            <label class="field-label" for="requirementTextInput" data-i18n="reqTextLabel">要件・受け入れ条件</label>
             <textarea
               id="requirementTextInput"
               class="textarea-base mono"
               rows="5"
-              placeholder="モジュール、受け入れ条件、Happy / Alternate / Exception Path を記入..."
+              placeholder="モジュール、受け入れ条件、正常系／代替系／異常系を記入..."
+              data-i18n-placeholder="reqTextPlaceholder"
             ></textarea>
 
-            <label class="field-label" for="unittestFileInput">ソースコード（フォルダ選択可）</label>
+            <label class="field-label" for="unittestFileInput" data-i18n="sourceCodeLabel">ソースコード（フォルダ選択可）</label>
             <input
               type="file"
               id="unittestFileInput"
-              class="file-input"
+              class="hidden"
               multiple
               webkitdirectory
               directory
               onchange="handleOffshoreFileSelect(this, 'unittest')"
             />
-            <p class="file-upload-status" id="unittestFileStatus">未選択（サンプルコードを使用）</p>
+            <button class="btn btn-secondary btn-sm file-pick-btn" type="button" onclick="$('unittestFileInput').click()">
+              <i class="fa-solid fa-folder-open"></i> <span data-i18n="selectFolder">フォルダを選択</span>
+            </button>
+            <p class="file-upload-status" id="unittestFileStatus" data-i18n="unittestStatusDefault">未選択（サンプルコードを使用）</p>
             <div class="folder-tree hidden" id="unittestFolderTree"></div>
 
-            <label class="field-label" for="unittestFrameworkSelect">Unit Test フレームワーク</label>
+            <label class="field-label" for="unittestFrameworkSelect" data-i18n="frameworkLabel">ユニットテストのフレームワーク</label>
             <select id="unittestFrameworkSelect" class="input-base">
-              <option value="" selected>自動判定（Java→JUnit5 / JS,TS→Jest）</option>
-              <option value="JUNIT5">JUnit5 + Mockito（Java）</option>
-              <option value="JEST">Jest（JavaScript / TypeScript）</option>
+              <option value="" selected data-i18n="frameworkAuto">自動判定（Java→JUnit5 / JS,TS→Jest）</option>
+              <option value="JUNIT5" data-i18n="frameworkJunit">JUnit5 + Mockito（Java）</option>
+              <option value="JEST" data-i18n="frameworkJest">Jest（JavaScript / TypeScript）</option>
             </select>
 
             <div class="unittest-action-row">
               <button class="btn btn-secondary" id="btnGenerateTestCases" type="button" onclick="runTestCaseGeneration()">
-                📋 テストケースを生成
+                📋 <span data-i18n="genTestCases">テストケースを生成</span>
               </button>
               <button class="btn btn-secondary" id="btnGenerateUnitTests" type="button" onclick="runUnitTestGeneration()">
-                🧪 Unit Testを生成
+                🧪 <span data-i18n="genUnitTests">ユニットテストを生成</span>
               </button>
             </div>
 
-            <label class="field-label" for="unittestOutput">生成結果（編集・コピー可能）</label>
+            <label class="field-label" for="unittestOutput" data-i18n="outputLabel">生成結果（編集・コピー可能）</label>
             <textarea
               id="unittestOutput"
               class="textarea-base mono unittest-output-textarea"
               rows="12"
               placeholder="生成ボタンを押すと、ここにテストケースまたはテストコードが表示されます..."
+              data-i18n-placeholder="outputPlaceholder"
             ></textarea>
             <p class="diff-note" id="unittestRiskNote"></p>
 
             <button class="btn btn-primary btn-block" type="button" onclick="copyUnitTestOutput(this)">
-              📋 結果をコピー
+              📋 <span data-i18n="copyResult">結果をコピー</span>
             </button>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- ================= MODAL: Googleカレンダー連携設定 ================= -->
+    <!-- ================= モーダル：Googleカレンダー連携設定 ================= -->
     <div class="modal-overlay hidden" id="gcalSettingsModal">
       <div class="modal-box">
         <div class="modal-topbar">
-          <h3><i class="fa-brands fa-google"></i> Googleカレンダー連携設定</h3>
+          <h3><i class="fa-brands fa-google"></i> <span data-i18n="gcalTitle">Googleカレンダー連携設定</span></h3>
           <button class="modal-close" type="button" onclick="closeGcalSettingsModal()">✕</button>
         </div>
         <div class="modal-body">
-          <p class="subtitle gcal-status-text" id="gcalStatusText">読み込み中...</p>
+          <p class="subtitle gcal-status-text" id="gcalStatusText" data-i18n="loading">読み込み中...</p>
 
-          <label class="field-label" for="gcalCalendarIdInput">カレンダーID</label>
-          <input type="text" id="gcalCalendarIdInput" class="input-base" placeholder="例）your-account@gmail.com" />
+          <label class="field-label" for="gcalCalendarIdInput" data-i18n="calendarId">カレンダーID</label>
+          <input type="text" id="gcalCalendarIdInput" class="input-base" placeholder="例）your-account@gmail.com" data-i18n-placeholder="calendarIdExample" />
 
-          <label class="field-label" for="gcalApiKeyInput">APIキー（登録済みの場合は空欄でも構いません）</label>
+          <label class="field-label" for="gcalApiKeyInput" data-i18n="gcalApiKey">APIキー（登録済みの場合は空欄でも構いません）</label>
           <input
             type="password"
             id="gcalApiKeyInput"
             class="input-base"
             placeholder="Google Cloud Consoleで発行したAPIキー"
+            data-i18n-placeholder="gcalApiKeyPlaceholder"
           />
 
           <button class="btn btn-primary btn-block" id="btnSaveGcalSettings" type="button" onclick="saveCalendarSettings(this)">
-            💾 設定を保存
+            💾 <span data-i18n="saveSettings">設定を保存</span>
           </button>
         </div>
       </div>
@@ -843,7 +882,7 @@
     <div class="processing-overlay hidden" id="fileProcessingOverlay">
       <div class="processing-box">
         <i class="fa-solid fa-microchip fa-spin"></i>
-        <p id="processingLabel">処理中...</p>
+        <p id="processingLabel" data-i18n="processing">処理中...</p>
         <div class="processing-progress-track">
           <div class="processing-progress-fill" id="processingProgressFill"></div>
         </div>
@@ -851,11 +890,43 @@
       </div>
     </div>
 
-    <!-- ================= TOAST DÙNG CHUNG ================= -->
+    <!-- ================= モーダル：APIキー設定（BYOK／localStorage） ================= -->
+    <div class="modal-overlay hidden" id="apiKeyModal">
+      <div class="modal-box">
+        <div class="modal-topbar">
+          <h3><i class="fa-solid fa-key"></i> <span data-i18n="apiKeySettings">APIキー設定</span></h3>
+          <button class="modal-close" type="button" onclick="closeApiKeyModal()">✕</button>
+        </div>
+        <div class="modal-body">
+          <p class="subtitle" data-i18n="apiKeyDesc">
+            AI機能をご利用いただくには、ご自身のGemini APIキーを入力してください。キーはこのブラウザ内（localStorage）にのみ保存され、サーバーへはAIリクエスト時だけ送信されます。
+          </p>
+          <p class="api-key-modal-warning hidden" id="apiKeyModalWarning" data-i18n="apiKeyWarning">
+            AI機能を利用する前に、APIキーを入力してください。
+          </p>
+          <p class="subtitle" id="apiKeyModalStatus"></p>
+          <label class="field-label" for="userApiKeyInput" data-i18n="apiKeyLabel">APIキー</label>
+          <input
+            type="password"
+            id="userApiKeyInput"
+            class="input-base"
+            placeholder="AIza... または Gemini APIキー"
+            data-i18n-placeholder="apiKeyPlaceholder"
+            autocomplete="off"
+          />
+          <div class="api-key-modal-actions">
+            <button class="btn btn-secondary" type="button" onclick="closeApiKeyModal()" data-i18n="cancel">キャンセル</button>
+            <button class="btn btn-primary" type="button" onclick="saveUserApiKey()" data-i18n="save">保存</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= 共通トースト ================= -->
     <div class="app-toast" id="appToast">
       <span class="app-toast-icon" id="appToastIcon">🔔</span>
       <div class="app-toast-body">
-        <h4 id="appToastTitle">AI Partner</h4>
+        <h4 id="appToastTitle">GROWTH PARTNER</h4>
         <p id="appToastText"></p>
       </div>
     </div>

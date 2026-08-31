@@ -11,8 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 /**
- * Nghiệp vụ "Unit Test生成": sinh Unit Test tự động từ source code offshore đã
- * upload/dán, hỗ trợ quy trình test (JUnit5+Mockito cho Java, Jest cho JS/TS).
+ * アップロード／貼付ソースからユニットテストを生成する（JavaはJUnit5＋Mockito、JS/TSはJest）。
  */
 @Component
 public class UnitTestGenStrategy implements OffshoreReviewStrategy {

@@ -4,10 +4,8 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 /**
- * Điểm khởi động ứng dụng AI PARTNER Backend.
- * Spring Boot vừa phục vụ REST API (/api/v1/copilot/**) vừa serve frontend tĩnh
- * (index.html, assets/css, assets/js) từ src/main/resources/static, nên chỉ cần
- * chạy một cổng duy nhất (mặc định 8080), không cần cấu hình CORS.
+ * GROWTH PARTNER バックエンドの起動点。
+ * REST API（/api/v1/copilot/**）と静的フロントを同一ポート（既定8080）で提供する。CORS設定は不要。
  */
 @SpringBootApplication
 public class BrseCopilotApplication {

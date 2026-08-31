@@ -10,7 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-/** Nghiệp vụ "Shadow Client": rà soát câu hỏi thô định gửi khách hàng trước khi gửi thật. */
+/** 顧客へ送る前の質問文を、ビジネス日本語とリスク観点で点検する。 */
 @Component
 public class ShadowClientReviewStrategy implements OffshoreReviewStrategy {
 

@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 
 /**
- * Task hiện có trên Calendar (frontend giữ danh sách này ở client, không có DB).
+ * カレンダー上の既存タスク（クライアント保持。サーバーDBは無い）。
  */
 public record TaskItemDto(
         @NotBlank(message = "タスクIDは必須です") String id,

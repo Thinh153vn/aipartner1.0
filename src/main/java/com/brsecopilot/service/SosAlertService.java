@@ -8,8 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 /**
- * Nghiệp vụ "Auto SOS": phát hiện kẹt logic lâu, soạn tin nhắn cầu cứu Senior.
- * Single Responsibility: chỉ lo dựng prompt + gọi AI cho nghiệp vụ này.
+ * 実装停滞を想定したSOS。先輩への相談文面をAIで用意する。
  */
 @Service
 public class SosAlertService {

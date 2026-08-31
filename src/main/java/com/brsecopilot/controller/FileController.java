@@ -13,10 +13,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 /**
- * REST API hỗ trợ upload file (仕様書/design doc dạng PDF, hoặc source code dạng text)
- * để lấy nội dung text, phục vụ tính năng so sánh Spec vs Code (Offshore Support).
- * Frontend gọi endpoint này trước, rồi dùng text trả về để gọi
- * /api/v1/copilot/review-offshore (mode=SPEC_DIFF) như bình thường.
+ * 仕様書PDF／ソーステキストを抽出し、オフショアの仕様比較へ渡す API。
+ * フロントは先にここを呼び、取得テキストで /review-offshore（SPEC_DIFF）を実行する。
  */
 @RestController
 @RequestMapping("/api/v1/files")
@@ -28,14 +26,14 @@ public class FileController {
         this.extractionService = extractionService;
     }
 
+    /** 単一ファイルからテキストを抽出する。 */
     @PostMapping("/extract-text")
     public ResponseEntity<ExtractedTextResponse> extractText(@RequestParam("file") MultipartFile file) {
         return ResponseEntity.ok(extractionService.extract(file));
     }
 
     /**
-     * Trích xuất + ghép text từ NHIỀU file cùng lúc (dùng khi người dùng chọn cả 1 thư mục
-     * project source code). File lỗi/không đọc được sẽ tự bị bỏ qua, không làm fail cả batch.
+     * 複数ファイルを抽出して結合する（フォルダ選択時）。読めないファイルはスキップし、バッチ全体は失敗させない。
      */
     @PostMapping("/extract-text-batch")
     public ResponseEntity<BatchExtractedTextResponse> extractTextBatch(

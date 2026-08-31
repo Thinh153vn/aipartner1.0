@@ -1,9 +1,7 @@
 package com.brsecopilot.exception;
 
 /**
- * Dùng cho các lỗi validate chéo giữa nhiều field (ví dụ: OffshoreReviewRequest
- * thiếu field bắt buộc tương ứng với mode) mà Bean Validation không xử lý được.
- * Được GlobalExceptionHandler bắt và trả HTTP 400.
+ * 複数項目の交差検証エラー（mode に応じた必須欠落など）。HTTP 400 で返す。
  */
 public class InvalidRequestException extends RuntimeException {
 

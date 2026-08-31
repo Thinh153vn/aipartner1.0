@@ -8,32 +8,23 @@ spring:
   ai:
     google:
       genai:
-        # Dùng Gemini Developer API (AI Studio - miễn phí), KHÔNG set project-id/location
-        # vì 2 property đó sẽ chuyển client sang chế độ Vertex AI (trả tiền) và làm API key
-        # dạng Developer bị từ chối.
-        #
-        # ⚠️ CẢNH BÁO BẢO MẬT (TẠM THỜI CHO MỤC ĐÍCH DEMO/HACKATHON):
-        # Key thật đang được gán cứng trực tiếp bên dưới để tiện chạy demo ngay mà không cần
-        # set biến môi trường. TUYỆT ĐỐI KHÔNG đẩy (commit/push) file này lên git repository
-        # công khai hoặc chia sẻ ra ngoài. Trước khi nộp bài/lưu trữ lâu dài, hãy xoá key khỏi
-        # đây và chuyển về dùng biến môi trường GEMINI_API_KEY (cú pháp ${GEMINI_API_KEY:...}).
-        # Nếu biến môi trường GEMINI_API_KEY được set, nó sẽ được ưu tiên dùng thay cho giá trị
-        # cứng bên dưới.
-        api-key: ${GEMINI_API_KEY:AQ.Ab8RN6IsZWSIneNfBMCPXDOVo5gvy1WEpzK8d-tBqvGwCJqeyg}
+        # Gemini Developer API（AI Studio）。project-id / location は設定しない（Vertex課金モードになるため）。
+        # ソースコードに実キーを書かない。サーバー側の予備は環境変数 GEMINI_API_KEY のみ。
+        # 画面の「APIキー設定」で保存したキーは、AIリクエスト時にヘッダーで送られ優先利用される。
+        api-key: ${GEMINI_API_KEY:unused-byok-placeholder}
         chat:
           options:
             model: gemini-3.6-flash
             temperature: 0.4
 
-  # Web servlet: cho phép Spring Boot serve toàn bộ frontend tĩnh trong src/main/resources/static
+  # 静的フロント（src/main/resources/static）を同一プロセスで配信する
   web:
     resources:
       static-locations: classpath:/static/
 
-  # Giới hạn dung lượng file upload cho tính năng "so sánh Spec vs Code" (PDF/text)
-  # max-request-size lớn hơn để hỗ trợ upload cả 1 thư mục project (nhiều file cùng lúc,
-  # tối đa 300 file/lượt theo OFFSHORE_MAX_BATCH_FILES ở frontend -> nâng trần lên đủ dư
-  # cho các project thật có nhiều file text/code, dù nội dung mỗi file vẫn bị cắt ở tầng AI).
+  # 仕様比較などのアップロード上限。
+  # フォルダ一括（フロントの OFFSHORE_MAX_BATCH_FILES=300）に備え request 上限を大きめにする。
+  # AIへ渡す本文は別途切り詰める。
   servlet:
     multipart:
       max-file-size: 20MB

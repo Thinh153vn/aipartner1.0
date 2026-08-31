@@ -12,13 +12,8 @@ import java.nio.file.Path;
 import java.util.Optional;
 
 /**
- * Lưu/đọc cấu hình liên kết Google Calendar (calendarId + apiKey) vào 1 file JSON
- * cục bộ trên đĩa (KHÔNG dùng DB vì app hiện tại không có DB, và đây là bản demo
- * single-user cho hackathon).
- *
- * File này nằm ngoài classpath (mặc định ./data/calendar-settings.json, tính từ
- * thư mục chạy app) và đã được thêm vào .gitignore để KHÔNG BAO GIỜ bị commit lên
- * git cùng với API Key thật của người dùng.
+ * Googleカレンダー設定（calendarId＋apiKey）をローカルJSONへ保存する（DBなしの単一ユーザー想定）。
+ * 既定パスは実行ディレクトリの ./data/calendar-settings.json。.gitignore 済みで実キーをコミットしない。
  */
 @Service
 public class CalendarSettingsService {
@@ -35,7 +30,7 @@ public class CalendarSettingsService {
         this.objectMapper = objectMapper;
     }
 
-    /** Đọc cấu hình đã lưu, trả rỗng nếu chưa từng lưu hoặc file lỗi. */
+    /** 保存済み設定を読む。未保存・破損時は空を返す。 */
     public Optional<StoredSettings> load() {
         if (!Files.exists(settingsFilePath)) {
             return Optional.empty();
@@ -50,8 +45,7 @@ public class CalendarSettingsService {
     }
 
     /**
-     * Lưu cấu hình mới. Nếu apiKey mới truyền vào rỗng/null, GIỮ NGUYÊN apiKey đã lưu
-     * trước đó (cho phép người dùng chỉ đổi calendarId mà không cần nhập lại API Key).
+     * 新設定を保存する。apiKey が空なら既存キーを残し、calendarId だけ変更できるようにする。
      */
     public StoredSettings save(String calendarId, String apiKey) {
         String resolvedApiKey = (apiKey != null && !apiKey.isBlank())
@@ -70,7 +64,7 @@ public class CalendarSettingsService {
         return toSave;
     }
 
-    /** Dữ liệu lưu trên đĩa. record + Jackson mặc định đã đủ để (de)serialize JSON. */
+    /** ディスク上の保存形。record と Jackson で JSON 化する。 */
     public record StoredSettings(String calendarId, String apiKey) {
     }
 }

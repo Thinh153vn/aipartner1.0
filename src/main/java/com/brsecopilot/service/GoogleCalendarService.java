@@ -17,12 +17,8 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * Gọi trực tiếp Google Calendar API v3 (REST, KHÔNG dùng OAuth) bằng 1 API Key.
- *
- * Lưu ý quan trọng: với API Key (không OAuth), Google chỉ cho đọc các calendar đã
- * được người dùng đặt ở chế độ "Công khai" (Public) trong phần Cài đặt chia sẻ của
- * Google Calendar. Đây là lựa chọn được xác nhận với người dùng để giữ kiến trúc
- * đơn giản cho bản demo hackathon (không cần luồng OAuth2 phức tạp).
+ * Google Calendar API v3 を APIキーで呼ぶ（OAuthは使わない）。
+ * APIキー方式では公開カレンダーのみ読める。ハッカソンデモ向けの簡易構成。
  */
 @Service
 public class GoogleCalendarService {
@@ -33,7 +29,7 @@ public class GoogleCalendarService {
 
     private final RestClient restClient = RestClient.create();
 
-    /** Lấy toàn bộ event trong khoảng [timeMin, timeMax) của 1 calendar, map thành SyncedTaskDto. */
+    /** 指定期間のイベントを SyncedTaskDto に変換する。 */
     public List<SyncedTaskDto> fetchEvents(String calendarId, String apiKey, LocalDate timeMin, LocalDate timeMax) {
         log.info("Googleカレンダーからイベント取得を開始します calendarId={} timeMin={} timeMax={}",
                 calendarId, timeMin, timeMax);
@@ -73,7 +69,7 @@ public class GoogleCalendarService {
     private SyncedTaskDto toSyncedTaskOrNull(GoogleCalendarEvent event) {
         LocalDate dueDate = extractDueDate(event);
         if (dueDate == null) {
-            return null; // Event không có start hợp lệ (hiếm), bỏ qua để không vỡ luồng sync.
+            return null; // 開始日時が取れない予定はスキップし、同期全体は止めない。
         }
         String title = (event.summary() != null && !event.summary().isBlank()) ? event.summary() : "(タイトルなし)";
         return new SyncedTaskDto("gcal-" + event.id(), title, dueDate);
@@ -92,7 +88,7 @@ public class GoogleCalendarService {
         return null;
     }
 
-    /** Chuyển lỗi HTTP thô từ Google thành message tiếng Nhật dễ hiểu, chỉ rõ nguyên nhân + hướng xử lý. */
+    /** GoogleのHTTPエラーを、原因と対処が分かる日本語メッセージへ変換する。 */
     private CalendarSyncException toFriendlyException(RestClientResponseException e) {
         int status = e.getStatusCode().value();
         log.warn("Google Calendar API がエラーを返しました status={} body={}", status, e.getResponseBodyAsString());
