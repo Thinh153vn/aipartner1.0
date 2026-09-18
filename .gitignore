@@ -1,0 +1,16 @@
+# Build output and local tooling
+target/
+.tools/
+
+# IDE / OS files
+.classpath
+.project
+.settings/
+.idea/
+*.iml
+.DS_Store
+
+# Local secrets and runtime files
+.env
+*.local
+application-local.properties
