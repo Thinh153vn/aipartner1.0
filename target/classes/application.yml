@@ -1,0 +1,39 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: brse-copilot-backend
+
+  ai:
+    google:
+      genai:
+        # Gemini Developer API（AI Studio）。project-id / location は設定しない（Vertex課金モードになるため）。
+        # ソースコードに実キーを書かない。サーバー側の予備は環境変数 GEMINI_API_KEY のみ。
+        # 画面の「APIキー設定」で保存したキーは、AIリクエスト時にヘッダーで送られ優先利用される。
+        api-key: ${GEMINI_API_KEY:unused-byok-placeholder}
+        chat:
+          options:
+            model: gemini-3.6-flash
+            temperature: 0.4
+
+  # 静的フロント（src/main/resources/static）を同一プロセスで配信する
+  web:
+    resources:
+      static-locations: classpath:/static/
+
+  # 仕様比較などのアップロード上限。
+  # フォルダ一括（フロントの OFFSHORE_MAX_BATCH_FILES=300）に備え request 上限を大きめにする。
+  # AIへ渡す本文は別途切り詰める。
+  servlet:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 300MB
+
+  jackson:
+    default-property-inclusion: non_null
+
+logging:
+  level:
+    com.brsecopilot: INFO
+    org.springframework.ai: WARN
