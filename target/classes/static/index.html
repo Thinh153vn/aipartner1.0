@@ -149,14 +149,27 @@
           </button>
         </div>
 
-        <!-- フッター：APIキー設定／表示設定 -->
-        <div class="sidebar-footer">
-          <button class="sidebar-tool-btn" type="button" onclick="openApiKeyModal()">
-            <i class="fa-solid fa-key"></i> <span data-i18n="apiKeySettings">APIキー設定</span>
-          </button>
-          <button class="sidebar-tool-btn" type="button" onclick="openThemeModal()">
-            <i class="fa-solid fa-gear"></i> <span data-i18n="settings">表示設定</span>
-          </button>
+        <!-- フッター：APIキー設定／表示設定 + 🚨 Emergency Demo Controls（登壇時のみ使う緊急パネル） -->
+        <div class="sidebar-bottom-group">
+          <div class="sidebar-footer">
+            <button class="sidebar-tool-btn" type="button" onclick="openApiKeyModal()">
+              <i class="fa-solid fa-key"></i> <span data-i18n="apiKeySettings">APIキー設定</span>
+            </button>
+            <button class="sidebar-tool-btn" type="button" onclick="openThemeModal()">
+              <i class="fa-solid fa-gear"></i> <span data-i18n="settings">表示設定</span>
+            </button>
+          </div>
+
+          <!-- 🚨 Emergency Demo Controls: 登壇中にデモが崩れた時、ワンクリックで標準シナリオへ強制復元する -->
+          <div class="emergency-demo-panel" id="emergencyDemoPanel">
+            <div class="emergency-demo-panel-head">
+              <i class="fa-solid fa-triangle-exclamation"></i>
+              <span>🚨 Emergency Demo Controls</span>
+            </div>
+            <button class="emergency-demo-reset-btn" type="button" onclick="emergencyResetDemoData()" title="ローカルデータを完全に消去し、標準デモシナリオ（保険システムのタスク4件）へ復元します">
+              🔄 Reset Demo Data
+            </button>
+          </div>
         </div>
       </aside>
 
@@ -164,6 +177,30 @@
       <main class="main-content">
         <!-- ---------- ビュー1：今日のタスク（初期表示） ---------- -->
         <section class="center-view is-active" id="view-today">
+          <div class="today-intro" aria-label="Growth Partner execution desk">
+            <div class="today-intro-copy">
+              <span class="today-intro-kicker">SYSTEM EXE / EXECUTION DESK</span>
+              <h1>仕事の流れを、<em>前に進める。</em></h1>
+              <p>タスク、予定、AIの気づきをひとつの視点に。今日の判断を、次の一歩へつなげます。</p>
+            </div>
+            <div class="today-intro-signal">
+              <span class="signal-line signal-line-one"></span>
+              <span class="signal-line signal-line-two"></span>
+              <span class="signal-core">EXE</span>
+              <span class="signal-caption">TOGETHER<br />FORWARD</span>
+            </div>
+          </div>
+          <section class="today-focus-card" aria-label="Today's focus">
+            <div class="today-focus-mark"><i class="fa-solid fa-crosshairs"></i></div>
+            <div class="today-focus-copy">
+              <span class="today-focus-kicker">TODAY'S FOCUS</span>
+              <strong id="todayFocusTitle">今日の重点タスクを読み込み中...</strong>
+              <span id="todayFocusMeta">AIが次の一歩を選びます</span>
+            </div>
+            <button class="today-focus-action" type="button" onclick="openTodayFocusTask()">
+              <span>FOCUS</span><i class="fa-solid fa-arrow-up-right-from-square"></i>
+            </button>
+          </section>
           <div class="view-topbar">
             <h2 id="todayViewTitle">今日</h2>
             <div class="view-topbar-actions">
@@ -271,12 +308,10 @@
           <div class="view-topbar">
             <h2 data-i18n="calendar">カレンダー</h2>
             <div class="view-topbar-actions">
-              <button class="btn btn-secondary btn-icon-only" type="button" onclick="openGcalSettingsModal()" data-i18n-title="gcalSettingsTitle" title="Google連携設定">
-                <i class="fa-solid fa-gear"></i>
-              </button>
-              <button class="btn btn-secondary" id="btnSyncGcal" type="button" onclick="syncGoogleCalendar(this)">
-                <i class="fa-brands fa-google"></i> <span data-i18n="googleSync">Google同期</span>
-              </button>
+              <!-- Local Sync (Demo Mode)：Google API/OAuthに依存せず、常にローカル固定データのみでカレンダーを描画していることを明示する静的バッジ -->
+              <span class="local-sync-badge" data-i18n-title="localSyncBadgeTitle" title="APIキーやOAuth連携なしで、ローカルの固定データのみでカレンダーを描画しています。">
+                📅 <span data-i18n="localSyncBadge">Local Sync (Demo Mode)</span>
+              </span>
               <button class="btn btn-ai" id="btnAiAnalyzeCalendar" type="button" onclick="runAiAutoSchedule(this)">
                 ✨ <span data-i18n="aiAnalyze">AI分析</span>
               </button>
@@ -287,7 +322,7 @@
             <span class="legend-item"><i class="legend-dot dot-blue"></i><span data-i18n="legendTask">タスク</span></span>
             <span class="legend-item"><i class="legend-dot dot-mint"></i><span data-i18n="legendLearning">AIおすすめ学習</span></span>
             <span class="legend-item"><i class="legend-dot dot-slate"></i><span data-i18n="legendMeeting">会議・打ち合わせ</span></span>
-            <span class="legend-item"><i class="legend-dot dot-google"></i><span data-i18n="legendGoogle">Googleカレンダー</span></span>
+            <span class="legend-item"><i class="legend-dot dot-milestone"></i><span data-i18n="legendMilestone">マイルストーン</span></span>
           </div>
 
           <!-- ドラッグ元: 未完了タスクをチップ表示し、そのままカレンダーの時間枠へドロップして予定を組める -->
@@ -302,9 +337,46 @@
 
       <!-- ================= 右サイドバー：タスク詳細（固定 320px） ================= -->
       <aside class="sidebar-right" id="sidebarRight">
+        <!-- タスク未選択時：空白のまま放置せず、AIによる「朝のブリーフィング」を能動的に提示する -->
         <div class="task-detail-empty" id="taskDetailEmpty">
-          <i class="fa-regular fa-square-check"></i>
-          <p data-i18n="taskDetailEmpty">タスクを選択すると、ここに詳細が表示されます。</p>
+          <div class="morning-briefing" id="morningBriefingPanel">
+            <div class="morning-briefing-header">
+              <span class="morning-briefing-header-icon">🌟</span>
+              <div class="morning-briefing-header-copy">
+                <h3 data-i18n="briefingTitle">Morning Briefing &amp; AIレコメンド</h3>
+                <p data-i18n="briefingSubtitle">今日の状況をAIが要約しました。</p>
+              </div>
+            </div>
+
+            <!-- カード1：至急対応が必要なタスク（期限超過） -->
+            <div class="briefing-card briefing-card-urgent">
+              <h4><span class="briefing-card-icon">🚨</span><span data-i18n="briefingUrgentTitle">至急対応が必要なタスク</span></h4>
+              <ul class="briefing-urgent-list" id="briefingUrgentList">
+                <!-- renderMorningBriefing() が動的に描画 -->
+              </ul>
+            </div>
+
+            <!-- カード2：今日のAIレコメンド -->
+            <div class="briefing-card briefing-card-ai">
+              <h4><span class="briefing-card-icon">💡</span><span data-i18n="briefingAiTitle">今日のAIレコメンド</span></h4>
+              <p class="briefing-ai-text" id="briefingAiText" data-i18n="briefingAiText">
+                14時までに保険料計算ロジックの実装を完了し、オフショアチームとの定例会議に備えましょう。
+              </p>
+            </div>
+
+            <!-- カード3：クイックアクション -->
+            <div class="briefing-card briefing-card-actions">
+              <h4><span class="briefing-card-icon">⚡</span><span data-i18n="briefingActionsTitle">クイックアクション</span></h4>
+              <div class="briefing-quick-actions">
+                <button class="btn btn-secondary briefing-quick-action-btn" type="button" onclick="openNippoModal()">
+                  <i class="fa-solid fa-pen-to-square"></i> <span data-i18n="nippo">日報作成</span>
+                </button>
+                <button class="btn btn-danger-outline briefing-quick-action-btn" id="btnQuickSos3" type="button" onclick="runQuickSos(this)">
+                  🆘 <span data-i18n="sos">緊急SOS</span>
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div class="task-detail-panel hidden" id="taskDetailPanel">
@@ -421,34 +493,106 @@
         </button>
       </div>
 
-      <div class="agent-quick-actions">
-        <button class="agent-chip" id="btnQuickRebalance" type="button" onclick="runAiAutoSchedule(this)">
-          <i class="fa-solid fa-scale-balanced"></i> <span data-i18n="autoReschedule">自動リスケジュール</span>
+      <!-- Dual-Tab Architecture：タブ1＝システムログ／ワークフローAgent、タブ2＝ナレッジQ&A -->
+      <div class="agent-panel-tabs" role="tablist">
+        <button
+          id="tabSystemLog"
+          class="tab-btn active"
+          type="button"
+          role="tab"
+          aria-selected="true"
+          aria-controls="viewSystemLog"
+          onclick="switchAgentPanelTab('systemLog')"
+        >
+          ⚙️ <span data-i18n="tabSystemLog">Agent Log</span>
         </button>
-        <button class="agent-chip agent-chip-danger" id="btnQuickSos2" type="button" onclick="runQuickSos(this)">
-          <i class="fa-solid fa-triangle-exclamation"></i> <span data-i18n="sos">緊急SOS</span>
+        <button
+          id="tabGeneralQA"
+          class="tab-btn"
+          type="button"
+          role="tab"
+          aria-selected="false"
+          aria-controls="viewGeneralQA"
+          onclick="switchAgentPanelTab('generalQA')"
+        >
+          💬 <span data-i18n="tabGeneralQA">Q&amp;A &amp; Knowledge</span>
         </button>
       </div>
 
-      <div class="agent-feed" id="agentFeed">
-        <div class="agent-feed-empty" id="agentFeedEmpty">
-          <i class="fa-solid fa-robot"></i>
-          <p data-i18n="chatEmpty">ここにAIエージェントの実行ログと会話が表示されます。</p>
+      <!-- ============ Tab 1：システムログ＆ワークフローAgent（既存機能をそのまま維持） ============ -->
+      <div class="agent-panel-view is-active" id="viewSystemLog" role="tabpanel" aria-labelledby="tabSystemLog">
+        <div class="agent-quick-actions">
+          <button class="agent-chip" id="btnQuickRebalance" type="button" onclick="runAiAutoSchedule(this)">
+            <i class="fa-solid fa-scale-balanced"></i> <span data-i18n="autoReschedule">自動リスケジュール</span>
+          </button>
+          <button class="agent-chip agent-chip-danger" id="btnQuickSos2" type="button" onclick="runQuickSos(this)">
+            <i class="fa-solid fa-triangle-exclamation"></i> <span data-i18n="sos">緊急SOS</span>
+          </button>
+        </div>
+
+        <div class="agent-feed" id="agentFeed">
+          <div class="agent-feed-empty" id="agentFeedEmpty">
+            <i class="fa-solid fa-robot"></i>
+            <p data-i18n="chatEmpty">ここにAIエージェントの実行ログと会話が表示されます。</p>
+          </div>
+        </div>
+
+        <div class="agent-input-bar">
+          <input
+            type="text"
+            id="agentChatInput"
+            class="agent-chat-input"
+            placeholder="AIに話しかける（例：今週のタスクを整理して）"
+            data-i18n-placeholder="chatPlaceholder"
+            onkeydown="handleAgentInputKeydown(event)"
+          />
+          <button class="agent-send-btn" id="btnAgentSend" type="button" onclick="sendAgentChatMessage()">
+            <i class="fa-solid fa-paper-plane"></i>
+          </button>
         </div>
       </div>
 
-      <div class="agent-input-bar">
-        <input
-          type="text"
-          id="agentChatInput"
-          class="agent-chat-input"
-          placeholder="AIに話しかける（例：今週のタスクを整理して）"
-          data-i18n-placeholder="chatPlaceholder"
-          onkeydown="handleAgentInputKeydown(event)"
-        />
-        <button class="agent-send-btn" id="btnAgentSend" type="button" onclick="sendAgentChatMessage()">
-          <i class="fa-solid fa-paper-plane"></i>
-        </button>
+      <!-- ============ Tab 2：Enterprise Knowledge Q&A（BrSE Knowledge Copilot / RAG Ready） ============ -->
+      <div class="agent-panel-view hidden" id="viewGeneralQA" role="tabpanel" aria-labelledby="tabGeneralQA">
+        <div class="qa-panel-header">
+          <i class="fa-solid fa-book-open-reader"></i>
+          <div class="qa-panel-header-copy">
+            <h4>BrSE Knowledge Copilot</h4>
+            <span class="qa-header-badge">RAG Ready</span>
+          </div>
+        </div>
+
+        <div class="agent-feed qa-feed" id="qaFeed">
+          <div class="agent-feed-empty" id="qaFeedEmpty">
+            <i class="fa-solid fa-comments"></i>
+            <p data-i18n="qaEmptyHint">保険業務・IT開発・BrSE業務について、何でも質問してください。</p>
+          </div>
+        </div>
+
+        <div class="agent-input-bar qa-input-bar">
+          <textarea
+            id="qaChatInput"
+            class="qa-chat-input"
+            rows="1"
+            placeholder="質問を入力、またはマイクで話してください..."
+            data-i18n-placeholder="qaInputPlaceholder"
+            oninput="autoResizeQaInput(this)"
+            onkeydown="handleQaInputKeydown(event)"
+          ></textarea>
+          <button
+            class="agent-mic-btn"
+            id="btnVoiceInput"
+            type="button"
+            onclick="toggleVoiceInput()"
+            data-i18n-title="voiceInputTitle"
+            title="Nhập bằng giọng nói"
+          >
+            🎤
+          </button>
+          <button class="agent-send-btn" id="btnQaSend" type="button" onclick="sendKnowledgeQaMessage()">
+            <i class="fa-solid fa-paper-plane"></i>
+          </button>
+        </div>
       </div>
     </aside>
 
@@ -546,6 +690,39 @@
           <p class="subtitle bg-image-hint" data-i18n="bgHint">
             背景画像を設定すると、画面全体にうっすらと表示されます（カード等の可読性は保たれます）。
           </p>
+
+          <!-- Ironclad Demo Mode: 登壇・オフライン発表時にAPIキー依存を完全に断ち切るための固定スイッチ -->
+          <div class="demo-mode-toggle-box" id="demoModeToggleBox">
+            <div>
+              <strong data-i18n="offlineDemoModeTitle">⚡ Demo Mode（オフライン固定）</strong>
+              <p data-i18n="offlineDemoModeHint">
+                ONにすると、API通信を一切行わず、すべてのAI機能で高品質なデモ結果を即座に返します。登壇・オフライン発表時にご利用ください。
+              </p>
+              <span class="demo-mode-status-label" id="demoModeStatusLabel">OFF（通常運転）</span>
+            </div>
+            <button
+              class="demo-mode-switch"
+              id="demoModeToggleBtn"
+              type="button"
+              role="switch"
+              aria-checked="false"
+              onclick="toggleDemoMode()"
+              data-i18n-title="offlineDemoModeTitle"
+              title="⚡ Demo Mode（オフライン固定）"
+            >
+              <span class="demo-mode-switch-knob"></span>
+            </button>
+          </div>
+
+          <div class="demo-data-reset-box">
+            <div>
+              <strong data-i18n="demoDataTitle">デモデータ</strong>
+              <p data-i18n="demoDataHint">追加したタスク・プロジェクト・完了状態だけを初期状態へ戻します。</p>
+            </div>
+            <button class="btn btn-danger-outline btn-sm" type="button" onclick="resetDemoData()" data-i18n="resetDemoData">
+              デモデータをリセット
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -849,35 +1026,6 @@
       </div>
     </div>
 
-    <!-- ================= モーダル：Googleカレンダー連携設定 ================= -->
-    <div class="modal-overlay hidden" id="gcalSettingsModal">
-      <div class="modal-box">
-        <div class="modal-topbar">
-          <h3><i class="fa-brands fa-google"></i> <span data-i18n="gcalTitle">Googleカレンダー連携設定</span></h3>
-          <button class="modal-close" type="button" onclick="closeGcalSettingsModal()">✕</button>
-        </div>
-        <div class="modal-body">
-          <p class="subtitle gcal-status-text" id="gcalStatusText" data-i18n="loading">読み込み中...</p>
-
-          <label class="field-label" for="gcalCalendarIdInput" data-i18n="calendarId">カレンダーID</label>
-          <input type="text" id="gcalCalendarIdInput" class="input-base" placeholder="例）your-account@gmail.com" data-i18n-placeholder="calendarIdExample" />
-
-          <label class="field-label" for="gcalApiKeyInput" data-i18n="gcalApiKey">APIキー（登録済みの場合は空欄でも構いません）</label>
-          <input
-            type="password"
-            id="gcalApiKeyInput"
-            class="input-base"
-            placeholder="Google Cloud Consoleで発行したAPIキー"
-            data-i18n-placeholder="gcalApiKeyPlaceholder"
-          />
-
-          <button class="btn btn-primary btn-block" id="btnSaveGcalSettings" type="button" onclick="saveCalendarSettings(this)">
-            💾 <span data-i18n="saveSettings">設定を保存</span>
-          </button>
-        </div>
-      </div>
-    </div>
-
     <!-- ================= 大容量ファイル処理オーバーレイ（WBS/オフショア フォルダ取込のシミュレーション） ================= -->
     <div class="processing-overlay hidden" id="fileProcessingOverlay">
       <div class="processing-box">
@@ -900,6 +1048,9 @@
         <div class="modal-body">
           <p class="subtitle" data-i18n="apiKeyDesc">
             AI機能をご利用いただくには、ご自身のGemini APIキーを入力してください。キーはこのブラウザ内（localStorage）にのみ保存され、サーバーへはAIリクエスト時だけ送信されます。
+          </p>
+          <p class="demo-mode-note" data-i18n="demoModeNote">
+            APIキー未設定時はデモ結果で操作を継続できます。APIキーを設定するとGeminiの実分析に切り替わります。
           </p>
           <p class="api-key-modal-warning hidden" id="apiKeyModalWarning" data-i18n="apiKeyWarning">
             AI機能を利用する前に、APIキーを入力してください。

@@ -14,6 +14,24 @@
   --medium: #f5a623;
   --low: #22b8a0;
 
+  /* ---------- 1a. セマンティックカラー（テーマ／アクセントカラーの影響を受けない固定値） ----------
+     どのテーマ・どのユーザー選択アクセントカラーが有効でも、期限超過・緊急SOS・完了・警告の
+     意味は絶対にブレてはならないため、!important 付きで固定する。以後、この4トークン以外の
+     場所でこれらの状態色を再定義しないこと。 */
+  --color-overdue: #dc2626 !important; /* Red */
+  --color-sos: #ef4444 !important; /* Crimson */
+  --color-done: #10b981 !important; /* Mint Green */
+  --color-warning: #f59e0b !important; /* Orange */
+
+  /* ---------- 1b. ユーザーアクセントカラー ----------
+     表示設定で選択できるブランドカラー。用途は「サイドバーのアクティブナビゲーション」
+     「プライマリアクションのボーダー」「装飾目的のボタン背景」の3箇所に限定すること。
+     状態（期限超過／SOS／完了／警告）を表す場所では絶対に使用しない。
+     JS の applyAccentColor() が --blue / --blue-dark を書き換えるため、ここではそれを
+     参照するだけのエイリアスとして定義する。 */
+  --user-accent-color: var(--blue);
+  --user-accent-color-dark: var(--blue-dark);
+
   --bg: #f5f6f8;
   --paper: #ffffff;
   --paper-soft: #fafbfc;
@@ -236,7 +254,8 @@ button {
   position: absolute;
   top: 0;
   right: 0;
-  background: var(--coral);
+  /* 通知バッジは「期限超過タスク件数」を表示するため、固定の overdue カラーを使う */
+  background: var(--color-overdue);
   color: #fff;
   font-size: 9px;
   font-weight: 700;
@@ -256,7 +275,8 @@ button {
 
 .quick-action-btn {
   flex: 1;
-  background: var(--blue);
+  /* 装飾目的のボタン背景：ユーザーアクセントカラーを使ってよい3箇所の一つ */
+  background: var(--user-accent-color);
   color: #fff;
   border: none;
   border-radius: var(--radius-sm);
@@ -300,7 +320,8 @@ button {
   background: none;
   border-radius: var(--radius-sm);
   color: var(--muted);
-  font-size: 13px;
+  /* プロジェクター投影時の視認性向上のため基準サイズ+1.5px */
+  font-size: 14.5px;
   font-weight: 600;
   text-align: left;
   width: 100%;
@@ -318,8 +339,9 @@ button {
 }
 
 .nav-item.is-active {
-  background: color-mix(in srgb, var(--blue) 14%, transparent);
-  color: var(--blue-dark);
+  /* サイドバーのアクティブナビゲーション：ユーザーアクセントカラーを使ってよい3箇所の一つ */
+  background: color-mix(in srgb, var(--user-accent-color) 14%, transparent);
+  color: var(--user-accent-color-dark);
 }
 
 .sidebar-section-head {
@@ -380,8 +402,9 @@ button {
 }
 
 .project-row.is-active {
-  border-color: var(--blue);
-  background: color-mix(in srgb, var(--blue) 10%, transparent);
+  /* プロジェクト行のアクティブハイライトもサイドバーナビゲーションの一部として扱う */
+  border-color: var(--user-accent-color);
+  background: color-mix(in srgb, var(--user-accent-color) 10%, transparent);
 }
 
 .project-color-dot {
@@ -394,7 +417,8 @@ button {
 .project-name {
   flex: 1;
   min-width: 0;
-  font-size: 12.5px;
+  /* プロジェクター投影時の視認性向上のため基準サイズ+1.5px */
+  font-size: 14px;
   font-weight: 600;
   white-space: nowrap;
   overflow: hidden;
@@ -416,9 +440,68 @@ button {
 }
 
 .sidebar-footer {
-  margin-top: auto;
   padding-top: 10px;
   border-top: 1px solid var(--border);
+}
+
+/* フッター＋Emergency Demo Controlsをまとめてサイドバー最下部に固定する */
+.sidebar-bottom-group {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* 🚨 Emergency Demo Controls: 登壇中にワンクリックで標準デモシナリオへ強制復元するパネル */
+.emergency-demo-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 11px;
+  /* 緊急パネルはテーマ／アクセントカラーに関係なく常に危険色（SOS）で表示する */
+  border: 1px solid color-mix(in srgb, var(--color-sos) 45%, var(--border));
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--color-sos) 8%, var(--paper));
+}
+
+.emergency-demo-panel-head {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  color: var(--color-sos);
+  text-transform: uppercase;
+}
+
+.emergency-demo-panel-head i {
+  color: var(--color-sos);
+}
+
+.emergency-demo-reset-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 9px 10px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(90deg, var(--color-sos), color-mix(in srgb, var(--color-sos) 70%, #b3261e));
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: filter 0.15s ease, transform 0.1s ease;
+}
+
+.emergency-demo-reset-btn:hover {
+  filter: brightness(1.08);
+}
+
+.emergency-demo-reset-btn:active {
+  transform: scale(0.98);
 }
 
 .sidebar-tool-btn {
@@ -429,7 +512,8 @@ button {
   border: none;
   border-radius: var(--radius-sm);
   padding: 8px 9px;
-  font-size: 12.5px;
+  /* プロジェクター投影時の視認性向上のため基準サイズ+1.5px */
+  font-size: 14px;
   font-weight: 600;
   color: var(--ink);
   text-align: left;
@@ -494,8 +578,26 @@ button {
 
 .view-topbar-actions {
   display: flex;
+  align-items: center;
   gap: 8px;
   flex-wrap: wrap;
+}
+
+/* 📅 Local Sync (Demo Mode)：Google API/OAuth不要で、常にローカル固定データのみで
+   カレンダーを描画していることを示す、クリック不要の静的バッジ。 */
+.local-sync-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+  /* 固定のdoneカラー（緑）＝「安定・オフラインで安全」を示す。テーマ切替の影響を受けない */
+  color: var(--color-done);
+  background: color-mix(in srgb, var(--color-done) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-done) 30%, transparent);
 }
 
 .btn {
@@ -521,7 +623,8 @@ button {
 }
 
 .btn-primary {
-  background: var(--blue);
+  /* プライマリアクションの背景：ユーザーアクセントカラーを使ってよい3箇所の一つ */
+  background: var(--user-accent-color);
   color: #fff;
 }
 
@@ -567,13 +670,14 @@ button {
 }
 
 .btn-danger-outline {
+  /* SOS／緊急系のボタンは固定の危険色を使い、テーマやアクセントカラーの影響を受けない */
   background: #fff;
-  color: var(--coral);
-  border: 1.5px solid var(--coral);
+  color: var(--color-sos);
+  border: 1.5px solid var(--color-sos);
 }
 
 .btn-danger-outline:hover:not(:disabled) {
-  background: rgba(232, 84, 77, 0.08);
+  background: color-mix(in srgb, var(--color-sos) 8%, transparent);
 }
 
 .btn-block {
@@ -626,9 +730,10 @@ button {
   display: flex;
   align-items: center;
   gap: 10px;
-  background: rgba(232, 84, 77, 0.1);
-  border: 1px solid rgba(232, 84, 77, 0.35);
-  color: var(--coral);
+  /* 期限超過アラートは固定の overdue カラーで表示し、テーマ／アクセントカラーに左右されない */
+  background: color-mix(in srgb, var(--color-overdue) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-overdue) 35%, transparent);
+  color: var(--color-overdue);
   padding: 10px 14px;
   border-radius: var(--radius-md);
   font-size: 12.5px;
@@ -710,7 +815,8 @@ button {
   height: 19px;
   flex-shrink: 0;
   cursor: pointer;
-  accent-color: var(--mint);
+  /* タスク完了チェックは固定の done カラーで表示する */
+  accent-color: var(--color-done);
 }
 
 .task-main {
@@ -736,7 +842,8 @@ button {
 }
 
 .task-deadline {
-  font-size: 12px;
+  /* プロジェクター投影時の視認性向上のため基準サイズ+1.5px */
+  font-size: 13.5px;
   color: var(--muted);
   flex-shrink: 0;
   min-width: 78px;
@@ -744,13 +851,15 @@ button {
 }
 
 .task-deadline.is-overdue {
-  color: var(--coral);
+  /* 期限超過は固定の overdue カラーで表示し、テーマ／アクセントカラーに左右されない */
+  color: var(--color-overdue);
   font-weight: 700;
 }
 
 .priority-badge {
   flex-shrink: 0;
-  font-size: 10.5px;
+  /* プロジェクター投影時の視認性向上のため基準サイズ+1.5px */
+  font-size: 12px;
   font-weight: 700;
   padding: 3px 9px;
   border-radius: 20px;
@@ -762,7 +871,8 @@ button {
 }
 
 .priority-badge-medium {
-  background: var(--warning);
+  /* 中優先度＝警告色。固定の warning カラーを使う */
+  background: var(--color-warning);
 }
 
 .priority-badge-low {
@@ -773,7 +883,7 @@ button {
   background: var(--high);
 }
 .priority-dot-medium {
-  background: var(--warning);
+  background: var(--color-warning);
 }
 .priority-dot-low {
   background: var(--low);
@@ -822,10 +932,10 @@ button {
   color: var(--blue);
 }
 .stat-done {
-  color: var(--mint);
+  color: var(--color-done);
 }
 .stat-overdue {
-  color: var(--coral);
+  color: var(--color-overdue);
 }
 
 .dashboard-charts-row {
@@ -1002,8 +1112,9 @@ button {
 .dot-slate {
   background: #64748b;
 }
-.dot-google {
-  background: #d94235;
+.dot-milestone {
+  /* マイルストーンは固定の warning カラーで統一（テーマ切替の影響を受けない） */
+  background: var(--color-warning);
 }
 
 .calendar-drag-rail {
@@ -1090,8 +1201,9 @@ button {
 }
 
 .fc-button-primary {
-  background: var(--blue) !important;
-  border-color: var(--blue) !important;
+  /* カレンダーのプライマリボタン：ユーザーアクセントカラーを使ってよい3箇所の一つ */
+  background: var(--user-accent-color) !important;
+  border-color: var(--user-accent-color) !important;
 }
 
 .fc-button-primary:hover {
@@ -1116,25 +1228,27 @@ button {
 .fc-event-meeting {
   background-color: #64748b !important;
 }
-.fc-event-google {
-  background-color: #d94235 !important;
+.fc-event-milestone {
+  /* マイルストーンレビューは固定の warning カラーで統一（テーマ切替の影響を受けない） */
+  background-color: var(--color-warning) !important;
 }
 .fc-event-done {
   opacity: 0.5 !important;
   text-decoration: line-through;
 }
 .fc-event-ai-new {
-  outline: 2px solid var(--warning);
+  /* AIが自動調整した予定は固定の warning カラーで強調する */
+  outline: 2px solid var(--color-warning);
   animation: aiNewPulse 1.4s ease-in-out infinite;
 }
 
 @keyframes aiNewPulse {
   0%,
   100% {
-    box-shadow: 0 0 0 0 rgba(245, 166, 35, 0.5);
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-warning) 50%, transparent);
   }
   50% {
-    box-shadow: 0 0 0 5px rgba(245, 166, 35, 0);
+    box-shadow: 0 0 0 5px color-mix(in srgb, var(--color-warning) 0%, transparent);
   }
 }
 
@@ -1150,43 +1264,158 @@ button {
 }
 
 .task-detail-empty {
-  margin: auto;
-  padding: 24px;
-  text-align: center;
+  margin: 0;
+  padding: 18px 16px;
   color: var(--muted);
   display: flex;
+  flex: 1;
+  min-height: 0;
   flex-direction: column;
-  align-items: center;
-  gap: 10px;
+  overflow-y: auto;
   font-size: 13px;
   line-height: 1.6;
 }
 
-.task-detail-empty i {
-  font-size: 28px;
-  opacity: 0.45;
+/* ---------- 🌟 Morning Briefing & AIレコメンド ----------
+   タスク未選択時、右パネルを「空白」のまま放置せず、AIが能動的に「今やるべきこと」を提示する
+   （Proactive方針）。3枚のカード：①至急対応タスク ②今日のAIレコメンド ③クイックアクション。 */
+.morning-briefing {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
 }
 
-/* 選択前の右パネルも「空白」ではなく、操作の起点として見えるようにする */
-.task-detail-empty {
-  position: relative;
-  min-height: 170px;
-  margin: auto 18px;
-  padding: 34px 22px;
-  border: 1px dashed color-mix(in srgb, var(--accent) 28%, var(--border));
-  border-radius: 16px;
-  background: color-mix(in srgb, var(--accent-soft) 42%, var(--paper));
-  box-shadow: 0 10px 24px rgba(20, 40, 70, 0.04);
+.morning-briefing-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding-bottom: 2px;
 }
 
-.task-detail-empty i {
-  color: var(--accent);
-  opacity: 0.72;
+.morning-briefing-header-icon {
+  font-size: 22px;
+  line-height: 1;
+  flex-shrink: 0;
 }
 
-.task-detail-empty p {
-  max-width: 210px;
+.morning-briefing-header-copy h3 {
+  font-size: 14.5px;
+  font-weight: 800;
+  color: var(--ink);
+  line-height: 1.35;
+}
+
+.morning-briefing-header-copy p {
+  margin-top: 3px;
+  font-size: 11.5px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.briefing-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 12px 13px;
+  background: var(--paper);
+  box-shadow: var(--shadow-sm);
+  text-align: left;
+}
+
+.briefing-card h4 {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--ink);
+  margin-bottom: 9px;
+}
+
+.briefing-card-icon {
+  font-size: 13px;
+}
+
+/* カード1：至急対応が必要なタスク（期限超過）は固定の overdue カラーで強調する */
+.briefing-card-urgent {
+  border-color: color-mix(in srgb, var(--color-overdue) 35%, var(--border));
+  background: color-mix(in srgb, var(--color-overdue) 5%, var(--paper));
+}
+
+.briefing-urgent-list {
+  list-style: none;
   margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.briefing-urgent-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 7px 9px;
+  border-radius: var(--radius-sm);
+  background: var(--paper-soft);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.briefing-urgent-item:hover,
+.briefing-urgent-item:focus-visible {
+  background: color-mix(in srgb, var(--color-overdue) 10%, var(--paper-soft));
+  transform: translateX(2px);
+  outline: none;
+}
+
+.briefing-urgent-item-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.briefing-urgent-item-meta {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--color-overdue);
+}
+
+.briefing-urgent-empty,
+.briefing-urgent-more {
+  font-size: 11.5px;
+  color: var(--muted);
+  padding: 4px 2px;
+}
+
+/* カード2：今日のAIレコメンドは装飾目的でユーザーアクセントカラーを使ってよい */
+.briefing-card-ai {
+  border-color: color-mix(in srgb, var(--user-accent-color) 30%, var(--border));
+  background: color-mix(in srgb, var(--user-accent-color) 6%, var(--paper));
+}
+
+.briefing-ai-text {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.65;
+  color: var(--ink);
+}
+
+/* カード3：クイックアクション */
+.briefing-quick-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.briefing-quick-action-btn {
+  width: 100%;
+  justify-content: center;
+  font-size: 12px;
+  padding: 9px 10px;
 }
 
 .task-title {
@@ -1585,8 +1814,9 @@ body.ai-processing .today-intro::before {
 }
 
 .agent-chip-danger {
-  color: var(--coral);
-  border-color: rgba(232, 84, 77, 0.4);
+  /* SOSチップは固定の危険色を使う */
+  color: var(--color-sos);
+  border-color: color-mix(in srgb, var(--color-sos) 40%, transparent);
 }
 
 .agent-feed {
@@ -1673,7 +1903,8 @@ body.ai-processing .today-intro::before {
 
 .agent-chat-input:focus {
   outline: none;
-  border-color: var(--blue);
+  /* プライマリアクションのボーダー：ユーザーアクセントカラーを使ってよい3箇所の一つ */
+  border-color: var(--user-accent-color);
 }
 
 .agent-send-btn {
@@ -1688,6 +1919,171 @@ body.ai-processing .today-intro::before {
 
 .agent-send-btn:hover {
   filter: brightness(1.08);
+}
+
+/* ---------- 4a. Dual-Tab Architecture：Tab1(システムログ／Agent) ⇔ Tab2(Q&A・ナレッジ) ---------- */
+.agent-panel-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  background: var(--paper-soft);
+}
+
+.tab-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 6px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--muted);
+  font-size: 11.5px;
+  font-weight: 700;
+  transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.tab-btn:hover {
+  color: var(--ink);
+}
+
+.tab-btn.active {
+  background: var(--paper);
+  /* タブの選択インジケーターはナビゲーション用途のため、ユーザーアクセントカラーを使ってよい */
+  color: var(--user-accent-color-dark);
+  box-shadow: var(--shadow-sm), inset 0 0 0 1px color-mix(in srgb, var(--user-accent-color) 30%, transparent);
+}
+
+/* タブビューの切り替えはフェード＋わずかな移動でスムーズに見せる */
+.agent-panel-view {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.agent-panel-view.is-active {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.agent-panel-view.hidden {
+  display: none;
+}
+
+/* ---------- 4b. Tab2：Enterprise Knowledge Q&A（BrSE Knowledge Copilot / RAG Ready） ---------- */
+.qa-panel-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.qa-panel-header i {
+  font-size: 18px;
+  color: var(--user-accent-color-dark);
+}
+
+.qa-panel-header-copy h4 {
+  font-size: 12.5px;
+  font-weight: 800;
+  color: var(--ink);
+}
+
+.qa-header-badge {
+  display: inline-block;
+  margin-top: 2px;
+  padding: 1px 7px;
+  border-radius: 20px;
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  color: var(--color-done);
+  background: color-mix(in srgb, var(--color-done) 14%, transparent);
+}
+
+.qa-feed {
+  /* .agent-feedのレイアウトを継承しつつ、Q&A吹き出し用に少し余白を広げる */
+  gap: 12px;
+}
+
+.qa-input-bar {
+  align-items: flex-end;
+}
+
+.qa-chat-input {
+  flex: 1;
+  resize: none;
+  max-height: 120px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 9px 14px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  background: var(--paper-soft);
+  color: var(--ink);
+  font-family: inherit;
+}
+
+.qa-chat-input:focus {
+  outline: none;
+  /* プライマリアクションのボーダー：ユーザーアクセントカラーを使ってよい3箇所の一つ */
+  border-color: var(--user-accent-color);
+}
+
+/* 🎤 マイクボタン：Web Speech APIによる音声入力トリガー */
+.agent-mic-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--paper-soft);
+  color: var(--muted);
+  font-size: 15px;
+  flex-shrink: 0;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.agent-mic-btn:hover {
+  color: var(--ink);
+  background: var(--border);
+}
+
+/* 録音中は固定のSOSカラー（危険色）でパルスさせ、テーマ／アクセントカラーに左右されず視認できるようにする */
+.agent-mic-btn.recording {
+  color: #fff;
+  background: var(--color-sos);
+  border-color: var(--color-sos);
+  animation: micRecordingPulse 1.4s ease-in-out infinite;
+}
+
+@keyframes micRecordingPulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-sos) 55%, transparent);
+  }
+  50% {
+    box-shadow: 0 0 0 7px color-mix(in srgb, var(--color-sos) 0%, transparent);
+  }
+}
+
+.qa-thinking-bubble {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.qa-thinking-bubble i {
+  color: var(--user-accent-color-dark);
 }
 
 /* AIチャット重ね表示。マスコット押下時のみ。右列は占有しない。 */
@@ -1942,9 +2338,10 @@ body.agent-chat-open .mascot-fab {
   border-radius: var(--radius-sm);
   font-size: 12.5px;
   line-height: 1.6;
-  color: var(--coral);
-  background: color-mix(in srgb, var(--coral) 10%, transparent);
-  border: 1px solid color-mix(in srgb, var(--coral) 28%, transparent);
+  /* APIキー未設定の警告は固定の危険色を使う */
+  color: var(--color-sos);
+  background: color-mix(in srgb, var(--color-sos) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-sos) 28%, transparent);
 }
 
 .api-key-modal-actions {
@@ -1987,7 +2384,8 @@ body.agent-chat-open .mascot-fab {
 .input-base:focus,
 .textarea-base:focus {
   outline: none;
-  border-color: var(--blue);
+  /* プライマリアクションのボーダー：ユーザーアクセントカラーを使ってよい3箇所の一つ */
+  border-color: var(--user-accent-color);
 }
 
 .textarea-base {
@@ -2022,14 +2420,16 @@ body.agent-chat-open .mascot-fab {
 }
 
 .mint-block {
-  background: rgba(34, 184, 160, 0.1);
-  border: 1px solid rgba(34, 184, 160, 0.35);
+  /* AIレビュー結果の「良好」ブロックは固定の done カラーを使う */
+  background: color-mix(in srgb, var(--color-done) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-done) 35%, transparent);
   color: #0f6b5c;
 }
 
 .coral-block {
-  background: rgba(232, 84, 77, 0.1);
-  border: 1px solid rgba(232, 84, 77, 0.35);
+  /* AIレビュー結果の「リスク／SOS」ブロックは固定の危険色を使う */
+  background: color-mix(in srgb, var(--color-sos) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-sos) 35%, transparent);
   color: #a3312b;
 }
 
@@ -2286,12 +2686,6 @@ html.has-custom-bg .sidebar-right {
 .diff-note {
   font-size: 11.5px;
   color: var(--muted);
-}
-
-.gcal-status-text {
-  padding: 8px 10px;
-  border-radius: var(--radius-sm);
-  background: var(--paper-soft);
 }
 
 /* ---------- 7. トースト ---------- */
@@ -2748,7 +3142,7 @@ body::after {
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, var(--blue-dark), var(--blue));
+  background: linear-gradient(135deg, var(--user-accent-color-dark), var(--user-accent-color));
 }
 
 .btn-ai {
@@ -3141,7 +3535,7 @@ body::after {
 }
 
 .task-row:has(.priority-badge-high)::before { background: var(--coral); }
-.task-row:has(.priority-badge-medium)::before { background: var(--warning); }
+.task-row:has(.priority-badge-medium)::before { background: var(--color-warning); }
 .task-row:has(.priority-badge-low)::before { background: var(--mint); }
 
 .task-row:hover {
@@ -3458,7 +3852,7 @@ body::after {
 }
 
 .sidebar-right .task-detail-empty {
-  padding: 30px 22px;
+  padding: 20px 18px;
 }
 
 @media (max-width: 1200px) {
@@ -3687,6 +4081,87 @@ html[data-theme="dark"] .signal-core {
   line-height: 1.55;
 }
 
+/* Ironclad Demo Mode: スイッチON時、AI機能はAPI通信を行わず常にデモ結果を返す */
+.demo-mode-toggle-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-top: 20px;
+  padding: 13px 14px;
+  border: 1px dashed color-mix(in srgb, var(--mint) 34%, var(--border));
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--mint) 6%, var(--paper));
+}
+
+.demo-mode-toggle-box strong {
+  display: block;
+  color: var(--ink);
+  font-size: 12px;
+}
+
+.demo-mode-toggle-box p {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.demo-mode-status-label {
+  display: inline-block;
+  margin-top: 6px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--muted);
+  background: color-mix(in srgb, var(--muted) 16%, transparent);
+}
+
+.demo-mode-switch {
+  flex: 0 0 auto;
+  position: relative;
+  width: 46px;
+  height: 26px;
+  border: none;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--muted) 30%, var(--paper));
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.demo-mode-switch-knob {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+  transition: transform 0.2s ease;
+}
+
+.demo-mode-switch.is-active {
+  background: linear-gradient(90deg, var(--mint), var(--blue));
+}
+
+.demo-mode-switch.is-active .demo-mode-switch-knob {
+  transform: translateX(20px);
+}
+
+@media (max-width: 520px) {
+  .demo-mode-toggle-box {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .demo-mode-switch {
+    align-self: flex-start;
+  }
+}
+
 .demo-data-reset-box {
   display: flex;
   align-items: center;
@@ -3694,9 +4169,10 @@ html[data-theme="dark"] .signal-core {
   gap: 14px;
   margin-top: 20px;
   padding: 13px 14px;
-  border: 1px dashed color-mix(in srgb, var(--coral) 34%, var(--border));
+  /* 破壊的操作（データ全消去）のため固定の SOS カラーで警告を表示する */
+  border: 1px dashed color-mix(in srgb, var(--color-sos) 34%, var(--border));
   border-radius: var(--radius-md);
-  background: color-mix(in srgb, var(--coral) 4%, var(--paper));
+  background: color-mix(in srgb, var(--color-sos) 4%, var(--paper));
 }
 
 .demo-data-reset-box strong {

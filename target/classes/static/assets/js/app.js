@@ -54,14 +54,23 @@ const translations = {
     colTaskName: "タスク名（クリックで詳細）",
     colDue: "期日",
     colPriority: "優先度",
-    googleSync: "Google同期",
     aiAnalyze: "AI分析",
     legendTask: "タスク",
     legendLearning: "AIおすすめ学習",
     legendMeeting: "会議・打ち合わせ",
-    legendGoogle: "Googleカレンダー",
+    legendMilestone: "マイルストーン",
+    localSyncBadge: "Local Sync (Demo Mode)",
+    localSyncBadgeTitle: "APIキーやOAuth連携なしで、ローカルの固定データのみでカレンダーを描画しています。",
     dragToSchedule: "ドラッグしてスケジュール",
     taskDetailEmpty: "タスクを選択すると、ここに詳細が表示されます。",
+    briefingTitle: "Morning Briefing ＆ AIレコメンド",
+    briefingSubtitle: "今日の状況をAIが要約しました。",
+    briefingUrgentTitle: "至急対応が必要なタスク",
+    briefingUrgentEmpty: "現在、期限超過のタスクはありません。素晴らしいです！",
+    briefingUrgentMore: "他 {count} 件の期限超過タスクがあります",
+    briefingAiTitle: "今日のAIレコメンド",
+    briefingAiText: "14時までに保険料計算ロジックの実装を完了し、オフショアチームとの定例会議に備えましょう。",
+    briefingActionsTitle: "クイックアクション",
     close: "閉じる",
     taskName: "タスク名",
     project: "プロジェクト",
@@ -81,6 +90,18 @@ const translations = {
     chatEmpty: "ここにAIエージェントの実行ログと会話が表示されます。",
     chatPlaceholder: "AIに話しかける（例：今週のタスクを整理して）",
     talkToAi: "GROWTH PARTNERに話しかける",
+    tabSystemLog: "Agent Log",
+    tabGeneralQA: "Q&A・ナレッジ",
+    qaEmptyHint: "保険業務・IT開発・BrSE業務について、何でも質問してください。",
+    qaInputPlaceholder: "質問を入力、またはマイクで話してください...",
+    voiceInputTitle: "🎤 音声入力",
+    qaThinking: "AIが回答を作成中...",
+    voiceNotSupported: "お使いのブラウザは音声入力（Web Speech API）に対応していません。Google Chromeでお試しください。",
+    voiceListening: "話しかけると、そのままテキストが入力されます。",
+    voiceEnded: "音声入力を終了しました。内容を確認して送信してください。",
+    voiceNoSpeech: "音声を検出できませんでした。もう一度お試しください。",
+    voiceMicDenied: "マイクへのアクセスが拒否されました。ブラウザの設定でマイクを許可してください。",
+    voiceError: "音声入力中にエラーが発生しました。",
     splashStart: "業務を開始する",
     languageLabel: "🌐 言語 / Language / Ngôn ngữ",
     settingsSubtitle: "お好みのテーマを選択してください。設定は自動的に保存されます。",
@@ -92,6 +113,18 @@ const translations = {
     selectImage: "画像を選択",
     delete: "削除",
     bgHint: "背景画像を設定すると、画面全体にうっすらと表示されます（カード等の可読性は保たれます）。",
+    demoModeNote: "APIキー未設定時はデモ結果で操作を継続できます。APIキーを設定するとGeminiの実分析に切り替わります。",
+    offlineDemoModeTitle: "⚡ Demo Mode（オフライン固定）",
+    offlineDemoModeHint: "ONにすると、API通信を一切行わず、すべてのAI機能で高品質なデモ結果を即座に返します。登壇・オフライン発表時にご利用ください。",
+    offlineDemoModeStatusOn: "ON（オフライン固定）",
+    offlineDemoModeStatusOff: "OFF（通常運転）",
+    offlineDemoModeToastOnMsg: "Demo Modeを有効にしました。以降、AI機能はAPI通信を行わずデモ結果を返します。",
+    offlineDemoModeToastOffMsg: "Demo Modeを解除しました。APIキーが設定されていればGeminiに接続します。",
+    aiThinkingMessage: "✨ AIエージェントがプロジェクトデータを分析中...",
+    demoDataTitle: "デモデータ",
+    demoDataHint: "追加したタスク・プロジェクト・完了状態だけを初期状態へ戻します。",
+    resetDemoData: "デモデータをリセット",
+    resetDemoConfirm: "追加したタスクや完了状態を初期状態へ戻します。続行しますか？",
     sosResultTitle: "緊急SOS - AI分析結果",
     riskSummary: "リスク要約",
     sosEmailLabel: "PM／先輩への連絡文面（編集可能）",
@@ -141,14 +174,7 @@ const translations = {
     outputLabel: "生成結果（編集・コピー可能）",
     outputPlaceholder: "生成ボタンを押すと、ここにテストケースまたはテストコードが表示されます...",
     copyResult: "結果をコピー",
-    gcalTitle: "Googleカレンダー連携設定",
-    gcalSettingsTitle: "Google連携設定",
     loading: "読み込み中...",
-    calendarId: "カレンダーID",
-    calendarIdExample: "例）your-account@gmail.com",
-    gcalApiKey: "APIキー（登録済みの場合は空欄でも構いません）",
-    gcalApiKeyPlaceholder: "Google Cloud Consoleで発行したAPIキー",
-    saveSettings: "設定を保存",
     processing: "処理中...",
     apiKeyDesc: "AI機能をご利用いただくには、ご自身のGemini APIキーを入力してください。キーはこのブラウザ内（localStorage）にのみ保存され、サーバーへはAIリクエスト時だけ送信されます。",
     apiKeyWarning: "AI機能を利用する前に、APIキーを入力してください。",
@@ -180,9 +206,6 @@ const translations = {
     needApiKey: "AI機能を利用する前に、APIキーを入力してください。",
     enterApiKey: "APIキーを入力してください。",
     apiKeySaved: "APIキーをこのブラウザに保存しました。",
-    gcalConfigured: "✅ 設定済みです。「Google同期」ボタンで最新の予定を取り込めます。",
-    gcalNotConfigured: "⚠️ 未設定です。カレンダーIDとAPIキーを登録してください。",
-    gcalLoadFailed: "⚠️ 設定状態を取得できませんでした。",
   },
   en: {
     pageTitle: "GROWTH PARTNER | Workspace",
@@ -216,14 +239,23 @@ const translations = {
     colTaskName: "Task name (click for details)",
     colDue: "Due date",
     colPriority: "Priority",
-    googleSync: "Google sync",
     aiAnalyze: "AI analysis",
     legendTask: "Task",
     legendLearning: "AI learning suggestion",
     legendMeeting: "Meeting",
-    legendGoogle: "Google Calendar",
+    legendMilestone: "Milestone",
+    localSyncBadge: "Local Sync (Demo Mode)",
+    localSyncBadgeTitle: "The calendar renders from fixed local data only — no API key or OAuth login required.",
     dragToSchedule: "Drag to schedule",
     taskDetailEmpty: "Select a task to view its details here.",
+    briefingTitle: "Morning Briefing & AI Recommendations",
+    briefingSubtitle: "AI has summarized today's situation for you.",
+    briefingUrgentTitle: "Tasks that need attention now",
+    briefingUrgentEmpty: "No overdue tasks right now. Great job!",
+    briefingUrgentMore: "{count} more overdue task(s)",
+    briefingAiTitle: "Today's AI recommendation",
+    briefingAiText: "You should focus on finishing the premium calculation logic before 2:00 PM to be ready for the meeting with the offshore team.",
+    briefingActionsTitle: "Quick actions",
     close: "Close",
     taskName: "Task name",
     project: "Project",
@@ -243,6 +275,18 @@ const translations = {
     chatEmpty: "AI agent logs and conversation appear here.",
     chatPlaceholder: "Talk to AI (e.g. Organize this week's tasks)",
     talkToAi: "Talk to GROWTH PARTNER",
+    tabSystemLog: "Agent Log",
+    tabGeneralQA: "Q&A & Knowledge",
+    qaEmptyHint: "Ask anything about insurance operations, IT development, or BrSE work.",
+    qaInputPlaceholder: "Type a question, or speak using the microphone...",
+    voiceInputTitle: "🎤 Voice input",
+    qaThinking: "AI is preparing an answer...",
+    voiceNotSupported: "Your browser does not support voice input (Web Speech API). Please try Google Chrome.",
+    voiceListening: "Start speaking and your words will appear as text.",
+    voiceEnded: "Voice input ended. Please review the text before sending.",
+    voiceNoSpeech: "No speech detected. Please try again.",
+    voiceMicDenied: "Microphone access was denied. Please allow microphone access in your browser settings.",
+    voiceError: "An error occurred during voice recognition.",
     splashStart: "Start work",
     languageLabel: "🌐 言語 / Language / Ngôn ngữ",
     settingsSubtitle: "Choose your preferred theme. Settings are saved automatically.",
@@ -254,6 +298,18 @@ const translations = {
     selectImage: "Choose image",
     delete: "Remove",
     bgHint: "A background image appears faintly behind the UI while keeping cards readable.",
+    demoModeNote: "Without an API key, demo results keep the workflow usable. Add a key to switch to real Gemini analysis.",
+    offlineDemoModeTitle: "⚡ Demo Mode (Offline)",
+    offlineDemoModeHint: "When ON, no network calls are made — every AI feature instantly returns a high-quality demo result. Use this for on-stage or offline presentations.",
+    offlineDemoModeStatusOn: "ON (offline demo)",
+    offlineDemoModeStatusOff: "OFF (normal)",
+    offlineDemoModeToastOnMsg: "Demo Mode enabled. AI features will now return demo results without any network call.",
+    offlineDemoModeToastOffMsg: "Demo Mode disabled. Gemini will be used if an API key is configured.",
+    aiThinkingMessage: "✨ AI Agent is analyzing project data...",
+    demoDataTitle: "Demo data",
+    demoDataHint: "Reset only added tasks, projects, and completion states to the initial scenario.",
+    resetDemoData: "Reset demo data",
+    resetDemoConfirm: "Added tasks and completion states will be reset. Continue?",
     sosResultTitle: "Emergency SOS - AI analysis",
     riskSummary: "Risk summary",
     sosEmailLabel: "Message to PM / senior (editable)",
@@ -303,14 +359,7 @@ const translations = {
     outputLabel: "Result (editable / copyable)",
     outputPlaceholder: "Generated test cases or test code will appear here...",
     copyResult: "Copy result",
-    gcalTitle: "Google Calendar settings",
-    gcalSettingsTitle: "Google Calendar settings",
     loading: "Loading...",
-    calendarId: "Calendar ID",
-    calendarIdExample: "e.g. your-account@gmail.com",
-    gcalApiKey: "API key (leave blank if already saved)",
-    gcalApiKeyPlaceholder: "API key from Google Cloud Console",
-    saveSettings: "Save settings",
     processing: "Processing...",
     apiKeyDesc: "Enter your own Gemini API key to use AI features. The key is stored only in this browser (localStorage) and sent only with AI requests.",
     apiKeyWarning: "Please enter an API key before using AI features.",
@@ -342,9 +391,6 @@ const translations = {
     needApiKey: "Please enter an API key before using AI features.",
     enterApiKey: "Please enter an API key.",
     apiKeySaved: "API key saved in this browser.",
-    gcalConfigured: "✅ Configured. Use “Google sync” to import the latest events.",
-    gcalNotConfigured: "⚠️ Not configured. Please register a Calendar ID and API key.",
-    gcalLoadFailed: "⚠️ Could not load the settings status.",
   },
   vi: {
     pageTitle: "GROWTH PARTNER | Không gian làm việc",
@@ -378,14 +424,23 @@ const translations = {
     colTaskName: "Tên task (bấm để xem chi tiết)",
     colDue: "Hạn",
     colPriority: "Ưu tiên",
-    googleSync: "Đồng bộ Google",
     aiAnalyze: "Phân tích AI",
     legendTask: "Task",
     legendLearning: "Gợi ý học tập AI",
     legendMeeting: "Họp",
-    legendGoogle: "Google Calendar",
+    legendMilestone: "Mốc quan trọng",
+    localSyncBadge: "Local Sync (Demo Mode)",
+    localSyncBadgeTitle: "Lịch chỉ hiển thị từ dữ liệu cục bộ cố định — không cần API key hay đăng nhập OAuth.",
     dragToSchedule: "Kéo để xếp lịch",
     taskDetailEmpty: "Chọn một task để xem chi tiết tại đây.",
+    briefingTitle: "Morning Briefing & AI Đề xuất",
+    briefingSubtitle: "AI đã tổng hợp tình hình hôm nay cho bạn.",
+    briefingUrgentTitle: "Việc cần xử lý ngay",
+    briefingUrgentEmpty: "Hiện không có task nào quá hạn. Tuyệt vời!",
+    briefingUrgentMore: "Còn {count} task quá hạn khác",
+    briefingAiTitle: "AI Đề xuất hôm nay",
+    briefingAiText: "Bạn nên tập trung hoàn tất logic tính phí bảo hiểm trước 14:00 để kịp họp với Offshore Team.",
+    briefingActionsTitle: "Quick Actions",
     close: "Đóng",
     taskName: "Tên task",
     project: "Dự án",
@@ -405,6 +460,18 @@ const translations = {
     chatEmpty: "Nhật ký và hội thoại với AI sẽ hiện ở đây.",
     chatPlaceholder: "Nói với AI (ví dụ: Sắp xếp task tuần này)",
     talkToAi: "Trò chuyện với GROWTH PARTNER",
+    tabSystemLog: "Agent Log",
+    tabGeneralQA: "Q&A & Knowledge",
+    qaEmptyHint: "Hãy hỏi bất cứ điều gì về nghiệp vụ bảo hiểm, phát triển IT hoặc công việc BrSE.",
+    qaInputPlaceholder: "Nhập câu hỏi, hoặc nói bằng micro...",
+    voiceInputTitle: "🎤 Nhập bằng giọng nói",
+    qaThinking: "AI đang soạn câu trả lời...",
+    voiceNotSupported: "Trình duyệt của bạn không hỗ trợ nhập liệu giọng nói (Web Speech API). Vui lòng thử Google Chrome.",
+    voiceListening: "Hãy nói, nội dung sẽ tự động hiện thành văn bản.",
+    voiceEnded: "Đã kết thúc nhập giọng nói. Vui lòng kiểm tra lại nội dung trước khi gửi.",
+    voiceNoSpeech: "Không phát hiện giọng nói. Vui lòng thử lại.",
+    voiceMicDenied: "Quyền truy cập micro đã bị từ chối. Vui lòng cho phép micro trong cài đặt trình duyệt.",
+    voiceError: "Đã xảy ra lỗi trong quá trình nhận diện giọng nói.",
     splashStart: "Bắt đầu công việc",
     languageLabel: "🌐 言語 / Language / Ngôn ngữ",
     settingsSubtitle: "Chọn giao diện bạn thích. Cài đặt được lưu tự động.",
@@ -416,6 +483,18 @@ const translations = {
     selectImage: "Chọn ảnh",
     delete: "Xóa",
     bgHint: "Ảnh nền hiển thị mờ phía sau, vẫn đảm bảo chữ trên thẻ dễ đọc.",
+    demoModeNote: "Khi chưa có API key, hệ thống dùng kết quả demo để tiếp tục thao tác. Nhập key để chuyển sang phân tích Gemini thật.",
+    offlineDemoModeTitle: "⚡ Demo Mode (Offline)",
+    offlineDemoModeHint: "Khi bật, ứng dụng sẽ không gọi API thật — mọi tính năng AI sẽ trả về ngay kết quả demo chất lượng cao. Dùng khi thuyết trình hoặc không có mạng.",
+    offlineDemoModeStatusOn: "ON (khóa chế độ offline)",
+    offlineDemoModeStatusOff: "OFF (chế độ thường)",
+    offlineDemoModeToastOnMsg: "Đã bật Demo Mode. Từ giờ các tính năng AI sẽ trả về kết quả demo mà không gọi API.",
+    offlineDemoModeToastOffMsg: "Đã tắt Demo Mode. Nếu đã có API key, hệ thống sẽ gọi Gemini thật.",
+    aiThinkingMessage: "✨ AI Agent đang phân tích dữ liệu dự án...",
+    demoDataTitle: "Dữ liệu demo",
+    demoDataHint: "Chỉ khôi phục task, project đã thêm và trạng thái hoàn thành về dữ liệu ban đầu.",
+    resetDemoData: "Đặt lại dữ liệu demo",
+    resetDemoConfirm: "Các task đã thêm và trạng thái hoàn thành sẽ được đặt lại. Bạn muốn tiếp tục?",
     sosResultTitle: "SOS khẩn cấp - Kết quả AI",
     riskSummary: "Tóm tắt rủi ro",
     sosEmailLabel: "Nội dung gửi PM / tiền bối (có thể sửa)",
@@ -465,14 +544,7 @@ const translations = {
     outputLabel: "Kết quả (sửa / sao chép được)",
     outputPlaceholder: "Test case hoặc mã test sẽ hiện ở đây...",
     copyResult: "Sao chép kết quả",
-    gcalTitle: "Cài đặt Google Calendar",
-    gcalSettingsTitle: "Cài đặt Google Calendar",
     loading: "Đang tải...",
-    calendarId: "Calendar ID",
-    calendarIdExample: "VD) your-account@gmail.com",
-    gcalApiKey: "API key (để trống nếu đã lưu)",
-    gcalApiKeyPlaceholder: "API key từ Google Cloud Console",
-    saveSettings: "Lưu cài đặt",
     processing: "Đang xử lý...",
     apiKeyDesc: "Nhập API Key của bạn để sử dụng các tính năng AI. Key sẽ được lưu an toàn trên trình duyệt của bạn (localStorage).",
     apiKeyWarning: "Vui lòng nhập API Key trước khi sử dụng tính năng AI!",
@@ -504,9 +576,6 @@ const translations = {
     needApiKey: "Vui lòng nhập API Key trước khi sử dụng tính năng AI!",
     enterApiKey: "Vui lòng nhập API key.",
     apiKeySaved: "Đã lưu API key trên trình duyệt này.",
-    gcalConfigured: "✅ Đã cấu hình. Bấm “Đồng bộ Google” để lấy lịch mới nhất.",
-    gcalNotConfigured: "⚠️ Chưa cấu hình. Hãy đăng ký Calendar ID và API key.",
-    gcalLoadFailed: "⚠️ Không lấy được trạng thái cài đặt.",
   },
   zh: {
     pageTitle: "GROWTH PARTNER | 工作区",
@@ -540,14 +609,23 @@ const translations = {
     colTaskName: "任务名（点击查看详情）",
     colDue: "截止日期",
     colPriority: "优先级",
-    googleSync: "Google同步",
     aiAnalyze: "AI分析",
     legendTask: "任务",
     legendLearning: "AI学习建议",
     legendMeeting: "会议",
-    legendGoogle: "Google日历",
+    legendMilestone: "里程碑",
+    localSyncBadge: "Local Sync (Demo Mode)",
+    localSyncBadgeTitle: "日历仅通过本地固定数据渲染，无需API密钥或OAuth登录。",
     dragToSchedule: "拖拽以安排日程",
     taskDetailEmpty: "选择任务后，详情将显示在此处。",
+    briefingTitle: "Morning Briefing 与 AI 推荐",
+    briefingSubtitle: "AI 已为您总结了今天的情况。",
+    briefingUrgentTitle: "需要立即处理的任务",
+    briefingUrgentEmpty: "目前没有逾期任务，非常好！",
+    briefingUrgentMore: "还有 {count} 项逾期任务",
+    briefingAiTitle: "今日AI建议",
+    briefingAiText: "建议在14点前完成保费计算逻辑的开发，以便准时参加与离岸团队的会议。",
+    briefingActionsTitle: "快捷操作",
     close: "关闭",
     taskName: "任务名",
     project: "项目",
@@ -567,6 +645,18 @@ const translations = {
     chatEmpty: "AI代理的执行日志和对话将显示在这里。",
     chatPlaceholder: "向AI提问（例如：整理本周任务）",
     talkToAi: "与GROWTH PARTNER对话",
+    tabSystemLog: "Agent Log",
+    tabGeneralQA: "Q&A・知识库",
+    qaEmptyHint: "关于保险业务、IT开发或BrSE工作，欢迎随时提问。",
+    qaInputPlaceholder: "输入问题，或使用麦克风说话...",
+    voiceInputTitle: "🎤 语音输入",
+    qaThinking: "AI正在生成回答...",
+    voiceNotSupported: "您的浏览器不支持语音输入（Web Speech API）。请尝试使用Google Chrome。",
+    voiceListening: "请开始说话，内容将自动转换为文字。",
+    voiceEnded: "语音输入已结束，请确认内容后再发送。",
+    voiceNoSpeech: "未检测到语音，请重试。",
+    voiceMicDenied: "麦克风访问被拒绝，请在浏览器设置中允许使用麦克风。",
+    voiceError: "语音识别过程中发生错误。",
     splashStart: "开始工作",
     languageLabel: "🌐 言語 / Language / Ngôn ngữ",
     settingsSubtitle: "请选择喜欢的主题。设置会自动保存。",
@@ -578,6 +668,18 @@ const translations = {
     selectImage: "选择图片",
     delete: "删除",
     bgHint: "设置背景图后，画面会淡淡显示，同时保持卡片上的文字可读。",
+    demoModeNote: "未设置API密钥时会使用演示结果继续操作。设置密钥后将切换到真实Gemini分析。",
+    offlineDemoModeTitle: "⚡ Demo Mode（离线固定）",
+    offlineDemoModeHint: "开启后将不进行任何网络请求，所有AI功能都会立即返回高质量的演示结果。适用于上台演示或离线场景。",
+    offlineDemoModeStatusOn: "ON（离线固定）",
+    offlineDemoModeStatusOff: "OFF（正常模式）",
+    offlineDemoModeToastOnMsg: "已开启Demo Mode。此后AI功能将不进行网络通信，直接返回演示结果。",
+    offlineDemoModeToastOffMsg: "已关闭Demo Mode。如已设置API密钥，将连接真实的Gemini。",
+    aiThinkingMessage: "✨ AI Agent正在分析项目数据...",
+    demoDataTitle: "演示数据",
+    demoDataHint: "仅将新增任务、项目和完成状态恢复为初始场景。",
+    resetDemoData: "重置演示数据",
+    resetDemoConfirm: "新增任务和完成状态将被重置。要继续吗？",
     sosResultTitle: "紧急SOS - AI分析结果",
     riskSummary: "风险摘要",
     sosEmailLabel: "发给PM／前辈的文案（可编辑）",
@@ -627,14 +729,7 @@ const translations = {
     outputLabel: "生成结果（可编辑／复制）",
     outputPlaceholder: "点击生成后，测试用例或测试代码将显示在这里...",
     copyResult: "复制结果",
-    gcalTitle: "Google日历联动设置",
-    gcalSettingsTitle: "Google联动设置",
     loading: "加载中...",
-    calendarId: "日历ID",
-    calendarIdExample: "例）your-account@gmail.com",
-    gcalApiKey: "API密钥（若已保存可留空）",
-    gcalApiKeyPlaceholder: "在Google Cloud Console发行的API密钥",
-    saveSettings: "保存设置",
     processing: "处理中...",
     apiKeyDesc: "使用AI功能请输入您自己的Gemini API密钥。密钥仅保存在本浏览器（localStorage），并仅在AI请求时发送。",
     apiKeyWarning: "使用AI功能前，请先输入API密钥。",
@@ -666,9 +761,6 @@ const translations = {
     needApiKey: "使用AI功能前，请先输入API密钥。",
     enterApiKey: "请输入API密钥。",
     apiKeySaved: "已将API密钥保存在此浏览器。",
-    gcalConfigured: "✅ 已设置。请点击“Google同步”导入最新日程。",
-    gcalNotConfigured: "⚠️ 尚未设置。请登记日历ID和API密钥。",
-    gcalLoadFailed: "⚠️ 无法获取设置状态。",
   },
 };
 
@@ -734,7 +826,7 @@ function changeLanguage(lang) {
   }
   applyI18n();
   if (typeof refreshAll === "function") refreshAll();
-  if (typeof loadCalendarSettings === "function") loadCalendarSettings();
+  if (typeof updateDemoModeToggleUI === "function") updateDemoModeToggleUI();
 }
 
 function initLanguage() {
@@ -820,13 +912,16 @@ const TASKS_SEED = [
 ];
 
 // 固定の会議イベント。カレンダー表示のみ（タスクではないためチェックボックスなし）。
+// Local Sync (Demo Mode)：Googleカレンダーの実API・OAuthに依存せず、常にこのローカル配列だけで
+// 保険システム開発のBrSE業務シナリオ（オフショア定例・PM報告・マイルストーンレビュー）を再現する。
 const FIXED_MEETINGS = [
-  { id: "mt1", title: "🗣 朝会（デイリースクラム）", start: `${toDateKey(TODAY)}T09:30:00`, end: `${toDateKey(TODAY)}T09:45:00` },
-  { id: "mt2", title: "🧑‍🏫 PMとの1on1", start: `${toDateKey(addDays(TODAY, 2))}T16:00:00`, end: `${toDateKey(addDays(TODAY, 2))}T16:30:00` },
+  { id: "mt1", title: "🗣 朝会（デイリースクラム）", start: `${toDateKey(TODAY)}T09:30:00`, end: `${toDateKey(TODAY)}T09:45:00`, category: "meeting" },
+  { id: "mt2", title: "🌉 Offshore Teamとの進捗定例会議（BrSE）", start: `${toDateKey(TODAY)}T14:00:00`, end: `${toDateKey(TODAY)}T15:00:00`, category: "meeting" },
+  { id: "mt3", title: "📊 保険API設計書 PM報告会", start: `${toDateKey(addDays(TODAY, 1))}T11:00:00`, end: `${toDateKey(addDays(TODAY, 1))}T11:30:00`, category: "meeting" },
+  { id: "mt4", title: "🧑‍🏫 PMとの1on1", start: `${toDateKey(addDays(TODAY, 2))}T16:00:00`, end: `${toDateKey(addDays(TODAY, 2))}T16:30:00`, category: "meeting" },
+  { id: "mt5", title: "🏁 マイルストーンレビュー：解約返戻金計算ロジック", start: `${toDateKey(addDays(TODAY, -3))}T17:00:00`, end: `${toDateKey(addDays(TODAY, -3))}T17:30:00`, category: "milestone" },
+  { id: "mt6", title: "🏁 マイルストーンレビュー：契約更新機能改修", start: `${toDateKey(addDays(TODAY, 5))}T15:00:00`, end: `${toDateKey(addDays(TODAY, 5))}T16:00:00`, category: "milestone" },
 ];
-
-// 「Google同期」後に取り込んだ予定。セッション内の状態で、同期のたびに置き換える。
-let GOOGLE_SYNCED_TASKS = [];
 
 /* ---------- 2b. ユーザー追加タスク（➕ タスク追加）- localStorage に保存 ---------- */
 const USER_TASKS_STORAGE_KEY = "brseCopilotUserTasks";
@@ -873,7 +968,7 @@ let AI_NEW_TASK_IDS = new Set();
 /* ---------- 2d. タスク共通ヘルパー（サイドバー／中央／右パネル） ---------- */
 
 function getAllTasksCombined() {
-  return [...TASKS_SEED, ...USER_ADDED_TASKS, ...GOOGLE_SYNCED_TASKS].map(applyTaskOverrides);
+  return [...TASKS_SEED, ...USER_ADDED_TASKS].map(applyTaskOverrides);
 }
 
 function isTaskDone(task) {
@@ -889,7 +984,7 @@ function getOverdueTasks() {
 }
 
 // ユーザー追加タスクなら変更後に localStorage へ保存する。
-// シード／Google同期タスクはセッション内のみのため永続化しない。
+// シードタスク（TASKS_SEED）はオーバーライドとして永続化する（persistSeedTaskOverride）。
 function persistIfUserTask(task) {
   if (USER_ADDED_TASKS.some((t) => t.id === task.id)) {
     saveUserTasks();
@@ -982,6 +1077,319 @@ function isAiEndpoint(url) {
   return typeof url === "string" && url.includes("/api/v1/copilot/");
 }
 
+/* =========================================================
+   3a-2. Ironclad Demo Mode
+   Mục tiêu: khi lên sân khấu demo, KHÔNG BAO GIỜ được phép vỡ trận vì
+   API key thiếu/sai, mạng rớt, timeout hay hết quota. Toàn bộ lời gọi AI
+   trong app phải đi qua safeCallAI() bên dưới để được bảo vệ.
+   ========================================================= */
+
+// Trạng thái Demo Mode được lưu độc lập với API key, cho phép ép toàn bộ
+// tính năng AI chạy offline ngay cả khi đã có key hợp lệ (an toàn tuyệt đối khi demo).
+const DEMO_MODE_STORAGE_KEY = "brseCopilotDemoModeOffline";
+
+// Đọc trạng thái Demo Mode hiện tại từ localStorage (mặc định: OFF)
+function isDemoModeEnabled() {
+  try {
+    return localStorage.getItem(DEMO_MODE_STORAGE_KEY) === "true";
+  } catch (e) {
+    return false;
+  }
+}
+
+// Lưu trạng thái Demo Mode và đồng bộ lại giao diện toggle trong Settings modal
+function setDemoModeEnabled(enabled) {
+  try {
+    localStorage.setItem(DEMO_MODE_STORAGE_KEY, enabled ? "true" : "false");
+  } catch (e) {
+    /* localStorage không khả dụng (VD: chế độ ẩn danh) -> chỉ giữ trạng thái trong phiên hiện tại */
+  }
+  updateDemoModeToggleUI();
+}
+
+// Được gọi khi người dùng bấm nút "⚡ Demo Mode (Offline)" trong màn hình 表示設定
+function toggleDemoMode() {
+  const nextState = !isDemoModeEnabled();
+  setDemoModeEnabled(nextState);
+  showToast(
+    nextState ? "⚡ Demo Mode ON" : "Demo Mode OFF",
+    nextState ? t("offlineDemoModeToastOnMsg") : t("offlineDemoModeToastOffMsg"),
+    "info"
+  );
+}
+
+// Đồng bộ nút gạt + nhãn trạng thái trong modal Settings theo giá trị đã lưu
+function updateDemoModeToggleUI() {
+  const enabled = isDemoModeEnabled();
+  const toggleBtn = $("demoModeToggleBtn");
+  const statusLabel = $("demoModeStatusLabel");
+  if (toggleBtn) {
+    toggleBtn.classList.toggle("is-active", enabled);
+    toggleBtn.setAttribute("aria-checked", enabled ? "true" : "false");
+  }
+  if (statusLabel) {
+    statusLabel.textContent = enabled ? t("offlineDemoModeStatusOn") : t("offlineDemoModeStatusOff");
+  }
+}
+
+// Hiệu ứng "AI đang suy nghĩ" tối thiểu 1 giây trước khi trả mock response,
+// giúp phần demo trông tự nhiên như đang thực sự gọi AI thật.
+async function showAiThinkingSpinner() {
+  showToast("🤖 GROWTH PARTNER", t("aiThinkingMessage"), "info");
+  await sleep(1000);
+}
+
+/**
+ * safeCallAI: lớp bọc toàn cục (global wrapper) cho MỌI lời gọi AI trong app.
+ *
+ * @param {Function} realCallFn - hàm async thực hiện lời gọi AI thật (VD: () => postJson(url, body))
+ * @param {Function} mockResponseCallback - hàm (có thể async) trả về mock response chất lượng cao,
+ *        bằng tiếng Nhật business, dùng khi không thể gọi AI thật.
+ *
+ * Quy tắc "Ironclad": nếu Demo Mode đang BẬT, hoặc chưa có/API key không hợp lệ,
+ * hoặc bản thân lời gọi thật thất bại (lỗi HTTP, timeout, hết quota, mất mạng...),
+ * hàm này sẽ NGAY LẬP TỨC "nuốt" lỗi, hiện spinner AI trong 1 giây rồi trả về
+ * mockResponseCallback(). Không bao giờ để lỗi thật lộ ra màn hình khi đang demo.
+ */
+async function safeCallAI(realCallFn, mockResponseCallback) {
+  const shouldForceDemo = isDemoModeEnabled() || !getStoredUserApiKey();
+
+  if (shouldForceDemo) {
+    await showAiThinkingSpinner();
+    return mockResponseCallback();
+  }
+
+  try {
+    return await realCallFn();
+  } catch (err) {
+    // Bất kể lý do thất bại là gì (HTTP lỗi, timeout, hết quota, network down...),
+    // ta không throw tiếp mà âm thầm chuyển sang kết quả demo.
+    console.warn("[safeCallAI] Real AI call failed, falling back to demo response:", err);
+    await showAiThinkingSpinner();
+    return mockResponseCallback();
+  }
+}
+
+/* ---------- 3a-3. Mock response chất lượng cao (tiếng Nhật, nghiệp vụ bảo hiểm) ---------- */
+
+// Mock cho "AIタスク自動調整"／"AI分析"／"自動リスケジュール" (POST /api/v1/copilot/analyze-schedule)
+function buildMockAutoScheduleResponse(overdueTasksPayload) {
+  const tasks = Array.isArray(overdueTasksPayload) ? overdueTasksPayload : [];
+  const rebalancedTasks = tasks.slice(0, 3).map((task, index) => ({
+    taskId: task.id,
+    title: task.title,
+    delayDays: index + 2,
+    newDueDate: toDateKey(addDays(new Date(), index + 2)),
+  }));
+  const taskNameList = tasks
+    .slice(0, 3)
+    .map((task) => `「${task.title}」`)
+    .join("、");
+  const taskNamesText = taskNameList || "対象の遅延タスク";
+
+  return Promise.resolve({
+    rebalancedTasks,
+    findingsSummary:
+      `【AI分析】現在 ${tasks.length} 件のタスクが期限を超過しています。優先度・工数・依存関係を踏まえて再計算した結果、` +
+      `${taskNamesText} を含む上位タスクの期日を再配置しました。まずは保険料計算ロジック（PremiumCalculator.java）まわりの実装を最優先で着手し、` +
+      `契約更新バッチとの依存関係が解消され次第、残りのタスクに着手することを推奨します。この再配置により、今週末までに約1.5日分のバッファを確保できる見込みです。`,
+    draftEmailBody:
+      `お疲れ様です。\n\n現在対応中のタスクについて、AIが工数とバッファを再計算し、以下の通りスケジュールを見直しましたのでご報告いたします。\n\n` +
+      `・対象タスク：${taskNamesText}\n` +
+      `・見直し後の優先順位：保険料計算ロジックの実装 → 契約更新バッチとの疎通確認 → 単体テストの整備\n` +
+      `・想定リスク：仕様確認待ちが発生した場合、さらに1〜2日の遅延が見込まれます。\n\n` +
+      `つきましては、上記の進め方で問題ないか、また仕様確認が必要な箇所について15分ほどお時間をいただけますと幸いです。\n\nよろしくお願いいたします。`,
+  });
+}
+
+// Mock cho "緊急SOS" (POST /api/v1/copilot/sos-alert)
+function buildMockSosResponse() {
+  return Promise.resolve({
+    alertMessage:
+      "【AI緊急分析】PremiumCalculator.java（保険料計算ロジック）の実装が180分以上停滞しています。直近のコード差分から、" +
+      "成人判定の境界値（仕様書：18歳以上 ／ 実装：20歳以上）の解釈違いで手が止まっている可能性が高いと推測されます。" +
+      "契約更新バッチとの結合テストにも影響する範囲のため、早めのエスカレーションを推奨します。",
+    slackMessageDraft:
+      "お疲れ様です。\n\n保険料計算ロジック（PremiumCalculator.java）の実装で180分ほど進捗が停滞しております。\n" +
+      "仕様書では成人の定義が「18歳以上」となっていますが、現行コードでは「20歳以上」を基準に判定しており、この差異の扱いについて確認が必要な状況です。\n\n" +
+      "お手数ですが、以下のいずれかでご支援いただけますと助かります。\n" +
+      "・仕様の最終確認（18歳／20歳のどちらを正とするか）\n" +
+      "・15分程度のペアプログラミングまたはレビュー\n\n" +
+      "何卒よろしくお願いいたします。",
+  });
+}
+
+// Mock cho "日報の自動生成" (POST /api/v1/copilot/generate-nippo)
+// Cố gắng phản chiếu lại nội dung log thật của người dùng để bản demo trông "sống" hơn.
+function buildMockNippoResponse(rawLogs) {
+  const trimmedLogs = (rawLogs || "").trim();
+  const logLines = trimmedLogs
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .slice(0, 8);
+
+  const bulletedLogs =
+    logLines.length > 0
+      ? logLines
+          .map((line) => `・${line.replace(/^git\s+commit\s+-m\s+["']?/i, "").replace(/["']$/, "")}`)
+          .join("\n")
+      : "・保険料計算ロジック（PremiumCalculator.java）の実装\n・契約更新バッチとの疎通確認";
+
+  return Promise.resolve({
+    nippoText:
+      `【本日の実施内容】\n${bulletedLogs}\n\n` +
+      `【進捗状況】\n保険料計算モジュールの主要ロジックの実装が完了し、現在は契約更新バッチとの結合部分を確認中です。想定していたスケジュール通りに進捗しています。\n\n` +
+      `【課題・所感】\n成人判定の年齢基準（仕様書：18歳以上／実装：20歳以上）について差異を確認したため、明日改めて仕様担当者へ確認を行う予定です。\n\n` +
+      `【明日の予定】\n・仕様差異の確認結果を実装へ反映\n・保険料計算ロジックの単体テストを追加\n・契約更新バッチとの結合テストを実施`,
+  });
+}
+
+// テストフレームワークの自動判定（Java系ソース→JUnit5 / それ以外→Jest）
+function detectOffshoreMockFramework(requestedFramework, codeText) {
+  const normalized = (requestedFramework || "").toUpperCase();
+  if (normalized === "JUNIT5" || normalized === "JEST") return normalized;
+  return /public\s+class|private\s+void|import\s+java\./i.test(codeText || "") ? "JUNIT5" : "JEST";
+}
+
+function buildMockJUnitCode() {
+  return `import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+class PremiumCalculatorTest {
+
+    private PremiumCalculator calculator;
+
+    @BeforeEach
+    void setUp() {
+        calculator = new PremiumCalculator();
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {18, 19, 20, 25})
+    void applyPremium_成人年齢では例外が発生しないこと(int age) {
+        assertDoesNotThrow(() -> calculator.applyPremium(age));
+    }
+
+    @Test
+    void applyPremium_年齢がnullの場合はValidationExceptionを送出すること() {
+        assertThrows(ValidationException.class, () -> calculator.applyPremium(null));
+    }
+
+    @Test
+    void applyPremium_年齢が負数の場合はValidationExceptionを送出すること() {
+        assertThrows(ValidationException.class, () -> calculator.applyPremium(-1));
+    }
+
+    @Test
+    void applyPremium_同一契約を連続実行しても例外なく処理できること() {
+        calculator.applyPremium(20);
+        assertDoesNotThrow(() -> calculator.applyPremium(20));
+    }
+}`;
+}
+
+function buildMockJestCode() {
+  return `const { PremiumCalculator, ValidationException } = require("./PremiumCalculator");
+
+describe("PremiumCalculator", () => {
+  let calculator;
+
+  beforeEach(() => {
+    calculator = new PremiumCalculator();
+  });
+
+  test.each([18, 19, 20, 25])("applyPremium(%i) は例外を投げない", (age) => {
+    expect(() => calculator.applyPremium(age)).not.toThrow();
+  });
+
+  test("age が null の場合は ValidationException を送出する", () => {
+    expect(() => calculator.applyPremium(null)).toThrow(ValidationException);
+  });
+
+  test("age が負数の場合は ValidationException を送出する", () => {
+    expect(() => calculator.applyPremium(-1)).toThrow(ValidationException);
+  });
+
+  test("同一契約を連続実行しても例外なく処理できる", () => {
+    calculator.applyPremium(20);
+    expect(() => calculator.applyPremium(20)).not.toThrow();
+  });
+});`;
+}
+
+// Mock cho "オフショア支援" (POST /api/v1/copilot/review-offshore) - dùng chung cho cả 4 chế độ
+function buildMockOffshoreResponse(mode, payload = {}) {
+  if (mode === "SPEC_DIFF") {
+    return Promise.resolve({
+      analysisText:
+        "【AI比較結果】仕様書 第3.2節では「成人の定義は18歳以上」と明記されていますが、現行コード（PremiumCalculator.java）は " +
+        "`if (age >= 20)` として20歳以上を基準に判定しています。この差異により、18歳・19歳の契約者に誤った保険料区分が適用される可能性があります。\n\n" +
+        "【推奨対応】\n" +
+        "1. 仕様担当者へ「18歳」「20歳」のどちらが正であるかを確認する\n" +
+        "2. 境界値（17, 18, 19, 20歳）のテストケースを追加する\n" +
+        "3. 修正時は契約更新バッチ側の年齢判定ロジックにも同様の差異がないか横展開で確認する",
+      riskWarningText: "これはデモ結果です。実際の仕様書・コードに基づく最終判断は、レビュー担当者が行ってください。",
+    });
+  }
+
+  if (mode === "SHADOW_CLIENT") {
+    const rawQuestion = (payload.rawQuestion || "").trim();
+    return Promise.resolve({
+      analysisText:
+        `お世話になっております。\n\n表題の件につきまして、${rawQuestion ? "ご質問いただいた内容" : "現行仕様"}を確認させていただきたく、ご連絡いたしました。\n\n` +
+        "保険料計算における成人の定義（18歳以上／20歳以上）について、貴社仕様書と現行実装との間に差異が見られるため、" +
+        "どちらを正としてよいか、恐れ入りますがご教示いただけますでしょうか。\n\n" +
+        "お忙しいところ恐縮ですが、ご確認のほどよろしくお願いいたします。",
+      riskWarningText:
+        "年齢の基準に関する質問は契約条件に直結するため、送信前に必ずPMまたは仕様担当者のレビューを受けてください。専門用語を避け、背景（なぜ確認が必要か）を添えると誤解が減ります。",
+    });
+  }
+
+  if (mode === "TEST_CASE_GEN") {
+    return Promise.resolve({
+      analysisText:
+        "【テストケース一覧（リスクベース）】\n\n" +
+        "■正常系\n" +
+        "TC-01: age=18 → applyAdultPremium() が呼ばれる\n" +
+        "TC-02: age=25 → applyAdultPremium() が呼ばれる\n\n" +
+        "■境界値\n" +
+        "TC-03: age=17 → 成人保険料が適用されない\n" +
+        "TC-04: age=18（下限） → 成人保険料が適用される\n" +
+        "TC-05: age=19 → 仕様書と実装の差異を検証（現行コードは20歳未満のため不適用となる想定）\n\n" +
+        "■異常系\n" +
+        "TC-06: age=null → ValidationException が送出される\n" +
+        "TC-07: age=-1（負数） → ValidationException が送出される\n\n" +
+        "■非機能・二重実行\n" +
+        "TC-08: 同一契約IDに対して applyPremium() を連続2回呼び出しても保険料が二重計上されない",
+      riskWarningText: "これはデモ結果です。実装方針の確定後、テストケースの過不足を最終確認してください。",
+    });
+  }
+
+  // UNIT_TEST_GEN
+  const framework = detectOffshoreMockFramework(payload.testFramework, payload.codeText);
+  const analysisText = framework === "JEST" ? buildMockJestCode() : buildMockJUnitCode();
+  return Promise.resolve({
+    analysisText,
+    riskWarningText: `これはデモ結果です（${framework === "JEST" ? "Jest" : "JUnit5 + Mockito"} 想定）。実際のクラス名・依存関係に合わせて調整してください。`,
+  });
+}
+
+// APIキーが未設定でも、ハッカソンの導線を止めないためのローカルデモ応答（requestJson の最終防衛ライン）。
+// safeCallAI 経由の呼び出しでは通常ここに到達しないが、直接 postJson を呼ぶ将来のコードのための保険。
+function getDemoAiResponse(url, body = {}) {
+  if (url.includes("analyze-schedule")) return buildMockAutoScheduleResponse(body.tasks);
+  if (url.includes("sos-alert")) return buildMockSosResponse();
+  if (url.includes("generate-nippo")) return buildMockNippoResponse(body.rawLogs);
+  if (url.includes("review-offshore")) return buildMockOffshoreResponse(body.mode, body);
+  return Promise.resolve({});
+}
+
 function openApiKeyModal(options = {}) {
   const input = $("userApiKeyInput");
   const warning = $("apiKeyModalWarning");
@@ -1045,6 +1453,12 @@ function buildRequestHeaders(baseHeaders, url) {
 }
 
 async function requestJson(url, method, body) {
+  // 保険：safeCallAI を経由せず直接 postJson/getJson/putJson を呼んだ場合でも、
+  // Demo ModeがONまたはAPIキー未設定であればここでデモ応答を返す（Ironclad Demo Modeの最終防衛ライン）。
+  if (isAiEndpoint(url) && (isDemoModeEnabled() || !getStoredUserApiKey())) {
+    return getDemoAiResponse(url, body);
+  }
+
   if (!ensureUserApiKeyForAi(url)) {
     throw new ApiError(t("needApiKey"));
   }
@@ -1423,6 +1837,7 @@ function renderTodayList() {
   if (!listEl || !titleEl || !progressFill || !progressLabel || !alertBanner || !alertText) return;
 
   const visible = getVisibleTasks();
+  updateTodayFocus(visible);
   const doneCount = visible.filter((task) => isTaskDone(task)).length;
   const totalCount = visible.length;
   const percent = totalCount === 0 ? 0 : Math.round((doneCount / totalCount) * 100);
@@ -1462,6 +1877,39 @@ function renderTodayList() {
 
   lastToggledTaskId = null;
   updateNotifBadge();
+}
+
+let todayFocusTaskId = null;
+
+function updateTodayFocus(tasks) {
+  const titleEl = $("todayFocusTitle");
+  const metaEl = $("todayFocusMeta");
+  if (!titleEl || !metaEl) return;
+
+  const candidates = tasks.filter((task) => !isTaskDone(task));
+  const focusTask = candidates.sort((a, b) => {
+    const overdueDiff = Number(isTaskOverdue(b)) - Number(isTaskOverdue(a));
+    if (overdueDiff !== 0) return overdueDiff;
+    const priorityRank = { high: 0, medium: 1, low: 2 };
+    return (priorityRank[a.priority] ?? 1) - (priorityRank[b.priority] ?? 1) || a.dueDate.localeCompare(b.dueDate);
+  })[0];
+
+  if (!focusTask) {
+    todayFocusTaskId = null;
+    titleEl.textContent = "今日のタスクはすべて完了です";
+    metaEl.textContent = "次のチャレンジを追加してみましょう";
+    return;
+  }
+
+  todayFocusTaskId = focusTask.id;
+  titleEl.textContent = focusTask.title;
+  metaEl.textContent = isTaskOverdue(focusTask)
+    ? "期限超過 — まずこのタスクから片付けましょう"
+    : `優先度 ${getPriorityLabel(focusTask.priority)} · 期日 ${formatDeadlineLabel(focusTask.dueDate, false)}`;
+}
+
+function openTodayFocusTask() {
+  if (todayFocusTaskId) openTaskDetail(todayFocusTaskId);
 }
 
 // 完了状態を切り替え、関連する表示をすべて再描画する。
@@ -1866,6 +2314,77 @@ function refreshAll() {
   updateAgentStatusLine();
   refreshActiveProjectDashboardIfVisible();
   refreshTaskDetailIfOpen();
+  renderMorningBriefing();
+}
+
+/* ---------- 右パネル：タスク未選択時に表示する「🌟 Morning Briefing & AIレコメンド」 ----------
+   何もしていない「空白」状態を放置せず、AIが能動的に「今やるべきこと」を提示する（Proactive方針）。
+   カード1では期限超過タスクを一覧表示し、クリックでそのままタスク詳細を開ける。 */
+function renderMorningBriefing() {
+  const listEl = $("briefingUrgentList");
+  if (!listEl) return;
+
+  // 超過日数が大きい（＝期日が古い）順に並べ、最も緊急性の高いタスクを先頭に表示する
+  const overdueTasks = getOverdueTasks()
+    .slice()
+    .sort((a, b) => a.dueDate.localeCompare(b.dueDate));
+
+  listEl.innerHTML = "";
+
+  if (overdueTasks.length === 0) {
+    const emptyItem = document.createElement("li");
+    emptyItem.className = "briefing-urgent-empty";
+    emptyItem.textContent = t("briefingUrgentEmpty");
+    listEl.appendChild(emptyItem);
+    return;
+  }
+
+  const projects = getAllProjects();
+  const MAX_VISIBLE_URGENT_TASKS = 4;
+
+  overdueTasks.slice(0, MAX_VISIBLE_URGENT_TASKS).forEach((task) => {
+    const project = projects.find((p) => p.id === task.projectId);
+    const overdueDays = Math.max(
+      1,
+      Math.round((TODAY - new Date(`${task.dueDate}T00:00:00`)) / 86400000)
+    );
+
+    const item = document.createElement("li");
+    item.className = "briefing-urgent-item";
+    item.setAttribute("role", "button");
+    item.tabIndex = 0;
+    item.title = t("openDetailTitle");
+
+    const titleEl = document.createElement("span");
+    titleEl.className = "briefing-urgent-item-title";
+    titleEl.textContent = task.title;
+
+    const metaEl = document.createElement("span");
+    metaEl.className = "briefing-urgent-item-meta";
+    const projectPart = project ? `${project.name} ・ ` : "";
+    metaEl.textContent = `${projectPart}${t("overdueDays", { days: overdueDays })}`;
+
+    item.appendChild(titleEl);
+    item.appendChild(metaEl);
+
+    const openThisTask = () => openTaskDetail(task.id);
+    item.addEventListener("click", openThisTask);
+    item.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        openThisTask();
+      }
+    });
+
+    listEl.appendChild(item);
+  });
+
+  if (overdueTasks.length > MAX_VISIBLE_URGENT_TASKS) {
+    const moreItem = document.createElement("li");
+    moreItem.className = "briefing-urgent-more";
+    moreItem.textContent = t("briefingUrgentMore", { count: overdueTasks.length - MAX_VISIBLE_URGENT_TASKS });
+    listEl.appendChild(moreItem);
+  }
 }
 
 /* ---------- 11. 中央：カレンダー（週表示＋ドラッグ＆ドロップ） ---------- */
@@ -1886,7 +2405,7 @@ function buildCalendarEvents() {
     title: meeting.title,
     start: meeting.start,
     end: meeting.end,
-    extendedProps: { taskId: meeting.id, category: "meeting" },
+    extendedProps: { taskId: meeting.id, category: meeting.category || "meeting" },
   }));
 
   return [...taskEvents, ...meetingEvents];
@@ -1924,7 +2443,7 @@ function initFullCalendar() {
       if (category === "work") classes.push("fc-event-work");
       else if (category === "learning") classes.push("fc-event-learning");
       else if (category === "meeting") classes.push("fc-event-meeting");
-      else if (category === "google") classes.push("fc-event-google");
+      else if (category === "milestone") classes.push("fc-event-milestone");
 
       const taskId = arg.event.extendedProps.taskId || arg.event.id;
       if (DONE_TASK_IDS.has(taskId)) classes.push("fc-event-done");
@@ -1932,9 +2451,10 @@ function initFullCalendar() {
       return classes;
     },
 
-    // 会議イベントはタスクではないためクリックしても完了切替の対象外
+    // 会議・マイルストーンイベントはタスクではないためクリックしても完了切替の対象外
     eventClick: function (arg) {
-      if (arg.event.extendedProps.category === "meeting") return;
+      const category = arg.event.extendedProps.category;
+      if (category === "meeting" || category === "milestone") return;
       const taskId = arg.event.extendedProps.taskId || arg.event.id;
       openTaskDetail(taskId);
     },
@@ -2010,108 +2530,56 @@ function initTaskDragDrop() {
   });
 }
 
-/* ---------- 12. モーダル：Googleカレンダー連携設定 ---------- */
-
-function openGcalSettingsModal() {
-  $("gcalSettingsModal")?.classList.remove("hidden");
-  loadCalendarSettings();
-}
-
-function closeGcalSettingsModal() {
-  $("gcalSettingsModal")?.classList.add("hidden");
-}
-
-async function loadCalendarSettings() {
-  const statusEl = $("gcalStatusText");
-  const idInput = $("gcalCalendarIdInput");
-  try {
-    const settings = await getJson("/api/v1/calendar/settings");
-    if (idInput && settings.calendarId) idInput.value = settings.calendarId;
-
-    if (statusEl) {
-      statusEl.removeAttribute("data-i18n");
-      const isConfigured = Boolean(settings.calendarId) && settings.apiKeyConfigured;
-      statusEl.textContent = isConfigured ? t("gcalConfigured") : t("gcalNotConfigured");
-    }
-  } catch (err) {
-    if (statusEl) {
-      statusEl.removeAttribute("data-i18n");
-      statusEl.textContent = t("gcalLoadFailed");
-    }
-  }
-}
-
-async function saveCalendarSettings(buttonEl) {
-  const calendarId = $("gcalCalendarIdInput")?.value.trim();
-  const apiKey = $("gcalApiKeyInput")?.value.trim();
-
-  if (!calendarId) {
-    alert("カレンダーIDを入力してください。");
-    return;
-  }
-
-  if (!buttonEl || buttonEl.disabled) return;
-  const originalHtml = buttonEl.innerHTML;
-  buttonEl.disabled = true;
-  buttonEl.innerHTML = "⏳ 保存中...";
-
-  try {
-    await putJson("/api/v1/calendar/settings", { calendarId, apiKey: apiKey || null });
-    const apiKeyInput = $("gcalApiKeyInput");
-    if (apiKeyInput) apiKeyInput.value = "";
-    showToast("✅ 保存完了", "Googleカレンダーの連携設定を保存しました。", "success");
-    await loadCalendarSettings();
-  } catch (err) {
-    notifyAiFailure(err);
-  } finally {
-    buttonEl.disabled = false;
-    buttonEl.innerHTML = originalHtml;
-  }
-}
-
-async function syncGoogleCalendar(buttonEl) {
-  if (!buttonEl || buttonEl.disabled) return;
-  const originalHtml = buttonEl.innerHTML;
-  buttonEl.disabled = true;
-  buttonEl.innerHTML = "⏳ 同期中...";
-
-  try {
-    const result = await postJson("/api/v1/calendar/sync");
-    GOOGLE_SYNCED_TASKS = (result.tasks || []).map((task) => ({
-      id: task.id,
-      projectId: null,
-      title: task.title,
-      priority: "medium",
-      dueDate: task.dueDate,
-      category: "google",
-    }));
-    refreshAll();
-    showToast(
-      "✅ 同期完了",
-      `Googleカレンダーから${GOOGLE_SYNCED_TASKS.length}件の予定を取り込みました。`,
-      "success"
-    );
-  } catch (err) {
-    notifyAiFailure(err);
-  } finally {
-    buttonEl.disabled = false;
-    buttonEl.innerHTML = originalHtml;
-  }
-}
+/* ---------- 12. カレンダー：Local Sync (Demo Mode) ----------
+   要件：ライブ登壇でのリスクを完全に排除するため、Googleカレンダーの実API連携／OAuth／
+   APIキー設定は撤去した。カレンダーは常に TASKS_SEED・USER_ADDED_TASKS・FIXED_MEETINGS という
+   ローカルの固定モックデータのみで構築され、ネットワーク通信や認証ポップアップなしに
+   瞬時に描画される（詳細は buildCalendarEvents() を参照）。 */
 
 /* ---------- 13. AIチャット（マスコット押下時のみオーバーレイ表示） ---------- */
 
 function openAgentChat() {
   document.body.classList.add("agent-chat-open");
+  // 自動化ワークフロー（AIタスク自動調整など）が開くのは常にTab1（システムログ）
+  switchAgentPanelTab("systemLog");
 }
 
 function toggleAgentChat() {
   document.body.classList.toggle("agent-chat-open");
 }
 
-function clearAgentFeedEmptyState() {
-  const empty = $("agentFeedEmpty");
+/* ---------- 13a. Dual-Tab Architecture：Tab1(システムログ／Agent) ⇔ Tab2(Q&A・ナレッジ) ---------- */
+function switchAgentPanelTab(tabName) {
+  const isSystemLog = tabName !== "generalQA";
+
+  const tabSystemLogBtn = $("tabSystemLog");
+  const tabGeneralQaBtn = $("tabGeneralQA");
+  const viewSystemLogEl = $("viewSystemLog");
+  const viewGeneralQaEl = $("viewGeneralQA");
+
+  tabSystemLogBtn?.classList.toggle("active", isSystemLog);
+  tabSystemLogBtn?.setAttribute("aria-selected", String(isSystemLog));
+  tabGeneralQaBtn?.classList.toggle("active", !isSystemLog);
+  tabGeneralQaBtn?.setAttribute("aria-selected", String(!isSystemLog));
+
+  viewSystemLogEl?.classList.toggle("is-active", isSystemLog);
+  viewSystemLogEl?.classList.toggle("hidden", !isSystemLog);
+  viewGeneralQaEl?.classList.toggle("is-active", !isSystemLog);
+  viewGeneralQaEl?.classList.toggle("hidden", isSystemLog);
+
+  // Tab2（Q&A）に切り替えた際、録音中のTab1向けマイクは無いため念のため録音を止めない。
+  // Tab1に戻る際は、進行中の音声入力があれば混乱を避けるため停止する。
+  if (isSystemLog) stopVoiceInput();
+}
+
+// 複数のフィード（システムログ／Q&A）で共通利用する「空状態を消す」ヘルパー
+function clearFeedEmptyState(feedEmptyId) {
+  const empty = $(feedEmptyId);
   if (empty) empty.remove();
+}
+
+function clearAgentFeedEmptyState() {
+  clearFeedEmptyState("agentFeedEmpty");
 }
 
 function appendTimelineStep(text) {
@@ -2140,10 +2608,11 @@ async function runTimelineSteps(stepTexts) {
   }
 }
 
-function appendChatBubble(role, text, options = {}) {
-  clearAgentFeedEmptyState();
-  const feed = $("agentFeed");
-  if (!feed) return;
+// フィードにチャット吹き出しを追加する共通処理（システムログ／Q&A共通）
+function appendFeedBubble(feedId, feedEmptyId, role, text, options = {}) {
+  clearFeedEmptyState(feedEmptyId);
+  const feed = $(feedId);
+  if (!feed) return null;
 
   const bubble = document.createElement("div");
   bubble.className = `agent-msg agent-msg-${role === "user" ? "user" : "ai"}`;
@@ -2167,6 +2636,247 @@ function appendChatBubble(role, text, options = {}) {
 
   feed.appendChild(bubble);
   feed.scrollTop = feed.scrollHeight;
+  return bubble;
+}
+
+// Tab1（システムログ）向け：既存の呼び出し元はシグネチャ変更なしでそのまま動作する。
+function appendChatBubble(role, text, options = {}) {
+  return appendFeedBubble("agentFeed", "agentFeedEmpty", role, text, options);
+}
+
+// Tab2（Q&A・ナレッジ）向け
+function appendQaChatBubble(role, text, options = {}) {
+  return appendFeedBubble("qaFeed", "qaFeedEmpty", role, text, options);
+}
+
+function appendQaThinkingBubble() {
+  clearFeedEmptyState("qaFeedEmpty");
+  const feed = $("qaFeed");
+  if (!feed) return null;
+
+  const el = document.createElement("div");
+  el.className = "agent-msg agent-msg-ai qa-thinking-bubble";
+  el.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span></span>';
+  const span = el.querySelector("span");
+  if (span) span.textContent = t("qaThinking");
+  feed.appendChild(el);
+  feed.scrollTop = feed.scrollHeight;
+  return el;
+}
+
+/* ---------- 13b. Tab2：Enterprise Knowledge Q&A（BrSE Knowledge Copilot / RAG Ready） ----------
+   要件2-3：社内ナレッジ（保険ドメイン・BrSE業務）に特化したシステムインストラクションを付与して
+   /api/v1/copilot/knowledge-qa を呼び出す。バックエンドが未実装／APIキー未設定／Demo Modeの場合は
+   safeCallAI() が自動的に高品質なモック回答へフォールバックする（Ironclad Demo Mode）。 */
+const KNOWLEDGE_QA_SYSTEM_INSTRUCTION =
+  "You are an AI BrSE Senior Consultant specializing in Insurance Domain Systems and IT Project Management. " +
+  "Answer questions strictly within professional BrSE context, Business Japanese phrasing, or Insurance logic. " +
+  "Keep answers concise and structured.";
+
+// Demo Mode用モック回答：保険ドメイン・BrSE業務に関するよくある質問に構造化された回答を返す。
+function buildMockKnowledgeQaResponse(question) {
+  const q = String(question || "").toLowerCase();
+
+  if (/(保険料|premium)/.test(q)) {
+    return Promise.resolve({
+      answer:
+        "【保険料計算ロジックについて】\n" +
+        "1. 前提：契約者の年齢・性別・保険期間・特約の有無を入力パラメータとして使用します。\n" +
+        "2. 計算：一般的に「基本保険料 ×（年齢係数）×（特約係数）」で算出します。\n" +
+        "3. 注意点：消費税・地域係数を含める場合は、要件定義書で「税込／税抜」の扱いを必ず確認してください。\n" +
+        "オフショアチームへ説明する際は、計算式をExcelサンプルで共有すると認識齟齬を防げます。",
+    });
+  }
+
+  if (/(更新|更改|renewal|renew)/.test(q)) {
+    return Promise.resolve({
+      answer:
+        "【契約更新（更改）処理について】\n" +
+        "1. 更新対象の抽出：満期日のNヶ日前をバッチで抽出するのが一般的です。\n" +
+        "2. 保険料の再計算：更新時点の年齢・特約内容をもとに再計算する必要があります。\n" +
+        "3. 通知タイミング：お客様への更新案内状の発送時期を要件定義書で確認してください。\n" +
+        "BrSEとしては、更新バッチ失敗時のリカバリ手順も仕様書に明記することを推奨します。",
+    });
+  }
+
+  if (/(オフショア|offshore)/.test(q)) {
+    return Promise.resolve({
+      answer:
+        "【オフショアチームとのコミュニケーションについて】\n" +
+        "1. 仕様は日本語だけでなく、英語または簡易図解を併記すると認識齟齬が減ります。\n" +
+        "2. 質問は「背景 → 質問内容 → 期待する回答」の順で構造化すると、相手も回答しやすくなります。\n" +
+        "3. 定例会議の前に論点を1枚のドキュメントへまとめ、事前共有することを推奨します。",
+    });
+  }
+
+  // 汎用フォールバック：質問文をそのまま踏まえた構造化された一般回答
+  return Promise.resolve({
+    answer:
+      `ご質問「${question}」について、BrSE／保険システムの観点から整理します。\n\n` +
+      "1. 論点の整理：まず要件定義書・設計書に該当箇所がないか確認しましょう。\n" +
+      "2. 保険業務の観点：保険料計算・契約管理・給付金支払いなど、関連する業務フローを特定します。\n" +
+      "3. 次のアクション：不明点はオフショアチームまたはPMへ、背景・質問・期待する回答をセットで確認することを推奨します。\n\n" +
+      "※本回答はDemo Mode（社内ナレッジRAG準備中）による参考情報です。正式な判断は必ず仕様書・PMにご確認ください。",
+  });
+}
+
+function autoResizeQaInput(el) {
+  if (!el) return;
+  el.style.height = "auto";
+  el.style.height = `${Math.min(el.scrollHeight, 120)}px`;
+}
+
+function handleQaInputKeydown(event) {
+  if (event.key === "Enter" && !event.shiftKey) {
+    event.preventDefault();
+    sendKnowledgeQaMessage();
+  }
+}
+
+async function sendKnowledgeQaMessage() {
+  const input = $("qaChatInput");
+  const sendBtn = $("btnQaSend");
+  if (!input || !sendBtn || sendBtn.disabled) return;
+
+  const text = input.value.trim();
+  if (!text) return;
+
+  if (isVoiceRecording) stopVoiceInput();
+
+  input.value = "";
+  autoResizeQaInput(input);
+  appendQaChatBubble("user", text);
+
+  sendBtn.disabled = true;
+  const thinkingEl = appendQaThinkingBubble();
+
+  try {
+    const result = await safeCallAI(
+      () =>
+        postJson("/api/v1/copilot/knowledge-qa", {
+          question: text,
+          systemInstruction: KNOWLEDGE_QA_SYSTEM_INSTRUCTION,
+        }),
+      () => buildMockKnowledgeQaResponse(text)
+    );
+    thinkingEl?.remove();
+    appendQaChatBubble("ai", result.answer || "回答を生成できませんでした。もう一度お試しください。");
+  } catch (err) {
+    thinkingEl?.remove();
+    appendQaChatBubble("ai", `⚠️ ${err.message}`);
+    notifyAiFailure(err);
+  } finally {
+    sendBtn.disabled = false;
+  }
+}
+
+/* ---------- 13c. Web Speech API：音声入力（Tab2 Q&A専用マイクボタン） ----------
+   要件2：ブラウザ標準の webkitSpeechRecognition / SpeechRecognition を用い、
+   アプリの表示言語（ja/vi/en/zh）に応じた認識言語を設定してリアルタイムにテキスト化する。 */
+let voiceRecognition = null;
+let isVoiceRecording = false;
+let voiceRecognitionHadError = false;
+
+function getSpeechRecognitionCtor() {
+  return window.SpeechRecognition || window.webkitSpeechRecognition || null;
+}
+
+function getVoiceRecognitionLang() {
+  if (currentLang === "ja") return "ja-JP";
+  if (currentLang === "vi") return "vi-VN";
+  if (currentLang === "zh") return "zh-CN";
+  return "en-US";
+}
+
+function stopVoiceInput() {
+  if (!voiceRecognition) return;
+  try {
+    voiceRecognition.stop();
+  } catch (e) {
+    /* すでに停止している場合は無視 */
+  }
+}
+
+function toggleVoiceInput() {
+  const micBtn = $("btnVoiceInput");
+  if (!micBtn) return;
+
+  // 録音中に再度クリック → 停止（onendで後片付けされる）
+  if (isVoiceRecording) {
+    stopVoiceInput();
+    return;
+  }
+
+  const SpeechRecognitionCtor = getSpeechRecognitionCtor();
+  if (!SpeechRecognitionCtor) {
+    showToast("⚠️ 音声入力は未対応です", t("voiceNotSupported"), "warning");
+    return;
+  }
+
+  const input = $("qaChatInput");
+  if (!input) return;
+
+  const recognition = new SpeechRecognitionCtor();
+  voiceRecognition = recognition;
+  voiceRecognitionHadError = false;
+  recognition.lang = getVoiceRecognitionLang();
+  recognition.continuous = true;
+  recognition.interimResults = true;
+
+  // 録音開始前に入力欄へ既に入力されていたテキストは保持し、認識結果を後ろへ追記する。
+  const baseText = input.value.trim();
+  const baseTextWithSpace = baseText ? `${baseText} ` : "";
+  let finalTranscript = "";
+
+  recognition.onstart = () => {
+    isVoiceRecording = true;
+    micBtn.classList.add("recording");
+    micBtn.setAttribute("aria-pressed", "true");
+    showToast("🎤 録音中...", t("voiceListening"), "info");
+  };
+
+  recognition.onresult = (event) => {
+    let interimTranscript = "";
+    for (let i = event.resultIndex; i < event.results.length; i += 1) {
+      const transcript = event.results[i][0].transcript;
+      if (event.results[i].isFinal) {
+        finalTranscript += transcript;
+      } else {
+        interimTranscript += transcript;
+      }
+    }
+    input.value = `${baseTextWithSpace}${finalTranscript}${interimTranscript}`;
+    autoResizeQaInput(input);
+  };
+
+  recognition.onerror = (event) => {
+    voiceRecognitionHadError = true;
+    console.warn("[voiceInput] recognition error:", event.error);
+    if (event.error === "no-speech") {
+      showToast("🎤 音声を検出できませんでした", t("voiceNoSpeech"), "warning");
+    } else if (event.error === "not-allowed" || event.error === "service-not-allowed") {
+      showToast("⚠️ マイクへのアクセスが拒否されました", t("voiceMicDenied"), "error");
+    } else {
+      showToast("⚠️ 音声入力エラー", t("voiceError"), "error");
+    }
+  };
+
+  recognition.onend = () => {
+    isVoiceRecording = false;
+    micBtn.classList.remove("recording");
+    micBtn.setAttribute("aria-pressed", "false");
+    if (!voiceRecognitionHadError) {
+      showToast("🎤 録音終了", t("voiceEnded"), "success");
+    }
+    voiceRecognition = null;
+  };
+
+  try {
+    recognition.start();
+  } catch (err) {
+    showToast("⚠️ 音声入力エラー", t("voiceError"), "error");
+    voiceRecognition = null;
+  }
 }
 
 // AIの再配置案（RebalancedTaskDto[]）を dueDate／category に反映し、カレンダーで一時強調する。
@@ -2212,8 +2922,10 @@ async function runAiAutoSchedule(buttonEl) {
   }
 
   const originalHtmlMap = new Map(triggerButtons.map((b) => [b, b.innerHTML]));
+  document.body.classList.add("ai-processing");
   triggerButtons.forEach((b) => {
     b.disabled = true;
+    b.classList.add("is-processing");
   });
 
   appendChatBubble("user", "✨ AIタスク自動調整を実行");
@@ -2225,7 +2937,10 @@ async function runAiAutoSchedule(buttonEl) {
 
   try {
     const tasksPayload = overdueTasks.map((t) => ({ id: t.id, title: t.title, dueDate: t.dueDate }));
-    const result = await postJson("/api/v1/copilot/analyze-schedule", { tasks: tasksPayload });
+    const result = await safeCallAI(
+      () => postJson("/api/v1/copilot/analyze-schedule", { tasks: tasksPayload }),
+      () => buildMockAutoScheduleResponse(tasksPayload)
+    );
 
     applyRebalancedTasks(result.rebalancedTasks || []);
     appendChatBubble("ai", result.findingsSummary || "遅延タスクは検出されませんでした。", {
@@ -2242,9 +2957,11 @@ async function runAiAutoSchedule(buttonEl) {
     appendChatBubble("ai", `⚠️ ${err.message}`);
     notifyAiFailure(err);
   } finally {
+    document.body.classList.remove("ai-processing");
     triggerButtons.forEach((b) => {
       b.disabled = false;
       b.innerHTML = originalHtmlMap.get(b);
+      b.classList.remove("is-processing");
     });
   }
 }
@@ -2281,7 +2998,10 @@ async function sendAgentChatMessage() {
 
   try {
     const tasksPayload = overdueTasks.map((t) => ({ id: t.id, title: t.title, dueDate: t.dueDate }));
-    const result = await postJson("/api/v1/copilot/analyze-schedule", { tasks: tasksPayload });
+    const result = await safeCallAI(
+      () => postJson("/api/v1/copilot/analyze-schedule", { tasks: tasksPayload }),
+      () => buildMockAutoScheduleResponse(tasksPayload)
+    );
     applyRebalancedTasks(result.rebalancedTasks || []);
     appendChatBubble("ai", result.findingsSummary || "現在、緊急の遅延タスクはありません。");
   } catch (err) {
@@ -2308,7 +3028,7 @@ function updateAgentStatusLine() {
 
 // SOSは最低1.5秒の分析表示のあと /api/v1/copilot/sos-alert を呼び、結果モーダルを開く。
 async function runQuickSos(buttonEl) {
-  const triggerButtons = [$("btnQuickSos"), $("btnQuickSos2")].filter(Boolean);
+  const triggerButtons = [$("btnQuickSos"), $("btnQuickSos2"), $("btnQuickSos3")].filter(Boolean);
   if (triggerButtons.some((b) => b.disabled)) return;
 
   const originalHtmlMap = new Map(triggerButtons.map((b) => [b, b.innerHTML]));
@@ -2319,10 +3039,14 @@ async function runQuickSos(buttonEl) {
 
   try {
     await sleep(1500);
-    const result = await postJson("/api/v1/copilot/sos-alert", {
-      fileName: "PremiumCalculator.java",
-      stuckMinutes: 180,
-    });
+    const result = await safeCallAI(
+      () =>
+        postJson("/api/v1/copilot/sos-alert", {
+          fileName: "PremiumCalculator.java",
+          stuckMinutes: 180,
+        }),
+      () => buildMockSosResponse()
+    );
     openSosResultModal(result);
   } catch (err) {
     notifyAiFailure(err);
@@ -2393,7 +3117,10 @@ async function generateNippoReport() {
   output.placeholder = "AIが日報を生成しています...";
 
   try {
-    const result = await postJson("/api/v1/copilot/generate-nippo", { rawLogs });
+    const result = await safeCallAI(
+      () => postJson("/api/v1/copilot/generate-nippo", { rawLogs }),
+      () => buildMockNippoResponse(rawLogs)
+    );
     output.value = result.nippoText || "";
   } catch (err) {
     notifyAiFailure(err);
@@ -2680,11 +3407,15 @@ async function runSpecDiffReview() {
   note.textContent = "";
 
   try {
-    const result = await postJson("/api/v1/copilot/review-offshore", {
+    const specDiffPayload = {
       mode: "SPEC_DIFF",
       specText: OFFSHORE_UPLOADED_TEXT.spec || OFFSHORE_SPEC_SAMPLE.specText,
       codeText: OFFSHORE_UPLOADED_TEXT.code || OFFSHORE_SPEC_SAMPLE.codeText,
-    });
+    };
+    const result = await safeCallAI(
+      () => postJson("/api/v1/copilot/review-offshore", specDiffPayload),
+      () => buildMockOffshoreResponse("SPEC_DIFF", specDiffPayload)
+    );
 
     box.textContent = result.analysisText || "分析結果がありませんでした。";
     note.textContent = result.riskWarningText ? `⚠️ ${result.riskWarningText}` : "";
@@ -2721,10 +3452,11 @@ async function runShadowClientReview() {
   btn.innerHTML = "🤖 AIが確認中...";
 
   try {
-    const result = await postJson("/api/v1/copilot/review-offshore", {
-      mode: "SHADOW_CLIENT",
-      rawQuestion,
-    });
+    const shadowPayload = { mode: "SHADOW_CLIENT", rawQuestion };
+    const result = await safeCallAI(
+      () => postJson("/api/v1/copilot/review-offshore", shadowPayload),
+      () => buildMockOffshoreResponse("SHADOW_CLIENT", shadowPayload)
+    );
 
     draftText.textContent = result.analysisText || "";
     riskText.textContent = result.riskWarningText || "";
@@ -2769,11 +3501,11 @@ async function runTestCaseGeneration() {
   output.placeholder = "AIがテストケースを生成しています...";
 
   try {
-    const result = await postJson("/api/v1/copilot/review-offshore", {
-      mode: "TEST_CASE_GEN",
-      specText,
-      codeText: codeText || null,
-    });
+    const testCasePayload = { mode: "TEST_CASE_GEN", specText, codeText: codeText || null };
+    const result = await safeCallAI(
+      () => postJson("/api/v1/copilot/review-offshore", testCasePayload),
+      () => buildMockOffshoreResponse("TEST_CASE_GEN", testCasePayload)
+    );
     showUnitTestResult(result.analysisText, result.riskWarningText);
     showToast("✅ 完了", "テストケースを生成しました。", "success");
   } catch (err) {
@@ -2798,11 +3530,15 @@ async function runUnitTestGeneration() {
   output.placeholder = "AIがユニットテストを生成しています...";
 
   try {
-    const result = await postJson("/api/v1/copilot/review-offshore", {
+    const unitTestPayload = {
       mode: "UNIT_TEST_GEN",
       codeText: resolveUnitTestSourceCode(),
       testFramework: $("unittestFrameworkSelect")?.value || null,
-    });
+    };
+    const result = await safeCallAI(
+      () => postJson("/api/v1/copilot/review-offshore", unitTestPayload),
+      () => buildMockOffshoreResponse("UNIT_TEST_GEN", unitTestPayload)
+    );
     showUnitTestResult(result.analysisText, result.riskWarningText);
     showToast("✅ 完了", "ユニットテストを生成しました。", "success");
   } catch (err) {
@@ -2886,30 +3622,144 @@ function sendQAMail(buttonEl) {
 
 /* ---------- 18. WBSインポート ---------- */
 
-// WBS取込のデモ。実ファイルは解析せず、サイズに応じた進捗表示のあと、
-// 絞り込み中（なければ先頭）のプロジェクトへサンプルタスク3件を追加する。
+function splitCsvLine(line) {
+  const cells = [];
+  let cell = "";
+  let quoted = false;
+  for (let i = 0; i < line.length; i += 1) {
+    const char = line[i];
+    if (char === '"' && line[i + 1] === '"' && quoted) {
+      cell += '"';
+      i += 1;
+    } else if (char === '"') {
+      quoted = !quoted;
+    } else if (char === "," && !quoted) {
+      cells.push(cell.trim());
+      cell = "";
+    } else {
+      cell += char;
+    }
+  }
+  cells.push(cell.trim());
+  return cells;
+}
+
+function normalizeWbsHeader(value) {
+  return String(value || "").toLowerCase().replace(/[\s_\-（）()]/g, "");
+}
+
+function normalizeWbsDate(value) {
+  const raw = String(value || "").trim();
+  if (!raw) return toDateKey(addDays(TODAY, 7));
+  const match = raw.match(/(\d{4})[./年-](\d{1,2})[./月-](\d{1,2})/);
+  if (!match) return toDateKey(addDays(TODAY, 7));
+  const date = new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
+  return Number.isNaN(date.getTime()) ? toDateKey(addDays(TODAY, 7)) : toDateKey(date);
+}
+
+function normalizeWbsPriority(value) {
+  const raw = String(value || "").toLowerCase();
+  if (/(high|urgent|critical|高|緊急)/.test(raw)) return "high";
+  if (/(low|低)/.test(raw)) return "low";
+  return "medium";
+}
+
+function parseWbsCsv(text, projectId) {
+  const lines = String(text || "").replace(/^\uFEFF/, "").split(/\r?\n/).filter((line) => line.trim());
+  if (lines.length < 2) return [];
+
+  const headers = splitCsvLine(lines[0]).map(normalizeWbsHeader);
+  const findColumn = (names) => headers.findIndex((header) => names.some((name) => header.includes(name)));
+  const titleIndex = findColumn(["title", "task", "name", "タスク", "作業", "項目"]);
+  const dueIndex = findColumn(["duedate", "deadline", "date", "期日", "期限"]);
+  const priorityIndex = findColumn(["priority", "優先"]);
+  const memoIndex = findColumn(["memo", "note", "description", "メモ", "備考"]);
+  if (titleIndex < 0) return [];
+
+  return lines.slice(1).map(splitCsvLine).map((cells, index) => {
+    const title = String(cells[titleIndex] || "").trim();
+    if (!title) return null;
+    return {
+      id: `wbs-${Date.now()}-${index}`,
+      projectId,
+      title,
+      priority: normalizeWbsPriority(priorityIndex >= 0 ? cells[priorityIndex] : ""),
+      dueDate: normalizeWbsDate(dueIndex >= 0 ? cells[dueIndex] : ""),
+      category: "work",
+      memo: memoIndex >= 0 ? String(cells[memoIndex] || "").trim() : "",
+    };
+  }).filter(Boolean);
+}
+
+// 実CSVは FileReader() で読み込んで本物のタスクとして取り込む。
+// Excel(.xlsx)やヘッダーを検出できないCSVなど「解析不可能」なファイルは、
+// ハッカソン用の「大容量ファイル解析」演出（Demo Mode: Processing Large Structure）へ
+// シームレスにフォールバックする。
+const WBS_DEMO_FALLBACK_FILE_SIZE_BYTES = 1024 * 1024 * 1024; // 1GB相当のダミーサイズ（デモ演出専用）
+
+// FileReader() でファイルをテキストとして読み込む（Promiseでラップ）。
+function readFileAsText(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ""));
+    reader.onerror = () => reject(reader.error || new Error("FileReaderでの読み込みに失敗しました。"));
+    reader.readAsText(file, "UTF-8");
+  });
+}
+
 async function handleWbsFileImport(inputEl) {
   const file = inputEl.files && inputEl.files[0];
   if (!file) return;
 
-  await simulateStreamProgress(
-    file.size,
-    `✨ AIがWBSファイル「${file.name}」（${formatFileSize(file.size)}）を解析しています...`
-  );
-
   const allProjects = getAllProjects();
   const targetProjectId = activeProjectFilter || (allProjects[0] && allProjects[0].id) || null;
   const stamp = Date.now();
-  const mockTasks = [
+  const fallbackTasks = [
     { id: `wbs-${stamp}-1`, projectId: targetProjectId, title: "API設計", priority: "medium", dueDate: toDateKey(addDays(TODAY, 2)), category: "work" },
     { id: `wbs-${stamp}-2`, projectId: targetProjectId, title: "ロジック実装", priority: "high", dueDate: toDateKey(addDays(TODAY, 4)), category: "work" },
     { id: `wbs-${stamp}-3`, projectId: targetProjectId, title: "単体テスト", priority: "medium", dueDate: toDateKey(addDays(TODAY, 6)), category: "work" },
   ];
 
-  USER_ADDED_TASKS.push(...mockTasks);
+  // ステップ1：CSVであれば FileReader() で実データの読み込み・解析を先に試みる。
+  const isCsv = /\.csv$/i.test(file.name);
+  let realCsvTasks = null;
+  if (isCsv) {
+    try {
+      const csvText = await readFileAsText(file);
+      const parsedTasks = parseWbsCsv(csvText, targetProjectId);
+      if (parsedTasks.length) realCsvTasks = parsedTasks;
+    } catch (error) {
+      console.warn("[handleWbsFileImport] CSVの読み込み・解析に失敗しました。Demo Modeへフォールバックします:", error);
+    }
+  }
+
+  let importedTasks;
+  if (realCsvTasks) {
+    // 実データを検出できた場合：ファイルの実サイズに応じた軽量プログレスで「解析中」を演出する
+    await simulateStreamProgress(
+      file.size,
+      `✨ AIがCSV「${file.name}」（${formatFileSize(file.size)}）を解析しています...`
+    );
+    importedTasks = realCsvTasks;
+  } else {
+    // .xlsx / .pdf / .txt、またはヘッダー（Task／タスク名・Deadline／期日・Priority／優先度）を
+    // 検出できなかったCSVは、常に成功して見える「大容量ファイル解析」のデモ演出へフォールバックする。
+    await simulateStreamProgress(
+      WBS_DEMO_FALLBACK_FILE_SIZE_BYTES,
+      `🗂️ Demo Mode: Processing Large Structure「${file.name}」...`
+    );
+    importedTasks = fallbackTasks;
+  }
+
+  USER_ADDED_TASKS.push(...importedTasks);
   saveUserTasks();
   refreshAll();
-  showToast("✅ インポート完了", `WBSファイルから${mockTasks.length}件のタスクを追加しました。`, "success");
+
+  if (realCsvTasks) {
+    showToast("✅ インポート完了", `CSVから${importedTasks.length}件のタスクを実際に取り込みました。`, "success");
+  } else {
+    showToast("✅ インポート完了（Demo Mode）", `Demo Modeとして${importedTasks.length}件のサンプルタスクを追加しました。`, "success");
+  }
   inputEl.value = "";
 }
 
@@ -2937,6 +3787,7 @@ function openThemeModal() {
   const current = document.documentElement.getAttribute("data-theme") || "light";
   updateThemeModalActiveState(current);
   updateAccentSwatchActiveState(localStorage.getItem(ACCENT_COLOR_STORAGE_KEY) || DEFAULT_ACCENT_COLOR);
+  updateDemoModeToggleUI();
   $("themeModal")?.classList.remove("hidden");
 }
 
@@ -3038,6 +3889,113 @@ function clearBgImage() {
   showToast("✅ 削除完了", "背景画像を削除しました。", "success");
 }
 
+function resetDemoData() {
+  if (!window.confirm(t("resetDemoConfirm"))) return;
+
+  [USER_PROJECTS_STORAGE_KEY, USER_TASKS_STORAGE_KEY, DONE_TASKS_STORAGE_KEY, TASK_OVERRIDES_STORAGE_KEY].forEach(
+    (key) => localStorage.removeItem(key)
+  );
+  showToast("✅", t("resetDemoData"), "success");
+
+  // A reload also resets in-memory state and returns the demo to its initial scenario.
+  setTimeout(() => window.location.reload(), 500);
+}
+
+/* =========================================================
+   21b. 🚨 Emergency Demo Controls
+   Nút "cứu hỏa" dùng khi đang thuyết trình mà demo bị lỗi (task rối, chat rác,
+   calendar loạn...). Khác với resetDemoData() (chỉ xoá vài key), hàm này XOÁ SẠCH
+   toàn bộ localStorage rồi dựng lại đúng 1 kịch bản demo chuẩn: 4 task nghiệp vụ
+   bảo hiểm (2 quá hạn / 1 đến hạn hôm nay / 1 đã hoàn thành).
+   ========================================================= */
+
+// Kịch bản demo chuẩn: ghi đè lên đúng 4 task có sẵn trong TASKS_SEED (t1〜t4) bằng nội
+// dung nghiệp vụ bảo hiểm thực tế, đồng thời đẩy các task còn lại (t5, t6) ra tương lai xa
+// để không bị lẫn vào danh sách "今日" (t7 vốn đã ở tương lai nên không cần đụng tới).
+function buildEmergencyDemoTaskOverrides() {
+  return {
+    t1: {
+      title: "保険料計算ロジックの実装（成人判定バグ修正）",
+      dueDate: toDateKey(addDays(TODAY, -2)),
+      priority: "high",
+      memo: "仕様書は18歳以上、現行コードは20歳以上を成人と判定しており差異あり。至急修正が必要。",
+      subtasks: [],
+    },
+    t2: {
+      title: "契約更新バッチとの疎通確認",
+      dueDate: toDateKey(addDays(TODAY, -1)),
+      priority: "high",
+      memo: "保険料計算モジュールの修正後、契約更新バッチとの結合テストが未着手のまま遅延中。",
+      subtasks: [],
+    },
+    t3: {
+      title: "解約返戻金計算ロジックの単体テスト追加",
+      dueDate: toDateKey(TODAY),
+      priority: "medium",
+      memo: "境界値（契約期間の端数月）のテストケースを追加する。",
+      subtasks: [],
+    },
+    t4: {
+      title: "更新ロジック仕様書レビュー",
+      dueDate: toDateKey(TODAY),
+      priority: "medium",
+      memo: "PMレビュー済み。指摘事項なしでクローズ。",
+      subtasks: [],
+    },
+    // 以下2件は「今日」ビューに写り込まないよう、期日を十分先へ逃がしておくだけ（内容は据え置き）。
+    t5: { title: "単体テスト設計書作成", dueDate: toDateKey(addDays(TODAY, 10)), priority: "low", memo: "", subtasks: [] },
+    t6: {
+      title: "Spring Boot設計パターンを学ぶ（短期目標）",
+      dueDate: toDateKey(addDays(TODAY, 12)),
+      priority: "low",
+      memo: "",
+      subtasks: [],
+    },
+  };
+}
+
+// 🚨 Emergency Demo Controls パネルの「🔄 Reset Demo Data」ボタンから呼ばれる。
+function emergencyResetDemoData() {
+  const confirmed = window.confirm(
+    "ローカルデータをすべて消去し、標準デモシナリオ（保険システムのタスク4件）へ復元します。よろしいですか？"
+  );
+  if (!confirmed) return;
+
+  // 1. localStorage を完全に消去（APIキー・テーマ・言語・タスクなど、保存内容を問わず全て）。
+  try {
+    localStorage.clear();
+  } catch (e) {
+    /* プライベートモード等で使用できない場合は無視して続行（リロード後は既定値で動作する） */
+  }
+
+  // 2. 標準デモシナリオのタスク上書き（期限超過2件／本日期限1件／完了1件）を書き込む。
+  TASK_OVERRIDES = buildEmergencyDemoTaskOverrides();
+  try {
+    saveTaskOverrides();
+  } catch (e) {
+    /* 保存に失敗しても、この後のリロードまではメモリ上の状態で表示される */
+  }
+
+  // 3. t4（更新ロジック仕様書レビュー）を「完了済み」としてマークする。
+  DONE_TASK_IDS = new Set(["t4"]);
+  try {
+    saveDoneTaskIds();
+  } catch (e) {
+    /* 同上 */
+  }
+
+  // 4. ユーザー追加タスク／プロジェクトをメモリ上でも空にする
+  //    （進捗バー・チャット履歴・カレンダーは、直後の reload で自然に初期状態へ戻る）。
+  USER_ADDED_TASKS = [];
+  USER_ADDED_PROJECTS = [];
+  AI_NEW_TASK_IDS = new Set();
+
+  showToast("✅ 標準デモシナリオに復元しました！", "Đã khôi phục kịch bản Demo chuẩn!", "success");
+
+  // reload により、進捗バー・チャット履歴・カレンダー表示もすべて初期状態から再構築される。
+  setTimeout(() => window.location.reload(), 800);
+}
+
 // 再読込時にアクセントカラーと背景画像を復元する。
 // テーマ本体は head のインラインスクリプトで先に当て、ちらつきを防ぐ。こちらはDOM準備後でよい。
 function restoreSavedAppearanceSettings() {
@@ -3113,12 +4071,12 @@ document.addEventListener("DOMContentLoaded", () => {
   initLanguage();
   initSidebarRightDefaultState();
   restoreSavedAppearanceSettings();
+  updateDemoModeToggleUI();
   renderProjectList();
   renderTodayList();
   initFullCalendar();
   renderCalendarDragRail();
   initTaskDragDrop();
-  loadCalendarSettings();
   updateAgentStatusLine();
   checkAndShowWelcomeSplash();
 });
